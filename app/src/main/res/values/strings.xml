@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="sign_up_text">Don’t have account? <b><font color='#2C5F2D'>Sign up</font></b></string>
+    <string name="web_client_id">539535860493-ff2dn0qv24au1dej4lb889buhdprh2av.apps.googleusercontent.com</string>
+
+
+    <string name="google_sign_in_button">Sign in with Google</string>
+    <string name="welcome_message">Welcome to My Android App!</string>
+    <string name="sign_in_failed">Sign in failed. Please try again.</string>
+    <string name="sign_in_success">Sign in successful!</string>
+    <string name="title_activity_bottom_navigation">BottomNavigationActivity</string>
+    <string name="title_home">Trang chủ</string>
+    <string name="title_folder">Thư viện</string>
+    <string name="title_add">Thêm</string>
+    <string name="title_messenger">Tin nhắn</string>
+    <string name="title_user">Cá nhân</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

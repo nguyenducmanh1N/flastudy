@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/home_page"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0E0D3D"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="8dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Flastudy"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:src="@drawable/ic_bell_notification"
+            app:tint="#888888" />
+    </LinearLayout>
+
+    <!-- Search Bar -->
+    <LinearLayout
+        android:id="@+id/searchBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_search_bar"
+        android:padding="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_search"
+            app:tint="#888888" />
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Học phần, sách giáo khoa, câu hỏi"
+            android:textColorHint="#888888"
+            android:textColor="#FFFFFF"
+            android:background="@null"
+            android:paddingStart="8dp" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_camera"
+            app:tint="#888888" />
+    </LinearLayout>
+
+    <!-- Content -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thư mục"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/folderRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        android:scrollbars="none"
+        android:clipToPadding="false" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Các học phần"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/courseRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:overScrollMode="never"
+        android:orientation="horizontal"
+        android:scrollbars="none"
+        android:clipToPadding="false" />
+
+</LinearLayout>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_sheet_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bottom_sheet_background">
+
+    <TextView
+        android:id="@+id/optionCreateSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/baseline_book_24"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Tạo học phần"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/optionCreateFolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_folder"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Tạo thư mục"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/optionCreateClass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Tạo lớp học"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
+</LinearLayout>

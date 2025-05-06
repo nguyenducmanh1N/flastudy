@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/home_page"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0E0D3D">
+
+    <!-- COPY TOÀN BỘ NỘI DUNG bạn gửi ở trên TRỪ BOTTOMNAVIGATIONVIEW -->
+
+    <!-- Cuối cùng loại bỏ đoạn này khỏi XML Fragment -->
+    <!-- Vì BottomNavigationView nên được đặt ở Activity chính -->
+    <!-- Header -->
+
+    <!-- Search Bar -->
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp">
+
+        <TextView
+
+            android:layout_width="182dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Tạo thư mục"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/inputNameFolder"
+        android:layout_width="324dp"
+        android:layout_height="62dp"
+        android:layout_above="@+id/addFolderButton"
+
+        android:layout_below="@id/header"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="41dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="41dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="50dp"
+        android:background="@drawable/bg_search_bar"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_folder"
+            app:tint="#888888" />
+
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="Nhập tên Thư mục "
+            android:paddingStart="8dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#888888" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/addFolderButton"
+        android:layout_width="211dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="98dp"
+        android:layout_marginEnd="102dp"
+        android:layout_marginBottom="434dp"
+        android:text="Tạo Thư mục" />
+
+
+    <!-- Scroll content -->
+
+</RelativeLayout>

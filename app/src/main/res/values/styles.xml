@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bo đáy của ảnh nền -->
+    <style name="BottomRoundedImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeBottomLeft">32dp</item>
+        <item name="cornerSizeBottomRight">32dp</item>
+    </style>
+
+    <!-- Bo góc trên của khối trắng -->
+    <style name="TopRoundedCard" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">32dp</item>
+        <item name="cornerSizeTopRight">32dp</item>
+    </style>
+
+</resources>

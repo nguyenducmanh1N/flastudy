@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0E0A2A">
+
+    <!-- Tiêu đề -->
+    <TextView
+
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="Thư viện của bạn"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <!-- Tabs -->
+
+    <!-- Bộ lọc -->
+
+    <!-- Thanh tìm kiếm -->
+
+    <!-- Danh sách học phần -->
+
+    <ImageButton
+        android:id="@+id/btnAdd"
+        android:layout_width="45dp"
+        android:layout_height="58dp"
+        android:layout_margin="20dp"
+        android:layout_marginStart="72dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:src="@drawable/baseline_add_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <com.google.android.material.tabs.TabLayout
+
+        android:id="@+id/tabLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:tabIndicatorColor="#CCCCFF"
+        app:tabSelectedTextColor="#FFFFFF"
+        app:tabTextColor="#8888AA"
+        tools:ignore="MissingConstraints">
+
+        <com.google.android.material.tabs.TabItem android:text="Học phần" />
+
+        <com.google.android.material.tabs.TabItem android:text="Thư mục" />
+        <com.google.android.material.tabs.TabItem android:text="Bài kiểm tra thử" />
+
+        <com.google.android.material.tabs.TabItem android:text="Lớp học" />
+
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <EditText
+
+        android:id="@+id/editText"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_margin="16dp"
+        android:background="@android:color/transparent"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:hint="Lọc học phần"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#AAAAAA"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tabLayout"
+        tools:ignore="MissingConstraints" />
+
+    <LinearLayout
+        android:layout_width="363dp"
+        android:layout_height="92dp"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/bg_card"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editText">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="40 thuật ngữ"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="16dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
