@@ -30,12 +30,8 @@ public class CreateClassActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_create_class);
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
-        findViewById(R.id.cancel).setOnClickListener(v -> finish());
+//
+        findViewById(R.id.btnClose).setOnClickListener(v -> finish());
 
         EditText edtClassName = findViewById(R.id.class_name);
         EditText edtDescription = findViewById(R.id.class_description);

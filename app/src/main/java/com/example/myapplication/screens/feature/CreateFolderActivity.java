@@ -4,11 +4,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
+import com.example.myapplication.model.Folder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,6 +56,12 @@ public class CreateFolderActivity extends AppCompatActivity {
                 createFolder();
             }
         });
+
+        ImageView btnBack = findViewById(R.id.btnCloseCreateFolder);
+        btnBack.setOnClickListener(v -> finish());
+
+        ImageView btnSave = findViewById(R.id.btnSave);
+        btnSave.setOnClickListener(v -> createFolder());
     }
 
     private void createFolder() {
@@ -71,15 +79,18 @@ public class CreateFolderActivity extends AppCompatActivity {
 
         String uid = currentUser.getUid();
 
-        // Dữ liệu thư mục
-        Map<String, Object> folder = new HashMap<>();
-        folder.put("name", folderName);
-        folder.put("createdAt", System.currentTimeMillis());
+
+        String folderId = db.collection("users").document(uid)
+                .collection("folders").document().getId();
+
+        Folder folder = new Folder(folderName, System.currentTimeMillis(), 0, uid);
+        folder.setId(folderId);
+
 
         db.collection("users").document(uid)
-                .collection("folders")
-                .add(folder)
-                .addOnSuccessListener(documentReference -> {
+                .collection("folders").document(folderId)
+                .set(folder)
+                .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Tạo thư mục thành công", Toast.LENGTH_SHORT).show();
                     editFolderName.setText(""); // clear text
                 })
@@ -87,4 +98,5 @@ public class CreateFolderActivity extends AppCompatActivity {
                     Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
 }

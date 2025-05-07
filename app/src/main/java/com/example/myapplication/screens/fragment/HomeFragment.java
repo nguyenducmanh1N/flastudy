@@ -1,5 +1,6 @@
 package com.example.myapplication.screens.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.FolderAdapter;
 import com.example.myapplication.model.Folder;
+import com.example.myapplication.screens.feature.FolderDetailActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -73,18 +75,18 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         RecyclerView folderRecyclerView = view.findViewById(R.id.folderRecyclerView);
-        folderRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        folderRecyclerView.setLayoutManager(layoutManager);
 
         List<Folder> folderList = new ArrayList<>();
         FolderAdapter adapter = new FolderAdapter(folderList);
         folderRecyclerView.setAdapter(adapter);
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
         if (currentUser != null) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             db.collection("users")
@@ -104,7 +106,13 @@ public class HomeFragment extends Fragment {
                         Toast.makeText(getContext(), "Lỗi khi tải thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         }
-
+        adapter.setOnFolderClickListener(folder -> {
+            Intent intent = new Intent(getContext(), FolderDetailActivity.class);
+            intent.putExtra("folderId", folder.getId());
+            startActivity(intent);
+        });
         return view;
     }
+
+
 }

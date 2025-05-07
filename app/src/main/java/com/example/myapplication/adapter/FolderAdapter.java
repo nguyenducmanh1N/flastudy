@@ -18,10 +18,23 @@ import java.util.List;
 public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderViewHolder> {
 
     private List<Folder> folderList;
+    private OnFolderClickListener listener;
 
     public FolderAdapter(List<Folder> folderList) {
         this.folderList = folderList;
     }
+    public void setOnFolderClickListener(OnFolderClickListener listener) {
+        this.listener = listener;
+    }
+    public FolderAdapter(List<Folder> folderList, OnFolderClickListener listener) {
+        this.folderList = folderList;
+        this.listener = listener;
+    }
+    public interface OnFolderClickListener {
+        void onFolderClick(Folder folder);
+    }
+
+
 
     @NonNull
     @Override
@@ -36,6 +49,11 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderView
     public void onBindViewHolder(@NonNull FolderViewHolder holder, int position) {
         Folder folder = folderList.get(position);
         holder.folderNameTextView.setText(folder.getName());
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onFolderClick(folder);
+            }
+        });
     }
 
     @Override
@@ -50,6 +68,24 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderView
             super(itemView);
             folderNameTextView = itemView.findViewById(R.id.folderName);
             folderCountTextView = itemView.findViewById(R.id.folderCount);
+        }
+    }
+    class ViewHolder extends RecyclerView.ViewHolder {
+        TextView folderName;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            folderName = itemView.findViewById(R.id.folderNameTextView);
+        }
+
+        public void bind(Folder folder) {
+            folderName.setText(folder.getName());
+
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onFolderClick(folder);
+                }
+            });
         }
     }
 }

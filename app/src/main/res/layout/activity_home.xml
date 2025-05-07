@@ -19,5 +19,5 @@
         android:background="#0E0D3D"
         app:itemIconTint="@color/bottom_nav_color_selector"
         app:itemTextColor="@color/bottom_nav_color_selector"
-        app:menu="@menu/bottom_nav_menu" />
+        app:menu="@menu/bottom_nav_menu" /> 
 </RelativeLayout>

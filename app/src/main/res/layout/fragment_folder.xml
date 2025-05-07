@@ -7,19 +7,6 @@
     android:background="#0E0A2A">
 
     <!-- Tiêu đề -->
-    <TextView
-
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Thư viện của bạn"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 
     <!-- Tabs -->
@@ -29,21 +16,67 @@
     <!-- Thanh tìm kiếm -->
 
     <!-- Danh sách học phần -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#0B0B28"
+        android:paddingHorizontal="16dp"
+        tools:ignore="MissingConstraints">
 
-    <ImageButton
-        android:id="@+id/btnAdd"
-        android:layout_width="45dp"
-        android:layout_height="58dp"
-        android:layout_margin="20dp"
-        android:layout_marginStart="72dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
-        android:src="@drawable/baseline_add_24"
+        <!-- Back button -->
+
+        <!-- Menu button (3 dots) -->
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Back"
+            android:src="@drawable/baseline_arrow_back_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@android:color/white"
+            tools:layout_editor_absoluteX="1dp"
+            tools:ignore="MissingConstraints" />
+
+        <ImageView
+            android:id="@+id/btnMenu"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/baseline_density_medium_24"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="Menu"
+            app:layout_constraintEnd_toStartOf="@+id/btnAdd"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@android:color/white" />
+
+        <!-- Add button -->
+        <ImageView
+            android:id="@+id/btnAdd"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/baseline_add_24"
+            android:contentDescription="Add"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/white" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="72dp"
+        android:text="Thư viện của bạn"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/textView"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteY="16dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.tabs.TabLayout
 

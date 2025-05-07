@@ -6,6 +6,7 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +43,11 @@ public class CreateCourseActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(v -> addTermLayout());
 
         addTermLayout(); // khởi tạo item đầu tiên
+
+        ImageView btnBack = findViewById(R.id.btnCloseCreateCourse);
+        btnBack.setOnClickListener(v -> finish());
+
+        ImageView btnSave = findViewById(R.id.btnSave);
     }
 
     private void addTermLayout() {
@@ -76,5 +82,8 @@ public class CreateCourseActivity extends AppCompatActivity {
                 }
             }
         });
+
+
     }
+
 }

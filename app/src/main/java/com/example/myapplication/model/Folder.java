@@ -1,18 +1,30 @@
 package com.example.myapplication.model;
 
 public class Folder {
+    private String id;
     private String name;
     private int count;
-
     private long createdAt;
+    private String creater;
 
     public Folder() {}
 
-    public Folder(String name, long createdAt, int count) {
+    public Folder(String name, long createdAt, int count, String creater) {
         this.name = name;
         this.createdAt = createdAt;
         this.count = count;
+        this.creater = creater;
     }
+
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
 
     public void setName(String name) {
         this.name = name;
@@ -34,7 +46,15 @@ public class Folder {
         return name;
     }
 
-    public long getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
+    }
+
+    public String getCreater() {
+        return creater;
+    }
+
+    public void setCreater(String creater) {
+        this.creater = creater;
     }
 }

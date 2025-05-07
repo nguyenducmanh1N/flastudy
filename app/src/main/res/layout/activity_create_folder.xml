@@ -6,43 +6,71 @@
     android:layout_height="match_parent"
     android:background="#0E0D3D">
 
-    <!-- COPY TOÀN BỘ NỘI DUNG bạn gửi ở trên TRỪ BOTTOMNAVIGATIONVIEW -->
 
-    <!-- Cuối cùng loại bỏ đoạn này khỏi XML Fragment -->
-    <!-- Vì BottomNavigationView nên được đặt ở Activity chính -->
-    <!-- Header -->
+    <TextView
+        android:id="@+id/title2"
 
-    <!-- Search Bar -->
+        android:layout_width="105dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="151dp"
+        android:layout_marginTop="79dp"
+        android:layout_marginEnd="154dp"
+        android:layout_marginBottom="628dp"
+        android:text="Tạo thư mục"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/header"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
+        android:layout_height="56dp"
+        android:background="#0B0B28"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp">
-
-        <TextView
-
-            android:layout_width="182dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Tạo thư mục"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+       >
 
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/btnCloseCreateFolder"
+            android:layout_width="53dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:tint="@android:color/white" />
+
+        <ImageView
+            android:id="@+id/btnSave"
+            android:layout_width="41dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_save"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/btnClose"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:tint="@android:color/white" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/inputNameFolder"
-        android:layout_width="324dp"
-        android:layout_height="62dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_above="@+id/addFolderButton"
 
-        android:layout_below="@id/header"
+
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="41dp"
@@ -50,7 +78,7 @@
         android:layout_marginTop="41dp"
         android:layout_marginEnd="44dp"
         android:layout_marginRight="16dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="39dp"
         android:background="@drawable/bg_search_bar"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -84,7 +112,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginStart="98dp"
         android:layout_marginEnd="102dp"
-        android:layout_marginBottom="434dp"
+        android:layout_marginBottom="480dp"
         android:text="Tạo Thư mục" />
 
 
