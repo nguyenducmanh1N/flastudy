@@ -64,12 +64,14 @@ public class FolderDetailActivity extends AppCompatActivity {
         ImageView btnMenu = findViewById(R.id.btnMenu);
 
         ImageView btnAdd = findViewById(R.id.btnAdd);
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(FolderDetailActivity.this, CreateCourseActivity.class);
-                startActivity(intent);
-            }
+        btnAdd.setOnClickListener(v -> {
+            // Tạo Intent và đính kèm folderId
+            Intent intent = new Intent(
+                    FolderDetailActivity.this,
+                    CreateCourseActivity.class
+            );
+            intent.putExtra("folderId", folderId);
+            startActivity(intent);
         });
 
 

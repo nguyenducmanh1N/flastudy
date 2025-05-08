@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -30,4 +31,13 @@
         android:hint="Định nghĩa"
         android:textColor="@android:color/white"
         android:textColorHint="#CCCCCC" />
+
+    <ImageButton
+        android:id="@+id/btnRemoveTerm"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_delete"
+        android:background="?android:selectableItemBackgroundBorderless"
+        android:layout_gravity="end"
+        app:tint="@android:color/white" />
 </LinearLayout>
