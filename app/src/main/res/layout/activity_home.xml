@@ -11,13 +11,27 @@
         android:layout_above="@id/bottom_navigation"/>
 
     <!-- BottomNavigationView -->
+<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--        android:id="@+id/bottom_navigation"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="95dp"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:background="#0E0D3D"-->
+<!--        app:itemIconTint="@color/bottom_nav_color_selector"-->
+<!--        app:itemTextColor="@color/bottom_nav_color_selector"-->
+<!--        app:menu="@menu/bottom_nav_menu" />-->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="95dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="0dp"
         android:background="#0E0D3D"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        app:itemIconSize="28dp"
         app:itemIconTint="@color/bottom_nav_color_selector"
         app:itemTextColor="@color/bottom_nav_color_selector"
-        app:menu="@menu/bottom_nav_menu" /> 
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
 </RelativeLayout>
