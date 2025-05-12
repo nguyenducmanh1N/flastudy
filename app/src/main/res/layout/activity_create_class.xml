@@ -78,26 +78,38 @@
         android:layout_width="373dp"
         android:layout_height="51dp"
         android:layout_below="@id/title"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="22dp"
+        android:layout_marginEnd="22dp"
         android:background="@android:color/transparent"
         android:hint="Môn học, khoá học, niên học, v.v..."
         android:textColor="#FFFFFF"
         android:textColorHint="#CCCCCC" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#FFFFFF"
-        android:layout_below="@id/class_name"
-        android:layout_marginTop="4dp" />
-
     <!-- Mô tả -->
+    <View
+        android:layout_width="346dp"
+        android:layout_height="1dp"
+        android:layout_below="@id/class_name"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="49dp"
+        android:background="#FFFFFF" />
+
     <EditText
         android:id="@+id/class_description"
         android:layout_width="385dp"
         android:layout_height="50dp"
         android:layout_below="@id/class_name"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
         android:background="@android:color/transparent"
         android:hint="Thông tin bổ sung (không bắt buộc)"
         android:textColor="#FFFFFF"
@@ -109,15 +121,23 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@id/class_description"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="3dp"
+        android:layout_marginEnd="16dp"
         android:background="#FFFFFF" />
 
     <TextView
         android:id="@+id/switch_text"
-        android:layout_width="wrap_content"
+        android:layout_width="275dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/class_description"
-        android:layout_marginTop="39dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="9dp"
+        android:layout_marginEnd="45dp"
+        android:layout_toStartOf="@+id/class_switch"
         android:text="Cho phép thành viên thêm học phần và thành viên mới"
         android:textColor="#FFFFFF" />
 
@@ -127,5 +147,6 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@id/switch_text"
         android:layout_alignParentEnd="true"
+        android:layout_marginEnd="35dp"
         android:checked="true" />
 </RelativeLayout>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,10 +8,9 @@
     android:background="#0E0E2C"
     android:padding="16dp">
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_width="387dp"
+        android:layout_height="53dp"
         android:background="#0B0B28"
         android:paddingHorizontal="16dp">
 
@@ -22,15 +20,15 @@
 
         <ImageView
             android:id="@+id/btnBack"
+            tools:ignore="MissingConstraints"
+            tools:layout_editor_absoluteX="1dp"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:contentDescription="Back"
             android:src="@drawable/baseline_arrow_back_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@android:color/white"
-            tools:ignore="MissingConstraints"
-            tools:layout_editor_absoluteX="1dp" />
+            app:tint="@android:color/white" />
 
         <ImageView
             android:id="@+id/btnMenu"
@@ -58,65 +56,54 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:layout_width="386dp"
-        android:layout_height="30dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="Back"
-            android:src="@drawable/baseline_book_24"
-            app:tint="#FFFFFF" />
-
-        <TextView
-            android:id="@+id/folderNameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Ngoc anh"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
     <TextView
-        android:id="@+id/folderDateTextView"
+        android:id="@+id/tvCourseName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Chỉnh sửa ngày 5/5/25"
-        android:textColor="#CCCCCC"
-        android:textSize="14sp" />
-
-    <Button
-        android:id="@+id/btnStudy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Học"
+        android:layout_marginTop="24dp"
+        android:text="Course Title"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#1E1E3F"
-        android:layout_marginTop="16dp" />
+        android:textSize="20sp"
+        android:textStyle="bold"/>
 
-    <!-- Danh sách học phần -->
     <TextView
+        android:id="@+id/tvCourseDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Gần đây"
-        android:textColor="#CCCCCC"
-        android:textSize="14sp"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="4dp"
+        android:text="01/01/2025 12:00"
+        android:textColor="#AAAAAA"
+        android:textSize="14sp"/>
 
-
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/courseRecyclerView"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vpCards"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="180dp"
+        android:layout_marginTop="16dp"
+        android:clipChildren="false"
         android:clipToPadding="false"
-        android:orientation="horizontal"
-        android:overScrollMode="never"
-        android:scrollbars="none" />
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+
+        />
+
+<!--    <com.google.android.material.tabs.TabLayout-->
+<!--        android:id="@+id/tabDots"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="35dp"-->
+<!--        android:layout_gravity="center"-->
+<!--        app:tabIndicatorColor="@android:color/transparent"-->
+<!--        app:tabIndicatorHeight="0dp"-->
+<!--        app:tabSelectedTextColor="@android:color/white"-->
+<!--        app:tabTextColor="#555555" />-->
+
+    <LinearLayout
+        android:id="@+id/dotsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal" />
+
+
 </LinearLayout>

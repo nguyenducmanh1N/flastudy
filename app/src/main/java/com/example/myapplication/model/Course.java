@@ -6,14 +6,35 @@ public class Course {
     private String id;
     private String title;
     private long createdAt;
+
+
+
+    private String creater;
     private List<Vocabulary> vocabularyList;
+    private String folderId;
 
     public Course() {}
 
-    public Course(String title, long createdAt, List<Vocabulary> vocabularyList) {
+    public Course(String title, long createdAt, List<Vocabulary> vocabularyList, String folderId,String creater) {
         this.title = title;
         this.createdAt = createdAt;
         this.vocabularyList = vocabularyList;
+        this.folderId = folderId;
+        this.creater= creater;
+    }
+
+    public String getCreater() {
+        return creater;
+    }
+
+    public void setCreater(String creater) {
+        this.creater = creater;
+    }
+    public String getFolderId() {
+        return folderId;
+    }
+    public void setFolderId(String folderId) {
+        this.folderId = folderId;
     }
 
     // Getters and Setters

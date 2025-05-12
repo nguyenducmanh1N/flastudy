@@ -32,8 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="#0B0B28"
-        android:paddingHorizontal="16dp"
-       >
+        android:paddingHorizontal="16dp">
 
 
         <ImageView

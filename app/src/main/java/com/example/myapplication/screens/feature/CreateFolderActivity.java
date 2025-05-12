@@ -78,12 +78,13 @@ public class CreateFolderActivity extends AppCompatActivity {
         }
 
         String uid = currentUser.getUid();
+        String creater = currentUser.getEmail();
 
 
         String folderId = db.collection("users").document(uid)
                 .collection("folders").document().getId();
 
-        Folder folder = new Folder(folderName, System.currentTimeMillis(), 0, uid);
+        Folder folder = new Folder(folderName, System.currentTimeMillis(), 0, creater);
         folder.setId(folderId);
 
 

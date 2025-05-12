@@ -1,0 +1,61 @@
+<!-- res/layout/item_flashcard.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/flashcard_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp">
+
+    <!-- Mặt trước -->
+    <LinearLayout
+        android:id="@+id/flashcard_front"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#2F334E"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvFrontWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Word"
+            android:textSize="24sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- Mặt sau -->
+    <LinearLayout
+        android:id="@+id/flashcard_back"
+        android:orientation="vertical"
+        android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#2F334E"
+            android:padding="16dp"
+            android:visibility="gone">
+
+    <!-- Meaning -->
+    <TextView
+        android:id="@+id/tvBackMeaning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Meaning"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="italic"/>
+
+    <!-- Example, cách Meaning một khoảng 8dp -->
+    <TextView
+        android:id="@+id/tvBackExample"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Example sentence..."
+        android:textSize="14sp"
+        android:textColor="#AAAAFF"
+        android:visibility="gone"/>
+</LinearLayout>
+
+    </FrameLayout>

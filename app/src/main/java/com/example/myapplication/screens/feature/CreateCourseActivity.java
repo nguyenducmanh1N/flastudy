@@ -3,8 +3,12 @@ package com.example.myapplication.screens.feature;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -27,8 +31,11 @@ import com.google.firebase.firestore.WriteBatch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -90,13 +97,72 @@ public class CreateCourseActivity extends AppCompatActivity {
 //        View termView = LayoutInflater.from(this).inflate(R.layout.item_term, containerTerms, false);
 //        containerTerms.addView(termView);
 //    }
-    private void addTermLayout() {
-        View termView = LayoutInflater.from(this)
-                .inflate(R.layout.item_term, containerTerms, false);
-        ImageButton btnRemove = termView.findViewById(R.id.btnRemoveTerm);
-        btnRemove.setOnClickListener(v -> containerTerms.removeView(termView));
-        containerTerms.addView(termView);
-    }
+private void addTermLayout() {
+    View termView = LayoutInflater.from(this)
+            .inflate(R.layout.item_term, containerTerms, false);
+
+    AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+    AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
+    ImageButton            btnRemove     = termView.findViewById(R.id.btnRemoveTerm);
+
+    Handler uiHandler = new Handler(Looper.getMainLooper());
+
+    // --- Adapter cho term ---
+    ArrayAdapter<String> termAdapter = new ArrayAdapter<>(
+            this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+    edtTerm.setAdapter(termAdapter);
+    edtTerm.setThreshold(1);
+
+    // --- Adapter cho definition ---
+    ArrayAdapter<String> defAdapter = new ArrayAdapter<>(
+            this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+    edtDefinition.setAdapter(defAdapter);
+    edtDefinition.setThreshold(1);
+
+    // 1) Gợi ý term như trước
+    edtTerm.addTextChangedListener(new TextWatcher() {
+        @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+        @Override public void afterTextChanged(Editable s) {}
+        @Override
+        public void onTextChanged(CharSequence s, int st, int before, int count) {
+            String input = s.toString().trim();
+            if (input.length() >= 1) {
+                fetchSuggestions(input, suggestions -> {
+                    List<String> top3 = suggestions.size() > 3
+                            ? suggestions.subList(0, 3)
+                            : suggestions;
+                    uiHandler.post(() -> {
+                        termAdapter.clear();
+                        termAdapter.addAll(top3);
+                        termAdapter.notifyDataSetChanged();
+                        if (!top3.isEmpty()) edtTerm.showDropDown();
+                    });
+                });
+            }
+        }
+    });
+
+    // 2) Khi chọn term → fetch definitions và show dropdown ở definition
+    edtTerm.setOnItemClickListener((parent, view, pos, id) -> {
+        String selectedTerm = termAdapter.getItem(pos);
+        fetchDefinitions(selectedTerm, defs -> {
+            uiHandler.post(() -> {
+                defAdapter.clear();
+                defAdapter.addAll(defs);
+                defAdapter.notifyDataSetChanged();
+                if (!defs.isEmpty()) edtDefinition.showDropDown();
+            });
+        });
+    });
+
+    // 3) Remove termView
+    btnRemove.setOnClickListener(v -> containerTerms.removeView(termView));
+
+    containerTerms.addView(termView);
+}
+
+
+
 
 
     private void saveCourse() {
@@ -128,9 +194,11 @@ public class CreateCourseActivity extends AppCompatActivity {
             return;
         }
 
+        String creater = currentUser.getEmail();
+
         // Tạo Course object
         long createdAt = System.currentTimeMillis();
-        Course course = new Course(title, createdAt, vocabList);
+        Course course = new Course(title, createdAt, vocabList,folderId,creater);
 
         String uid      = currentUser.getUid();
         String courseId = db.collection("users").document(uid)
@@ -208,6 +276,93 @@ public class CreateCourseActivity extends AppCompatActivity {
 
 
     }
+    private void fetchDefinitionSuggestions(String word, Consumer<List<String>> callback) {
+        OkHttpClient client = new OkHttpClient();
+        String url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word;
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) { e.printStackTrace(); }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) return;
+                List<String> defs = new ArrayList<>();
+                try {
+                    JSONArray arr = new JSONArray(response.body().string());
+                    // lấy meanings[0].definitions[*].definition
+                    JSONArray meanings = arr
+                            .getJSONObject(0)
+                            .getJSONArray("meanings");
+                    for (int i = 0; i < meanings.length(); i++) {
+                        JSONArray dlist = meanings
+                                .getJSONObject(i)
+                                .getJSONArray("definitions");
+                        for (int j = 0; j < dlist.length(); j++) {
+                            String def = dlist
+                                    .getJSONObject(j)
+                                    .getString("definition");
+                            defs.add(def);
+                            if (defs.size() >= 3) break;
+                        }
+                        if (defs.size() >= 3) break;
+                    }
+                } catch (JSONException e) { e.printStackTrace(); }
+                new Handler(Looper.getMainLooper()).post(() -> callback.accept(defs));
+            }
+        });
+    }
+    private void fetchDefinitions(String term, Consumer<List<String>> callback) {
+        OkHttpClient client = new OkHttpClient();
+        String encodedTerm;
+        try {
+            encodedTerm = URLEncoder.encode(term, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            // Nếu encoding thất bại, dùng term gốc
+            encodedTerm = term;
+        }
+
+        String url = "https://glosbe.com/gapi/translate"
+                + "?from=eng&dest=vie&format=json&phrase=" + encodedTerm
+                + "&pretty=true";
+
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) { e.printStackTrace(); }
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) return;
+                try {
+                    JSONObject json = new JSONObject(response.body().string());
+                    JSONArray tuc = json.optJSONArray("tuc");
+                    List<String> defs = new ArrayList<>();
+                    if (tuc != null) {
+                        for (int i = 0; i < tuc.length(); i++) {
+                            JSONObject entry = tuc.getJSONObject(i);
+                            if (entry.has("meanings")) {
+                                JSONArray meanings = entry.getJSONArray("meanings");
+                                for (int j = 0; j < meanings.length(); j++) {
+                                    JSONObject m = meanings.getJSONObject(j);
+                                    if ("vie".equalsIgnoreCase(m.optString("language"))) {
+                                        String text = m.optString("text");
+                                        if (!defs.contains(text)) {
+                                            defs.add(text);
+                                        }
+                                    }
+                                }
+                            }
+                            if (defs.size() >= 5) break;
+                        }
+                    }
+                    if (defs.isEmpty()) defs.add("Chưa có định nghĩa");
+                    new Handler(Looper.getMainLooper()).post(() -> callback.accept(defs));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+
+
 
 
 }

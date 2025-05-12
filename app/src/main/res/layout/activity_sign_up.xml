@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Create your new account"
-        android:textColor="#A8A8A8"
+        android:textColor="#050505"
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/tvRegister"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +68,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Full Name"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            android:textColor="#050505"
+            android:textColorHint="#000000"
+            android:textColorLink="#020202" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Email -->
@@ -95,7 +98,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="user@mail.com"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:textColor="#050505"
+            android:textColorHint="#040404"
+            android:textColorLink="#0D0C0C" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Password -->
@@ -123,7 +129,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="••••••••"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:textColor="#050505"
+            android:textColorHint="#040404"
+            android:textColorLink="#000000" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Remember Me -->
@@ -132,7 +141,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Remember Me"
-        android:textColor="#A8A8A8"
+        android:textColor="#040404"
         android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/tiPasswordLayout"
         app:layout_constraintStart_toStartOf="parent"

@@ -85,7 +85,8 @@
                     android:drawablePadding="10dp"
                     android:hint="Email"
                     android:paddingLeft="12dp"
-                    android:textColorHint="#888888" />
+                    android:textColorHint="#040404"
+                    android:textColor="#000000"/>
 
                 <EditText
                     android:id="@+id/loginPassword"
@@ -99,7 +100,8 @@
                     android:hint="Password"
                     android:inputType="textPassword"
                     android:paddingLeft="12dp"
-                    android:textColorHint="#888888" />
+                    android:textColorHint="#040404"
+                    android:textColor="#000000"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -109,6 +111,7 @@
                     android:orientation="horizontal">
 
                     <CheckBox
+                        android:id="@+id/checkboxRemember"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Remember Me"

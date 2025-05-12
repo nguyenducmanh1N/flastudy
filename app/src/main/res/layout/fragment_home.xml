@@ -78,6 +78,16 @@
         android:textSize="16sp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp" />
+    <TextView
+        android:id="@+id/tvEmptyFolders"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chưa có thư mục"
+        android:textColor="#888888"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/folderRecyclerView"
@@ -96,6 +106,16 @@
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:layout_marginBottom="8dp" />
+    <TextView
+        android:id="@+id/tvEmptyCourses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chưa có học phần"
+        android:textColor="#888888"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/courseRecyclerView"
@@ -105,5 +125,33 @@
         android:orientation="horizontal"
         android:scrollbars="none"
         android:clipToPadding="false" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Các lớp học"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+    <TextView
+        android:id="@+id/tvEmptyClasses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chưa có lớp học"
+        android:textColor="#888888"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/classRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
 
 </LinearLayout>
