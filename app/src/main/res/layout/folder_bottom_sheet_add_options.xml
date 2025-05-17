@@ -33,7 +33,7 @@
         android:id="@+id/optionCreateClass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
+        android:drawableLeft="@drawable/baseline_diversity_3_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
         android:text="Tạo lớp học"

@@ -1,5 +1,6 @@
 package com.example.myapplication.screens.feature;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -21,6 +22,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.adapter.VocabAdapter;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
+import com.example.myapplication.screens.feature.learn.FlashCardActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -47,8 +49,10 @@ public class CourseDetailActivity extends AppCompatActivity {
     private ViewPager2 vpCards;
     private VocabAdapter vocabAdapter;
     private List<Vocabulary> vocabList = new ArrayList<>();
-    private LinearLayout dotsContainer;
+    private LinearLayout dotsContainer ,flashCard,learn,graft,listen,d;
     private ImageView[] dots;
+
+
 
 
     @Override
@@ -82,6 +86,13 @@ public class CourseDetailActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
+        flashCard = findViewById(R.id.btnFlashCard);
+        flashCard.setOnClickListener(v -> {
+            Intent intent = new Intent(CourseDetailActivity.this, FlashCardActivity.class);
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            intent.putExtra("courseId", courseId);
+            startActivity(intent);
+        });
         loadCourseDetail();
     }
 
@@ -130,7 +141,7 @@ public class CourseDetailActivity extends AppCompatActivity {
             lp.setMargins(8, 0, 8, 0);
             dotsContainer.addView(dots[i], lp);
         }
-        // highlight dot đầu
+
         if (count > 0) {
             dots[0].setImageDrawable(getDrawable(R.drawable.dot_selected));
         }

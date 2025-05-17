@@ -17,12 +17,13 @@
 
         <TextView
             android:id="@+id/tvFrontWord"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="268dp"
+            android:layout_height="67dp"
             android:text="Word"
-            android:textSize="24sp"
             android:textColor="#FFFFFF"
-            android:textStyle="bold"/>
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
     </LinearLayout>
 
     <!-- Mặt sau -->

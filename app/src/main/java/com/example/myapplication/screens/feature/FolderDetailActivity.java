@@ -93,11 +93,11 @@ public class FolderDetailActivity extends AppCompatActivity {
 
         ImageView btnMenu = findViewById(R.id.btnMenu);
         btnMenu.setOnClickListener(v -> {
-            // 1. Khởi tạo PopupMenu
+
             PopupMenu popup = new PopupMenu(this, v);
             popup.getMenuInflater().inflate(R.menu.folder_menu, popup.getMenu());
 
-            // 2. Bắt sự kiện chọn item
+
             popup.setOnMenuItemClickListener(item -> {
                 int id = item.getItemId();
                 if (id == R.id.action_edit) {
