@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0E0D3D"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/btnRead2"
+        android:layout_width="53dp"
+        android:layout_height="27dp"
+        android:layout_gravity="end"
+        android:background="?android:selectableItemBackgroundBorderless"
+        android:src="@drawable/baseline_hearing_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/tvPrompt"
+        app:tint="@android:color/white"
+        tools:layout_editor_absoluteY="64dp"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/tvPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Định nghĩa tiếng Việt"
+        android:textColor="#FDFBFB"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/etAnswer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.817"
+        tools:layout_editor_absoluteX="100dp"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/etAnswer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="80dp"
+        android:hint="Nhập thuật ngữ tiếng Anh"
+        android:inputType="text"
+        android:textColor="#FDFBFB"
+        app:layout_constraintBottom_toTopOf="@+id/btnCheck"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="24dp" />
+
+    <TextView
+        android:id="@+id/tvCorrect"
+        android:layout_width="363dp"
+        android:layout_height="53dp"
+        android:background="#276215"
+        android:padding="12dp"
+        android:textColor="#000099"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btnCheck"
+        app:layout_constraintTop_toBottomOf="@+id/etAnswer"
+        app:layout_constraintVertical_bias="0.388"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <Button
+        android:id="@+id/btnCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="404dp"
+        android:text="Kiểm tra"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:layout_editor_absoluteX="24dp" />
+
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="44dp"
+
+        android:visibility="gone"
+        android:text="Tiếp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnCheck"
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="32dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

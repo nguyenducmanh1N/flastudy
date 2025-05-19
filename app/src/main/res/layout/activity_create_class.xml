@@ -5,7 +5,7 @@
     android:id="@+id/create_class_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A2A"
+    android:background="#0E0D3D"
     android:padding="16dp"
 
     >
@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#0B0B28"
+        android:background="#0E0D3D"
         android:paddingHorizontal="16dp"
         tools:ignore="MissingConstraints">
 

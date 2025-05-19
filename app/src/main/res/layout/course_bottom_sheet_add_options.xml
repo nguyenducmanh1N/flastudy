@@ -8,35 +8,56 @@
     android:background="@drawable/bottom_sheet_background">
 
     <TextView
-        android:id="@+id/optionCreateSubject"
+        android:id="@+id/edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/baseline_book_24"
+        android:drawableLeft="@drawable/baseline_edit_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="Tạo học phần"
+        android:text="sửa học phần"
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/optionCreateFolder"
+        android:id="@+id/addToFolder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawableLeft="@drawable/ic_folder"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="Tạo thư mục"
+        android:text="Thêm vào thư mục"
         android:textSize="16sp"
         android:textColor="@android:color/white" />
 
     <TextView
-        android:id="@+id/optionCreateClass"
+        android:id="@+id/addToClass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawableLeft="@drawable/baseline_groups_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="Tạo lớp học"
+        android:text="Thêm va lớp học"
         android:textSize="16sp"
         android:textColor="@android:color/white" />
+    <TextView
+        android:id="@+id/share"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/baseline_ios_share_24"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Chia sẻ"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:drawableLeft="@drawable/baseline_delete_24"
+        android:text="Thêm va lớp học"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
 </LinearLayout>

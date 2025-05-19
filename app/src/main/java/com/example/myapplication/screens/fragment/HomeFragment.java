@@ -57,16 +57,16 @@ public class HomeFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Init Firestore & User
+
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
 
-        // Empty state TextViews
+
         tvEmptyFolders = view.findViewById(R.id.tvEmptyFolders);
         tvEmptyCourses = view.findViewById(R.id.tvEmptyCourses);
         tvEmptyClasses = view.findViewById(R.id.tvEmptyClasses);
 
-        // Folder RecyclerView
+
         folderRecyclerView = view.findViewById(R.id.folderRecyclerView);
         folderRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -79,7 +79,7 @@ public class HomeFragment extends Fragment {
         });
         folderRecyclerView.setAdapter(folderAdapter);
 
-        // Course RecyclerView
+
         courseRecyclerView = view.findViewById(R.id.courseRecyclerView);
         courseRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -93,7 +93,7 @@ public class HomeFragment extends Fragment {
 
         courseRecyclerView.setAdapter(courseAdapter);
 
-        // Class RecyclerView
+
         classRecyclerView = view.findViewById(R.id.classRecyclerView);
         classRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -126,7 +126,7 @@ public class HomeFragment extends Fragment {
                     }
                     folderAdapter.notifyDataSetChanged();
 
-                    // Show/hide empty view
+
                     if (folderList.isEmpty()) {
                         tvEmptyFolders.setVisibility(View.VISIBLE);
                         folderRecyclerView.setVisibility(View.GONE);
@@ -146,7 +146,7 @@ public class HomeFragment extends Fragment {
                                 .get()
                                 .addOnSuccessListener(csnap -> {
                                     int courseCount = csnap.size();
-                                    f.setCount(courseCount);      // dùng trường 'count' đã có sẵn trong model
+                                    f.setCount(courseCount);
                                     folderAdapter.notifyItemChanged(folderList.indexOf(f));
                                     for (DocumentSnapshot cDoc : csnap) {
                                         Course c = cDoc.toObject(Course.class);
@@ -156,7 +156,7 @@ public class HomeFragment extends Fragment {
 
                                     courseAdapter.notifyDataSetChanged();
 
-                                    // Show/hide courses empty view
+
                                     if (courseList.isEmpty()) {
                                         tvEmptyCourses.setVisibility(View.VISIBLE);
                                         courseRecyclerView.setVisibility(View.GONE);

@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0E0E2C"
+    android:background="#0E0D3D"
     android:padding="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="387dp"
         android:layout_height="53dp"
-        android:background="#0B0B28"
+        android:background="#0E0D3D"
         android:paddingHorizontal="16dp">
 
         <!-- Back button -->
@@ -34,25 +34,25 @@
             android:id="@+id/btnMenu"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="12dp"
             android:contentDescription="Menu"
             android:src="@drawable/baseline_density_medium_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btnAdd"
+
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@android:color/white" />
 
         <!-- Add button -->
-        <ImageView
-            android:id="@+id/btnAdd"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="Add"
-            android:src="@drawable/baseline_add_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white" />
+<!--        <ImageView-->
+<!--            android:id="@+id/btnAdd"-->
+<!--            android:layout_width="24dp"-->
+<!--            android:layout_height="24dp"-->
+<!--            android:contentDescription="Add"-->
+<!--            android:src="@drawable/baseline_add_24"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:tint="@color/white" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

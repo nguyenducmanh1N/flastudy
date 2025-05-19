@@ -5,7 +5,7 @@
     android:id="@+id/detail_class_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A2A"
+    android:background="#0E0D3D"
     android:padding="16dp"
 
     >
@@ -15,14 +15,18 @@
 
     <!-- Tabs: Các học phần | Thành viên -->
 
+    <!-- Ngày tháng -->
+
+    <!-- Danh sách học phần -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#0B0B28"
+        android:layout_width="382dp"
+        android:layout_height="29dp"
+        android:background="#0E0D3D"
         android:paddingHorizontal="16dp"
-        tools:layout_editor_absoluteX="-5dp"
-        tools:layout_editor_absoluteY="-4dp"
-        tools:ignore="MissingConstraints">
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteY="16dp">
 
 
         <ImageView
@@ -52,10 +56,6 @@
             app:tint="@android:color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Ngày tháng -->
-
-    <!-- Danh sách học phần -->
 
     <com.google.android.material.tabs.TabLayout
 

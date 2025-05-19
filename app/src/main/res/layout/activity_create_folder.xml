@@ -31,7 +31,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#0B0B28"
+        android:background="#0E0D3D"
         android:paddingHorizontal="16dp">
 
 

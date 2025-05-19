@@ -156,8 +156,7 @@ public class FolderDetailActivity extends AppCompatActivity {
                     for (DocumentSnapshot ds : qsnap.getDocuments()) {
                         Course c = ds.toObject(Course.class);
                         if (c != null) {
-                            // Firestore trả về list vocabulary nếu bạn lưu nguyên list trong Course,
-                            // nhưng nếu bạn lưu sub‐collection "vocabularies", cần fetch riêng.
+
                             courseList.add(c);
                         }
                     }
@@ -180,7 +179,7 @@ public class FolderDetailActivity extends AppCompatActivity {
                         Toast.makeText(this, "Tên không được để trống", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    // Cập nhật Firestore
+
                     db.collection("users")
                             .document(currentUser.getUid())
                             .collection("folders")
@@ -199,7 +198,7 @@ public class FolderDetailActivity extends AppCompatActivity {
     }
 
     private void shareFolder() {
-        // Ví dụ chỉ chia sẻ tên và ID
+
         String shareText = "Mình chia sẻ thư mục: "
                 + ((TextView)findViewById(R.id.folderNameTextView)).getText()
                 + "\nID: " + folderId;
@@ -215,7 +214,7 @@ public class FolderDetailActivity extends AppCompatActivity {
                 .setTitle("Xóa thư mục")
                 .setMessage("Bạn có chắc muốn xóa thư mục này? Toàn bộ khóa học sẽ bị xóa theo.")
                 .setPositiveButton("Xóa", (dialog, which) -> {
-                    // Xóa document folder (Firestore tự xóa sub-collections nếu dùng security rule cascade hoặc bạn phải tự xóa)
+
                     db.collection("users")
                             .document(currentUser.getUid())
                             .collection("folders")
@@ -223,7 +222,7 @@ public class FolderDetailActivity extends AppCompatActivity {
                             .delete()
                             .addOnSuccessListener(aVoid -> {
                                 Toast.makeText(this, "Đã xóa thư mục", Toast.LENGTH_SHORT).show();
-                                // Quay về MainActivity
+
                                 Intent i = new Intent(this, HomeActivity.class);
                                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);

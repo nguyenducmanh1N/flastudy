@@ -2,6 +2,7 @@ package com.example.myapplication.screens.feature;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -22,7 +23,10 @@ import com.example.myapplication.R;
 import com.example.myapplication.adapter.VocabAdapter;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
+import com.example.myapplication.screens.feature.learn.FillActivity;
 import com.example.myapplication.screens.feature.learn.FlashCardActivity;
+import com.example.myapplication.screens.feature.learn.QuizActivity;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -53,8 +57,6 @@ public class CourseDetailActivity extends AppCompatActivity {
     private ImageView[] dots;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +71,11 @@ public class CourseDetailActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvCourseName);
         tvCreatedAt = findViewById(R.id.tvCourseDate);
         vpCards = findViewById(R.id.vpCards);
+        btnMenu = findViewById(R.id.btnMenu);
 
+
+
+        btnMenu.setOnClickListener(v -> showAddOptionsCourse());
         vocabAdapter = new VocabAdapter(this, vocabList);
         vpCards.setAdapter(vocabAdapter);
 
@@ -94,6 +100,18 @@ public class CourseDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
         loadCourseDetail();
+
+
+        LinearLayout learn = findViewById(R.id.learn);
+        learn.setOnClickListener(v -> showAddOptionsLearn());
+
+
+//        learn.setOnClickListener(v -> {
+//            Intent intent = new Intent(CourseDetailActivity.this, QuizActivity.class);
+//            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+//            startActivity(intent);
+//        });
+
     }
 
     private void loadCourseDetail() {
@@ -154,5 +172,97 @@ public class CourseDetailActivity extends AppCompatActivity {
                     : R.drawable.dot_unselected);
             dots[i].setImageDrawable(getDrawable(res));
         }
+    }
+
+    private void showAddOptionsCourse() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.course_bottom_sheet_add_options, null);
+        bottomSheetDialog.setContentView(view);
+
+        TextView edit = view.findViewById(R.id.edit);
+        TextView addToFolder = view.findViewById(R.id.addToFolder);
+        TextView addToClass = view.findViewById(R.id.addToClass);
+        TextView share = view.findViewById(R.id.share);
+        TextView delete = view.findViewById(R.id.delete);
+
+        edit.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateCourseActivity.class);
+            startActivity(intent);
+        });
+
+        addToFolder.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateFolderActivity.class);
+            startActivity(intent);
+        });
+
+        addToClass.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateClassActivity.class);
+            startActivity(intent);
+        });
+        share.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateClassActivity.class);
+            startActivity(intent);
+        });
+        delete.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateClassActivity.class);
+            startActivity(intent);
+        });
+
+
+        bottomSheetDialog.show();
+    }
+
+    private void showAddOptionsLearn() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.learn_bottom_sheet_add_options, null);
+        bottomSheetDialog.setContentView(view);
+
+        TextView edit = view.findViewById(R.id.quiz);
+        TextView addToFolder = view.findViewById(R.id.fill);
+        TextView addToClass = view.findViewById(R.id.hear);
+        TextView share = view.findViewById(R.id.phonetic);
+        TextView delete = view.findViewById(R.id.test);
+
+        edit.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, QuizActivity.class);
+
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            startActivity(intent);
+        });
+
+        addToFolder.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, FillActivity.class);
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            startActivity(intent);
+        });
+
+        addToClass.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateClassActivity.class);
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            startActivity(intent);
+        });
+        share.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateClassActivity.class);
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            startActivity(intent);
+        });
+        delete.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, CreateClassActivity.class);
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            startActivity(intent);
+        });
+
+
+        bottomSheetDialog.show();
     }
 }

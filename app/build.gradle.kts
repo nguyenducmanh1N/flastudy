@@ -56,5 +56,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation ("com.google.firebase:firebase-firestore:24.10.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
+    // ML Kit Text Recognition
+    implementation ("com.google.mlkit:text-recognition:16.0.0")
+
+    // Nếu bạn muốn xử lý ảnh Bitmap dễ hơn
+    implementation ("com.squareup.picasso:picasso:2.71828")
 
 }

@@ -35,15 +35,15 @@ public class FlashCardPagerAdapter extends RecyclerView.Adapter<FlashCardPagerAd
         Vocabulary vocab = list.get(position);
         holder.tvTerm.setText(vocab.getWord());
         holder.tvDefinition.setText(vocab.getMeaning());
+        holder.tvExample.setText("Example : " + vocab.getExample());
         holder.bindFlip();
-
     }
 
     @Override public int getItemCount() { return list.size(); }
 
     class VH extends RecyclerView.ViewHolder {
         View front, back;
-        TextView tvTerm, tvDefinition;
+        TextView tvTerm, tvDefinition, tvExample;
 
         VH(View itemView) {
             super(itemView);
@@ -51,6 +51,7 @@ public class FlashCardPagerAdapter extends RecyclerView.Adapter<FlashCardPagerAd
             back  = itemView.findViewById(R.id.card_back);
             tvTerm = itemView.findViewById(R.id.tvTerm);
             tvDefinition = itemView.findViewById(R.id.tvDefinition);
+            tvExample = itemView.findViewById(R.id.tvExample);  // Initialize example
             itemView.getViewTreeObserver()
                     .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                         @Override

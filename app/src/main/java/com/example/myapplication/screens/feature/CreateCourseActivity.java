@@ -1,18 +1,22 @@
 package com.example.myapplication.screens.feature;
 
+import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +24,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
+import com.example.myapplication.screens.feature.act.CameraActivity;
+import com.example.myapplication.screens.feature.learn.FlashCardActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -34,7 +40,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +62,8 @@ public class CreateCourseActivity extends AppCompatActivity {
     private Handler uiHandler;
     private String folderId;
 
+    private ImageView btnScan;
+
     private static class DictionaryData {
         List<String> meanings;
         String example;
@@ -73,6 +80,14 @@ public class CreateCourseActivity extends AppCompatActivity {
         inputCourseTitle = findViewById(R.id.inputTitle);
         containerTerms = findViewById(R.id.containerTerms);
         btnAdd = findViewById(R.id.btnAdd);
+        btnScan = findViewById(R.id.btnScan);
+
+        btnScan.setOnClickListener(v -> {
+            Intent intent = new Intent(CreateCourseActivity.this, CameraActivity.class);
+            startActivity(intent);
+        });
+
+
         uiHandler = new Handler(Looper.getMainLooper());
 
         btnAdd.setOnClickListener(v -> addTermLayout());
@@ -97,12 +112,31 @@ public class CreateCourseActivity extends AppCompatActivity {
         AutoCompleteTextView edtTerm = termView.findViewById(R.id.edtTerm);
         AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
         ImageButton btnRemove = termView.findViewById(R.id.btnRemoveTerm);
+        ImageView btnRead = termView.findViewById(R.id.btnRead);
 
         ArrayAdapter<String> termAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line,
                 new ArrayList<>());
         edtTerm.setAdapter(termAdapter);
         edtTerm.setThreshold(1);
+
+        TextWatcher termWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+            @Override public void afterTextChanged(Editable s) {}
+            @Override
+            public void onTextChanged(CharSequence s, int st, int before, int count) {
+                String input = s.toString().trim();
+                if (input.length() >= 1) {
+                    fetchSuggestions(input, suggestions -> uiHandler.post(() -> {
+                        termAdapter.clear();
+                        termAdapter.addAll(suggestions);
+                        termAdapter.notifyDataSetChanged();
+                        if (!suggestions.isEmpty()) edtTerm.showDropDown();
+                    }));
+                }
+            }
+        };
+        edtTerm.addTextChangedListener(termWatcher);
 
         ArrayAdapter<String> defAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line,
@@ -128,8 +162,31 @@ public class CreateCourseActivity extends AppCompatActivity {
             }
         });
 
+//        edtTerm.setOnItemClickListener((parent, view, pos, id) -> {
+//            String selected = termAdapter.getItem(pos);
+//            fetchDefinitionsDictionary(selected, dict -> uiHandler.post(() -> {
+//                // fill adapter nghĩa
+//                defAdapter.clear();
+//                defAdapter.addAll(dict.meanings);
+//                defAdapter.notifyDataSetChanged();
+////                if (!dict.meanings.isEmpty()) {
+////                    edtDefinition.setText(dict.meanings.get(0));
+////                    edtDefinition.setSelection(dict.meanings.get(0).length());
+////                    edtDefinition.showDropDown();
+////                }
+//                // lưu DictionaryData vào termView để dùng khi save
+//                termView.setTag(R.id.tag_definition_data, dict);
+//            }));
+//        });
+
+
         edtTerm.setOnItemClickListener((parent, view, pos, id) -> {
             String selected = termAdapter.getItem(pos);
+
+            fetchDefinitionsDictionary(selected, dict -> uiHandler.post(() -> {
+
+                termView.setTag(R.id.tag_definition_data, dict);
+            }));
 
             fetchTranslationSuggestions(selected, defs -> uiHandler.post(() -> {
 
@@ -142,25 +199,41 @@ public class CreateCourseActivity extends AppCompatActivity {
                     edtDefinition.showDropDown();
                 }
             }));
+            edtTerm.removeTextChangedListener(termWatcher);
+            edtTerm.setAdapter(null);
+            edtTerm.dismissDropDown();
 
         });
 
-//        edtTerm.setOnItemClickListener((parent, view, pos, id) -> {
-//            String selected = termAdapter.getItem(pos);
-//            fetchDefinitionsDictionary(selected, dict -> uiHandler.post(() -> {
-//                // fill adapter nghĩa
-//                defAdapter.clear();
-//                defAdapter.addAll(dict.meanings);
-//                defAdapter.notifyDataSetChanged();
-//                if (!dict.meanings.isEmpty()) {
-//                    edtDefinition.setText(dict.meanings.get(0));
-//                    edtDefinition.setSelection(dict.meanings.get(0).length());
-//                    edtDefinition.showDropDown();
-//                }
-//                // lưu DictionaryData vào termView để dùng khi save
-//                termView.setTag(R.id.tag_definition_data, dict);
-//            }));
-//        });
+
+        btnRead.setOnClickListener(v -> {
+            Object tag = termView.getTag(R.id.tag_definition_data);
+            if (!(tag instanceof DictionaryData)) {
+                Toast.makeText(this, "Chưa có audio để phát", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String audioUrl = ((DictionaryData) tag).audio;
+            if (audioUrl == null || audioUrl.isEmpty()) {
+                Toast.makeText(this, "Audio trống hoặc chưa fetch được", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+            MediaPlayer mp = new MediaPlayer();
+            try {
+                mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mp.setDataSource(audioUrl);
+                mp.setOnPreparedListener(MediaPlayer::start);
+                mp.setOnCompletionListener(mediaPlayer -> {
+                    mediaPlayer.release();
+                });
+                mp.prepareAsync();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Không thể phát audio", Toast.LENGTH_SHORT).show();
+                mp.release();
+            }
+        });
 
         btnRemove.setOnClickListener(v -> containerTerms.removeView(termView));
         containerTerms.addView(termView);
@@ -187,7 +260,7 @@ public class CreateCourseActivity extends AppCompatActivity {
 
             if (!word.isEmpty() && !meaning.isEmpty()) {
                 Vocabulary vocab = new Vocabulary(word, meaning, "","","");
-                // lấy DictionaryData lưu trước đó (nếu có)
+
                 Object tag = v.getTag(R.id.tag_definition_data);
                 if (tag instanceof DictionaryData) {
                     DictionaryData dict = (DictionaryData) tag;
@@ -334,10 +407,8 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
                 JSONArray arr = new JSONArray(response.body().string());
                 JSONObject entry = arr.getJSONObject(0);
 
-                // phonetic chung
                 data.phonetic = entry.optString("phonetic", "");
 
-                // lấy audio đầu tiên có link
                 JSONArray phonetics = entry.optJSONArray("phonetics");
                 if (phonetics != null) {
                     for (int i = 0; i < phonetics.length(); i++) {
@@ -349,7 +420,6 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
                     }
                 }
 
-                // meanings + example đầu tiên
                 JSONArray meaningsArr = entry.getJSONArray("meanings");
                 outer:
                 for (int i = 0; i < meaningsArr.length() && data.meanings.size() < 5; i++) {

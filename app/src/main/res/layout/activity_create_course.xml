@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0F0F3F"
+    android:background="#0E0D3D"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="40dp">
 
@@ -13,7 +13,7 @@
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#0B0B28"
+        android:background="#0E0D3D"
         android:paddingHorizontal="16dp"
         tools:ignore="MissingConstraints">
 
@@ -102,25 +102,22 @@
             android:textStyle="bold" />
 
         <ImageView
-            android:layout_width="24dp"
+            android:id="@+id/btnScan"
+            android:layout_width="55dp"
             android:layout_height="24dp"
             android:layout_marginStart="12dp"
             android:src="@android:drawable/ic_menu_camera"
             app:tint="#FFCC00" />
 
         <TextView
+
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginStart="4dp"
             android:text="Quét tài liệu"
             android:textColor="#FFCC00" />
 
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginStart="4dp"
-            android:src="@android:drawable/ic_lock_lock"
-            app:tint="#FFCC00" />
+
 
         <TextView
             android:layout_width="0dp"

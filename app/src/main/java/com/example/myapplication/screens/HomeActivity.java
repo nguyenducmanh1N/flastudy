@@ -45,7 +45,7 @@ private BottomNavigationView bottomNavigationView;
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Load màn hình mặc định
+
         loadFragment(new HomeFragment());
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -57,9 +57,8 @@ private BottomNavigationView bottomNavigationView;
             } else if (itemId == R.id.navigation_folder) {
                 selectedFragment = new FolderFragment();
             } else if (itemId == R.id.navigation_add) {
-                showAddOptions(); // 👉 Thay vì chuyển sang AddFragment
+                showAddOptions();
                 return false;
-//                selectedFragment = new AddFragment();
             } else if (itemId == R.id.navigation_messenger) {
                 selectedFragment = new MessengerFragment();
             } else if (itemId == R.id.navigation_user) {

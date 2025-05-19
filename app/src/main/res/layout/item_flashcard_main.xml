@@ -46,6 +46,13 @@
             android:text="Definition"
             android:textColor="#FFFFFF"
             android:textSize="18sp"/>
+        <TextView
+            android:id="@+id/tvExample"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Definition"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"/>
     </LinearLayout>
     <!-- overlay đánh dấu -->
 

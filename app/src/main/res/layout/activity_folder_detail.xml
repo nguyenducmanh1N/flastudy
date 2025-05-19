@@ -6,14 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0E0E2C"
+    android:background="#0E0D3D"
     android:padding="16dp">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="#0B0B28"
+        android:background="#0E0D3D"
         android:paddingHorizontal="16dp">
 
         <!-- Back button -->

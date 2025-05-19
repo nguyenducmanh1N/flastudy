@@ -5,6 +5,8 @@
     android:layout_height="match_parent"
     android:layout_margin="8dp">
 
+
+
     <!-- Mặt trước -->
     <LinearLayout
         android:id="@+id/flashcard_front"
