@@ -1,12 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="#0E0D3D">
 
     <!-- Top Bar -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="387dp"
+        android:layout_height="53dp"
+        android:layout_marginBottom="8dp"
+        android:background="#0E0D3D"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/tvCounter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.935">
+
+        <!-- Back button -->
+
+        <!-- Menu button (3 dots) -->
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Back"
+            android:src="@drawable/baseline_arrow_back_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@android:color/white"
+            tools:ignore="MissingConstraints"
+            tools:layout_editor_absoluteX="1dp" />
+
+        <ImageView
+            android:id="@+id/btnMenu"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Menu"
+            android:src="@drawable/baseline_density_medium_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@android:color/white" />
+
+        <!-- Add button -->
+        <!--        <ImageView-->
+        <!--            android:id="@+id/btnAdd"-->
+        <!--            android:layout_width="24dp"-->
+        <!--            android:layout_height="24dp"-->
+        <!--            android:contentDescription="Add"-->
+        <!--            android:src="@drawable/baseline_add_24"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            app:tint="@color/white" />-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <ImageView
         android:id="@+id/btnClose"
         android:layout_width="24dp"
@@ -19,15 +74,15 @@
 
     <TextView
         android:id="@+id/tvCounter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_width="74dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="72dp"
         android:padding="16dp"
         android:text="26 / 26"
         android:textColor="#FFFFFF"
-        android:textSize="16sp"
+        android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@id/btnSettings"
-        app:layout_constraintHorizontal_bias="0.472"
+
         app:layout_constraintStart_toEndOf="@id/btnClose"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -42,42 +97,10 @@
         app:tint="#FFFFFF" />
 
     <!-- Progress thin -->
-    <View
-        android:id="@+id/progressBar"
-        android:layout_width="0dp"
-        android:layout_height="4dp"
-        android:background="#2E3A5F"
-        app:layout_constraintTop_toBottomOf="@id/btnClose"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Wrong counter -->
-    <TextView
-        android:id="@+id/notMasteredIds"
-        android:layout_width="48dp"
-        android:layout_height="32dp"
-        android:layout_margin="16dp"
-        android:background="@drawable/bg_counter_red"
-        android:gravity="center"
-        android:text="25"
-        android:textColor="#FF5722"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/progressBar"
-        app:layout_constraintStart_toStartOf="parent"/>
 
     <!-- Correct counter -->
-    <TextView
-        android:id="@+id/masteredIds"
-        android:layout_width="48dp"
-        android:layout_height="32dp"
-        android:layout_margin="16dp"
-        android:background="@drawable/bg_counter_green"
-        android:gravity="center"
-        android:text="0"
-        android:textColor="#4CAF50"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/progressBar"
-        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Flashcard Frame -->
 <!--    <FrameLayout-->
@@ -102,17 +125,49 @@
 <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
 <!--    </FrameLayout>-->
+
+    <TextView
+        android:id="@+id/notMasteredIds"
+        android:layout_width="48dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_counter_red"
+        android:gravity="center"
+        android:text="25"
+        android:textColor="#FF5722"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvCounter"
+        app:layout_constraintEnd_toStartOf="@+id/tvCounter"
+        app:layout_constraintHorizontal_bias="0.128"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/masteredIds"
+        android:layout_width="48dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_counter_green"
+        android:gravity="center"
+        android:text="0"
+        android:textColor="#4CAF50"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvCounter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/tvCounter" />
+
     <FrameLayout
         android:id="@+id/flashcard_container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="381dp"
+        android:layout_height="511dp"
         android:layout_margin="16dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintBottom_toTopOf="@id/bottomControls"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvCounter"
-        android:clipToPadding="false"
-        android:clipChildren="false">
+        app:layout_constraintTop_toBottomOf="@+id/tvCounter">
 
 
         <androidx.viewpager2.widget.ViewPager2
@@ -139,14 +194,14 @@
     <!-- Bottom Controls -->
     <LinearLayout
         android:id="@+id/bottomControls"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_width="411dp"
+        android:layout_height="96dp"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
             android:id="@+id/btnUndo"
@@ -154,36 +209,62 @@
             android:layout_height="32dp"
             android:src="@drawable/baseline_arrow_back_24"
             app:tint="#FFFFFF" />
+
         <View
-            android:layout_width="100dp"
-            android:layout_height="0dp" />
+            android:layout_width="12dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btnNotMastered"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:src="@drawable/book"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/book"
             app:tint="#FF5722" />
 
         <View
-            android:layout_width="32dp"
-            android:layout_height="0dp" />
+            android:id="@+id/view"
+            android:layout_width="12dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/btnHeadCard"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/baseline_hearing_24"
+            app:tint="#FDFDFD" />
+
+        <View
+
+            android:layout_width="12dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btnMastered"
-            android:layout_width="48dp"
+            android:layout_width="18dp"
             android:layout_height="48dp"
-            android:src="@drawable/book"
+            android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/book"
             app:tint="#4CAF50" />
 
         <View
-            android:layout_width="64dp"
-            android:layout_height="4dp"
-            android:background="#FFFFFF"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_width="12dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/btnAutoScroll"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/baseline_hdr_auto_24"
+            app:tint="#FFFFFF" />
+
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

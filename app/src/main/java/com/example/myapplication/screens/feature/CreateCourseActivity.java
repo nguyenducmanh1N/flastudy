@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -30,6 +31,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
@@ -53,16 +55,21 @@ import okhttp3.Response;
 
 public class CreateCourseActivity extends AppCompatActivity {
 
-    public static final String EXTRA_FOLDER_ID = "folderId";
-    private LinearLayout containerTerms;
-    private ImageButton btnAdd;
-    private EditText inputCourseTitle;
-    private FirebaseFirestore db;
-    private FirebaseUser currentUser;
-    private Handler uiHandler;
-    private String folderId;
+    public static final String EXTRA_FOLDER_ID   = "folderId";
+    public static final String EXTRA_IS_EDIT     = "isEdit";
+    public static final String EXTRA_COURSE_ID   = "courseId";
 
-    private ImageView btnScan;
+    private LinearLayout    containerTerms;
+    private ImageButton     btnAdd;
+    private EditText        inputCourseTitle;
+    private ImageView       btnScan, btnSave, btnClose;
+    private FirebaseFirestore db;
+    private FirebaseUser     currentUser;
+    private Handler          uiHandler;
+    private String           folderId;
+
+    private boolean isEditMode;
+    private String  editCourseId;
 
     private static class DictionaryData {
         List<String> meanings;
@@ -76,58 +83,110 @@ public class CreateCourseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_course);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
+        // find views
         inputCourseTitle = findViewById(R.id.inputTitle);
-        containerTerms = findViewById(R.id.containerTerms);
-        btnAdd = findViewById(R.id.btnAdd);
-        btnScan = findViewById(R.id.btnScan);
+        containerTerms    = findViewById(R.id.containerTerms);
+        btnAdd            = findViewById(R.id.btnAdd);
+        btnScan           = findViewById(R.id.btnScan);
+        btnSave           = findViewById(R.id.btnSave);
+        btnClose          = findViewById(R.id.btnCloseCreateCourse);
 
-        btnScan.setOnClickListener(v -> {
-            Intent intent = new Intent(CreateCourseActivity.this, CameraActivity.class);
-            startActivity(intent);
-        });
+        uiHandler      = new Handler(Looper.getMainLooper());
+        db             = FirebaseFirestore.getInstance();
+        currentUser    = FirebaseAuth.getInstance().getCurrentUser();
+        folderId       = getIntent().getStringExtra(EXTRA_FOLDER_ID);
+        isEditMode     = getIntent().getBooleanExtra(EXTRA_IS_EDIT, false);
+        editCourseId   = getIntent().getStringExtra(EXTRA_COURSE_ID);
 
-
-        uiHandler = new Handler(Looper.getMainLooper());
-
-        btnAdd.setOnClickListener(v -> addTermLayout());
-        addTermLayout();
-
-        findViewById(R.id.btnCloseCreateCourse).setOnClickListener(v -> finish());
-        findViewById(R.id.btnSave).setOnClickListener(v -> saveCourse());
-
-        db = FirebaseFirestore.getInstance();
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        folderId = getIntent().getStringExtra(EXTRA_FOLDER_ID);
         if (folderId == null) {
             Toast.makeText(this, "Không xác định được thư mục", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }
+        if (currentUser == null) {
+            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // scan button
+        btnScan.setOnClickListener(v -> {
+            startActivity(new Intent(this, CameraActivity.class));
+        });
+
+        // add term
+        btnAdd.setOnClickListener(v -> addTermLayout());
+
+        // close
+        btnClose.setOnClickListener(v -> finish());
+
+        // save/update
+        btnSave.setOnClickListener(v -> saveCourse());
+
+        // if edit mode, load existing course
+        if (isEditMode && editCourseId != null) {
+            btnSave.setImageResource(android.R.drawable.ic_menu_edit);
+            containerTerms.removeAllViews();
+            loadCourseForEdit();
+        } else {
+            // new course: add one empty term row
+            addTermLayout();
+        }
+    }
+
+    private void loadCourseForEdit() {
+        String uid = currentUser.getUid();
+        DocumentReference ref = db.collection("users").document(uid)
+                .collection("folders").document(folderId)
+                .collection("courses").document(editCourseId);
+
+        ref.get().addOnSuccessListener(doc -> {
+            Course course = doc.toObject(Course.class);
+            if (course == null) return;
+            inputCourseTitle.setText(course.getTitle());
+            for (Vocabulary v : course.getVocabularyList()) {
+                addTermLayout();
+                View termView = containerTerms.getChildAt(containerTerms.getChildCount()-1);
+                AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+                AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
+
+                edtTerm.setText(v.getWord());
+                edtDefinition.setText(v.getMeaning());
+
+                DictionaryData dict = new DictionaryData();
+                dict.example  = v.getExample();
+                dict.audio    = v.getAudio();
+                dict.phonetic = v.getPhonetic();
+                termView.setTag(R.id.tag_definition_data, dict);
+            }
+        }).addOnFailureListener(e ->
+                Toast.makeText(this, "Lỗi load Course: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
     }
 
     private void addTermLayout() {
         View termView = LayoutInflater.from(this)
                 .inflate(R.layout.item_term, containerTerms, false);
-        AutoCompleteTextView edtTerm = termView.findViewById(R.id.edtTerm);
+        AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
         AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
-        ImageButton btnRemove = termView.findViewById(R.id.btnRemoveTerm);
-        ImageView btnRead = termView.findViewById(R.id.btnRead);
+        ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
+        ImageView   btnRead                = termView.findViewById(R.id.btnRead);
 
+        // suggestions adapter
         ArrayAdapter<String> termAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line,
-                new ArrayList<>());
+                this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         edtTerm.setAdapter(termAdapter);
         edtTerm.setThreshold(1);
 
-        TextWatcher termWatcher = new TextWatcher() {
+        TextWatcher watcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
             @Override public void afterTextChanged(Editable s) {}
-            @Override
-            public void onTextChanged(CharSequence s, int st, int before, int count) {
-                String input = s.toString().trim();
-                if (input.length() >= 1) {
-                    fetchSuggestions(input, suggestions -> uiHandler.post(() -> {
+            @Override public void onTextChanged(CharSequence s, int st, int before, int count) {
+                String q = s.toString().trim();
+                if (q.length() >= 1) {
+                    fetchSuggestions(q, suggestions -> uiHandler.post(() -> {
                         termAdapter.clear();
                         termAdapter.addAll(suggestions);
                         termAdapter.notifyDataSetChanged();
@@ -136,60 +195,23 @@ public class CreateCourseActivity extends AppCompatActivity {
                 }
             }
         };
-        edtTerm.addTextChangedListener(termWatcher);
+        edtTerm.addTextChangedListener(watcher);
 
+        // definition translation adapter
         ArrayAdapter<String> defAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line,
-                new ArrayList<>());
+                this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         edtDefinition.setAdapter(defAdapter);
         edtDefinition.setThreshold(1);
 
-        edtTerm.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-            @Override public void afterTextChanged(Editable s) {}
-            @Override
-            public void onTextChanged(CharSequence s, int st, int before, int count) {
-                String input = s.toString().trim();
-                if (input.length() >= 1) {
-
-                    fetchSuggestions(input, suggestions -> uiHandler.post(() -> {
-                        termAdapter.clear();
-                        termAdapter.addAll(suggestions);
-                        termAdapter.notifyDataSetChanged();
-                        if (!suggestions.isEmpty()) edtTerm.showDropDown();
-                    }));
-                }
-            }
-        });
-
-//        edtTerm.setOnItemClickListener((parent, view, pos, id) -> {
-//            String selected = termAdapter.getItem(pos);
-//            fetchDefinitionsDictionary(selected, dict -> uiHandler.post(() -> {
-//                // fill adapter nghĩa
-//                defAdapter.clear();
-//                defAdapter.addAll(dict.meanings);
-//                defAdapter.notifyDataSetChanged();
-////                if (!dict.meanings.isEmpty()) {
-////                    edtDefinition.setText(dict.meanings.get(0));
-////                    edtDefinition.setSelection(dict.meanings.get(0).length());
-////                    edtDefinition.showDropDown();
-////                }
-//                // lưu DictionaryData vào termView để dùng khi save
-//                termView.setTag(R.id.tag_definition_data, dict);
-//            }));
-//        });
-
-
-        edtTerm.setOnItemClickListener((parent, view, pos, id) -> {
-            String selected = termAdapter.getItem(pos);
-
-            fetchDefinitionsDictionary(selected, dict -> uiHandler.post(() -> {
-
-                termView.setTag(R.id.tag_definition_data, dict);
-            }));
-
-            fetchTranslationSuggestions(selected, defs -> uiHandler.post(() -> {
-
+        // on term selected
+        edtTerm.setOnItemClickListener((p, v, pos, id) -> {
+            String word = termAdapter.getItem(pos);
+            // fetch dictionary details
+            fetchDefinitionsDictionary(word, dict -> uiHandler.post(() ->
+                    termView.setTag(R.id.tag_definition_data, dict)
+            ));
+            // fetch translation
+            fetchTranslationSuggestions(word, defs -> uiHandler.post(() -> {
                 defAdapter.clear();
                 defAdapter.addAll(defs);
                 defAdapter.notifyDataSetChanged();
@@ -199,43 +221,40 @@ public class CreateCourseActivity extends AppCompatActivity {
                     edtDefinition.showDropDown();
                 }
             }));
-            edtTerm.removeTextChangedListener(termWatcher);
+            // disable further suggestions
+            edtTerm.removeTextChangedListener(watcher);
             edtTerm.setAdapter(null);
             edtTerm.dismissDropDown();
-
         });
 
-
+        // play audio
         btnRead.setOnClickListener(v -> {
             Object tag = termView.getTag(R.id.tag_definition_data);
             if (!(tag instanceof DictionaryData)) {
-                Toast.makeText(this, "Chưa có audio để phát", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Chưa có audio", Toast.LENGTH_SHORT).show();
                 return;
             }
-            String audioUrl = ((DictionaryData) tag).audio;
+            String audioUrl = ((DictionaryData)tag).audio;
             if (audioUrl == null || audioUrl.isEmpty()) {
-                Toast.makeText(this, "Audio trống hoặc chưa fetch được", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Audio rỗng", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-
             MediaPlayer mp = new MediaPlayer();
             try {
                 mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mp.setDataSource(audioUrl);
-                mp.setOnPreparedListener(MediaPlayer::start);
-                mp.setOnCompletionListener(mediaPlayer -> {
-                    mediaPlayer.release();
-                });
                 mp.prepareAsync();
+                mp.setOnPreparedListener(MediaPlayer::start);
+                mp.setOnCompletionListener(MediaPlayer::release);
             } catch (IOException e) {
-                e.printStackTrace();
                 Toast.makeText(this, "Không thể phát audio", Toast.LENGTH_SHORT).show();
                 mp.release();
             }
         });
 
+        // remove row
         btnRemove.setOnClickListener(v -> containerTerms.removeView(termView));
+
         containerTerms.addView(termView);
     }
 
@@ -245,28 +264,21 @@ public class CreateCourseActivity extends AppCompatActivity {
             Toast.makeText(this, "Nhập tiêu đề Course", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (currentUser == null) {
-            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         List<Vocabulary> vocabList = new ArrayList<>();
         for (int i = 0; i < containerTerms.getChildCount(); i++) {
             View v = containerTerms.getChildAt(i);
-            String word = ((EditText) v.findViewById(R.id.edtTerm))
+            String w = ((EditText)v.findViewById(R.id.edtTerm))
                     .getText().toString().trim();
-            String meaning = ((EditText) v.findViewById(R.id.edtDefinition))
+            String m = ((EditText)v.findViewById(R.id.edtDefinition))
                     .getText().toString().trim();
-
-            if (!word.isEmpty() && !meaning.isEmpty()) {
-                Vocabulary vocab = new Vocabulary(word, meaning, "","","");
-
+            if (!w.isEmpty() && !m.isEmpty()) {
+                Vocabulary vocab = new Vocabulary(w,m,"","","");
                 Object tag = v.getTag(R.id.tag_definition_data);
                 if (tag instanceof DictionaryData) {
-                    DictionaryData dict = (DictionaryData) tag;
-                    vocab.setExample(dict.example);
-                    vocab.setAudio(dict.audio);
-                    vocab.setPhonetic(dict.phonetic);
+                    DictionaryData d = (DictionaryData)tag;
+                    vocab.setExample(d.example);
+                    vocab.setAudio(d.audio);
+                    vocab.setPhonetic(d.phonetic);
                 }
                 vocabList.add(vocab);
             }
@@ -277,36 +289,70 @@ public class CreateCourseActivity extends AppCompatActivity {
         }
 
         String uid = currentUser.getUid();
-        String courseId = db.collection("users").document(uid)
-                .collection("folders").document(folderId)
-                .collection("courses").document().getId();
-        Course course = new Course(title, System.currentTimeMillis(),
-                vocabList, folderId, currentUser.getEmail());
-        course.setId(courseId);
-
-        DocumentReference courseRef = db.collection("users").document(uid)
-                .collection("folders").document(folderId)
-                .collection("courses").document(courseId);
-
-        courseRef.set(course)
-                .addOnSuccessListener(a -> commitVocabBatch(courseRef, vocabList))
-                .addOnFailureListener(e -> Toast.makeText(this,
-                        "Lỗi lưu Course: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        DocumentReference courseRef;
+        if (isEditMode) {
+            courseRef = db.collection("users").document(uid)
+                    .collection("folders").document(folderId)
+                    .collection("courses").document(editCourseId);
+            // update title + timestamp
+            courseRef.update("title", title, "createdAt", System.currentTimeMillis())
+                    .addOnSuccessListener(a -> {
+                        // delete old vocab then write new
+                        courseRef.collection("vocabularies").get()
+                                .addOnSuccessListener(qs -> {
+                                    WriteBatch batch = db.batch();
+                                    for (DocumentSnapshot ds : qs) batch.delete(ds.getReference());
+                                    for (Vocabulary vv : vocabList) {
+                                        DocumentReference vr = courseRef
+                                                .collection("vocabularies").document();
+                                        vv.setId(vr.getId());
+                                        batch.set(vr, vv);
+                                    }
+                                    batch.commit()
+                                            .addOnSuccessListener(a2 -> {
+                                                Toast.makeText(this,
+                                                        "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+                                                finish();
+                                            })
+                                            .addOnFailureListener(e -> Toast.makeText(this,
+                                                    "Lỗi lưu từ vựng: "+e.getMessage(),
+                                                    Toast.LENGTH_SHORT).show());
+                                });
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(this,
+                            "Lỗi update Course: "+e.getMessage(),
+                            Toast.LENGTH_SHORT).show());
+        } else {
+            String newId = db.collection("users").document(uid)
+                    .collection("folders").document(folderId)
+                    .collection("courses").document().getId();
+            Course course = new Course(title, System.currentTimeMillis(),
+                    vocabList, folderId, currentUser.getEmail());
+            course.setId(newId);
+            courseRef = db.collection("users").document(uid)
+                    .collection("folders").document(folderId)
+                    .collection("courses").document(newId);
+            courseRef.set(course)
+                    .addOnSuccessListener(a -> commitVocabBatch(courseRef,vocabList))
+                    .addOnFailureListener(e -> Toast.makeText(this,
+                            "Lỗi lưu Course: "+e.getMessage(),
+                            Toast.LENGTH_SHORT).show());
+        }
     }
 
-    private void commitVocabBatch(DocumentReference courseRef, List<Vocabulary> vocabList) {
+    private void commitVocabBatch(DocumentReference ref, List<Vocabulary> list) {
         WriteBatch batch = db.batch();
-        CollectionReference vocabCol = courseRef.collection("vocabularies");
-        for (Vocabulary vocab : vocabList) {
-            DocumentReference vocabRef = vocabCol.document();
-            vocab.setId(vocabRef.getId());
-            batch.set(vocabRef, vocab);
+        for (Vocabulary v : list) {
+            DocumentReference vr = ref.collection("vocabularies").document();
+            v.setId(vr.getId());
+            batch.set(vr, v);
         }
         batch.commit()
-                .addOnSuccessListener(a2 -> Toast.makeText(this,
+                .addOnSuccessListener(a -> Toast.makeText(this,
                         "Tạo Course và lưu từ vựng thành công", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(this,
-                        "Lỗi lưu từ vựng: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                        "Lỗi lưu từ vựng: "+e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
     }
 
 

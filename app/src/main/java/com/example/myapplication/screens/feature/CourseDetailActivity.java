@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,6 +26,7 @@ import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.screens.feature.learn.FillActivity;
 import com.example.myapplication.screens.feature.learn.FlashCardActivity;
+import com.example.myapplication.screens.feature.learn.ListenQuizActivity;
 import com.example.myapplication.screens.feature.learn.QuizActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +44,7 @@ import java.util.Locale;
 public class CourseDetailActivity extends AppCompatActivity {
     public static final String EXTRA_FOLDER_ID = "folderId";
     public static final String EXTRA_COURSE_ID = "courseId";
+    public static final String EXTRA_IS_EDIT = "isEdit";
 
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
@@ -57,10 +60,15 @@ public class CourseDetailActivity extends AppCompatActivity {
     private ImageView[] dots;
 
 
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_detail);
+
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
@@ -188,8 +196,12 @@ public class CourseDetailActivity extends AppCompatActivity {
         edit.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             Intent intent = new Intent(this, CreateCourseActivity.class);
+            intent.putExtra(CreateCourseActivity.EXTRA_FOLDER_ID, folderId);
+            intent.putExtra(CreateCourseActivity.EXTRA_COURSE_ID, courseId);
+            intent.putExtra(CreateCourseActivity.EXTRA_IS_EDIT, true);
             startActivity(intent);
         });
+
 
         addToFolder.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
@@ -245,7 +257,7 @@ public class CourseDetailActivity extends AppCompatActivity {
 
         addToClass.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateClassActivity.class);
+            Intent intent = new Intent(this, ListenQuizActivity.class);
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
             startActivity(intent);
         });

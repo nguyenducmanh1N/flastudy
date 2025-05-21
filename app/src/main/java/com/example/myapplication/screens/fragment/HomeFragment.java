@@ -41,12 +41,17 @@ public class HomeFragment extends Fragment {
     private CourseAdapter courseAdapter;
     private ClassAdapter classAdapter;
 
-    private TextView tvEmptyFolders, tvEmptyCourses, tvEmptyClasses;
+    private boolean isFoldersLoaded = false;
+    private boolean isCoursesLoaded = false;
+    private boolean isClassesLoaded = false;
 
+    private View loadingLayout;  // layout che khi loading
+
+
+    private TextView tvEmptyFolders, tvEmptyCourses, tvEmptyClasses;
     private List<Folder> folderList = new ArrayList<>();
     private List<Course> courseList = new ArrayList<>();
     private List<ClassModel> classList = new ArrayList<>();
-
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
 
@@ -60,6 +65,9 @@ public class HomeFragment extends Fragment {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
+
+        loadingLayout = view.findViewById(R.id.loadingLayout);
+        loadingLayout.setVisibility(View.VISIBLE);
 
 
         tvEmptyFolders = view.findViewById(R.id.tvEmptyFolders);
@@ -110,9 +118,17 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadData() {
-        if (currentUser == null) return;
+        isFoldersLoaded = false;
+        isCoursesLoaded = false;
+        isClassesLoaded = false;
 
-        // Load folders
+        loadingLayout.setVisibility(View.VISIBLE); // hiện loading
+
+        loadFolders();
+        loadClasses();
+    }
+
+    private void loadFolders() {
         db.collection("users")
                 .document(currentUser.getUid())
                 .collection("folders")
@@ -126,7 +142,6 @@ public class HomeFragment extends Fragment {
                     }
                     folderAdapter.notifyDataSetChanged();
 
-
                     if (folderList.isEmpty()) {
                         tvEmptyFolders.setVisibility(View.VISIBLE);
                         folderRecyclerView.setVisibility(View.GONE);
@@ -135,43 +150,60 @@ public class HomeFragment extends Fragment {
                         folderRecyclerView.setVisibility(View.VISIBLE);
                     }
 
-                    // Load courses for each folder
-                    courseList.clear();
-                    for (Folder f : folderList) {
-                        db.collection("users")
-                                .document(currentUser.getUid())
-                                .collection("folders")
-                                .document(f.getId())
-                                .collection("courses")
-                                .get()
-                                .addOnSuccessListener(csnap -> {
-                                    int courseCount = csnap.size();
-                                    f.setCount(courseCount);
-                                    folderAdapter.notifyItemChanged(folderList.indexOf(f));
-                                    for (DocumentSnapshot cDoc : csnap) {
-                                        Course c = cDoc.toObject(Course.class);
-                                        c.setFolderId(f.getId());
-                                        courseList.add(c);
-                                    }
+                    // Sau khi load folder → load course cho từng folder
+                    loadCoursesForFolders();
 
-                                    courseAdapter.notifyDataSetChanged();
-
-
-                                    if (courseList.isEmpty()) {
-                                        tvEmptyCourses.setVisibility(View.VISIBLE);
-                                        courseRecyclerView.setVisibility(View.GONE);
-
-
-                                    } else {
-                                        tvEmptyCourses.setVisibility(View.GONE);
-                                        courseRecyclerView.setVisibility(View.VISIBLE);
-                                    }
-                                });
-                    }
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Lỗi load folders: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Lỗi load folders: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    isFoldersLoaded = true;
+                    isCoursesLoaded = true;  // fail luôn cả course
+                    checkAllLoaded();
+                });
+    }
 
-        // Load classes
+    private void loadCoursesForFolders() {
+        courseList.clear();
+        List<com.google.android.gms.tasks.Task<?>> courseTasks = new ArrayList<>();
+
+        for (Folder f : folderList) {
+            com.google.android.gms.tasks.Task<?> task = db.collection("users")
+                    .document(currentUser.getUid())
+                    .collection("folders")
+                    .document(f.getId())
+                    .collection("courses")
+                    .get()
+                    .addOnSuccessListener(csnap -> {
+                        f.setCount(csnap.size());
+                        folderAdapter.notifyItemChanged(folderList.indexOf(f));
+                        for (DocumentSnapshot cDoc : csnap) {
+                            Course c = cDoc.toObject(Course.class);
+                            c.setFolderId(f.getId());
+                            courseList.add(c);
+                        }
+                    });
+
+            courseTasks.add(task);
+        }
+
+        com.google.android.gms.tasks.Tasks.whenAllComplete(courseTasks)
+                .addOnCompleteListener(t -> {
+                    courseAdapter.notifyDataSetChanged();
+                    if (courseList.isEmpty()) {
+                        tvEmptyCourses.setVisibility(View.VISIBLE);
+                        courseRecyclerView.setVisibility(View.GONE);
+                    } else {
+                        tvEmptyCourses.setVisibility(View.GONE);
+                        courseRecyclerView.setVisibility(View.VISIBLE);
+                    }
+
+                    isCoursesLoaded = true;
+                    isFoldersLoaded = true; // đánh dấu folder cũng đã load xong
+                    checkAllLoaded();
+                });
+    }
+
+    private void loadClasses() {
         db.collection("classes")
                 .whereArrayContains("members", currentUser.getEmail())
                 .get()
@@ -184,7 +216,6 @@ public class HomeFragment extends Fragment {
                     }
                     classAdapter.notifyDataSetChanged();
 
-                    // Show/hide classes empty view
                     if (classList.isEmpty()) {
                         tvEmptyClasses.setVisibility(View.VISIBLE);
                         classRecyclerView.setVisibility(View.GONE);
@@ -192,7 +223,21 @@ public class HomeFragment extends Fragment {
                         tvEmptyClasses.setVisibility(View.GONE);
                         classRecyclerView.setVisibility(View.VISIBLE);
                     }
+
+                    isClassesLoaded = true;
+                    checkAllLoaded();
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Lỗi load lớp: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Lỗi load lớp: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    isClassesLoaded = true;
+                    checkAllLoaded();
+                });
     }
+
+    private void checkAllLoaded() {
+        if (isFoldersLoaded && isCoursesLoaded && isClassesLoaded) {
+            loadingLayout.setVisibility(View.GONE); // ẩn loading khi tất cả đã xong
+        }
+    }
+
 }
