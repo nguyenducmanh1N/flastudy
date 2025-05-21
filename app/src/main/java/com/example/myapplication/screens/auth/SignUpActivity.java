@@ -2,6 +2,7 @@ package com.example.myapplication.screens.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -13,12 +14,17 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
+import com.example.myapplication.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
+
+    private FirebaseFirestore db;
     private EditText edtFullName, signupEmail, signupPassword;
     private Button signupButton;
     private ImageButton btnBack;
@@ -34,6 +40,7 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up); // hoặc tên file XML bạn đã tạo
 
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         // Ánh xạ view
         edtFullName = findViewById(R.id.edtFullName);
@@ -62,13 +69,30 @@ public class SignUpActivity extends AppCompatActivity {
                 auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
-                                Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_SHORT).show();
-                                // Chuyển sang màn hình đăng nhập hoặc chính
-                                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
-                                finish();
-                            } else {
-                                Toast.makeText(SignUpActivity.this, "Sign up failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                FirebaseUser user = auth.getCurrentUser();
+                                if (user != null) {
+                                    String uid = user.getUid();
+                                    Log.d("SIGN_UP", "UID: " + uid);
+
+                                    User userData = new User(uid, fullName, email);
+
+                                    db.collection("users").document(uid)
+                                            .set(userData)
+                                            .addOnSuccessListener(aVoid -> {
+                                                Log.d("SIGN_UP", "User saved to Firestore");
+                                                Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_SHORT).show();
+                                                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
+                                                finish();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("SIGN_UP", "Firestore write failed", e);
+                                                Toast.makeText(SignUpActivity.this, "Failed to save user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            });
+                                } else {
+                                    Log.e("SIGN_UP", "FirebaseUser is null");
+                                }
                             }
+
                         });
             }
         });

@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.myapplication.R;
+import com.example.myapplication.model.User;
 import com.example.myapplication.screens.HomeActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -28,10 +29,13 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
+    private FirebaseFirestore db;
     private EditText loginEmail, loginPassword;
     private Button loginButton;
     private CheckBox rememberMe;
@@ -61,6 +65,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // init Firebase Auth
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         // init UI
         loginEmail    = findViewById(R.id.loginEmail);
@@ -173,12 +178,33 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
-                        Toast.makeText(this, "Welcome " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, HomeActivity.class));
-                        finish();
+                        if (user != null) {
+                            saveUserToFirestore(user); // ⬅️ Lưu người dùng vào Firestore
+                            Toast.makeText(this, "Welcome " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, HomeActivity.class));
+                            finish();
+                        }
                     } else {
                         Toast.makeText(this, "Authentication Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
+
+
+    private void saveUserToFirestore(FirebaseUser user) {
+        String uid = user.getUid();
+
+        User userData = new User(uid, user.getDisplayName(), user.getEmail());
+
+        db.collection("users")
+                .document(uid)
+                .set(userData, SetOptions.merge()) // merge tránh ghi đè nếu đã tồn tại
+                .addOnSuccessListener(aVoid -> {
+                    // thành công, không cần toast ở đây vì đã có ở trên
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to save user to Firestore", Toast.LENGTH_SHORT).show();
+                });
+    }
+
 }
