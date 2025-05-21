@@ -40,13 +40,10 @@ public class HomeFragment extends Fragment {
     private FolderAdapter folderAdapter;
     private CourseAdapter courseAdapter;
     private ClassAdapter classAdapter;
-
     private TextView tvEmptyFolders, tvEmptyCourses, tvEmptyClasses;
-
     private List<Folder> folderList = new ArrayList<>();
     private List<Course> courseList = new ArrayList<>();
     private List<ClassModel> classList = new ArrayList<>();
-
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
 

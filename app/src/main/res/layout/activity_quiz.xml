@@ -34,8 +34,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:text="English Word"
-            android:textSize="24sp"
+            android:text="Chọn đáp án"
+            android:textSize="14sp"
             android:textStyle="bold" />
 
         <Button
@@ -118,6 +118,8 @@
         <!--            app:tint="@color/white" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

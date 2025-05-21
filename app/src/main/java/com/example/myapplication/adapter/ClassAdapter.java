@@ -15,7 +15,6 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassVH> {
     public interface OnItemClickListener {
         void onClick(ClassModel cls);
     }
-
     private List<ClassModel> data;
     private OnItemClickListener listener;
 
