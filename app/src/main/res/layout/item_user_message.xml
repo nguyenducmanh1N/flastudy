@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_message"
+        android:background="@drawable/bg_user_message"
+        android:textColor="#ffffff"
+        android:padding="10dp"
+        android:layout_gravity="end"
+        android:layout_margin="4dp"
+        android:text="Tin nhắn người dùng"/>
+</FrameLayout>
