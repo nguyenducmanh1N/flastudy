@@ -58,15 +58,15 @@ public class FlashCardActivity extends AppCompatActivity {
 
     private void setupViewPager() {
         updateCounter(0);
-        vp.setOffscreenPageLimit(3);
-        vp.setClipToPadding(false);
-        vp.setClipChildren(false);
-        vp.setPadding(48, 0, 48, 0);
+
+        vp.setOffscreenPageLimit(1);
+        vp.setClipToPadding(true);
+        vp.setClipChildren(true);
+        vp.setPadding(0, 0, 0, 0);
 
         CompositePageTransformer transformer = new CompositePageTransformer();
         transformer.addTransformer((page, position) -> {
             float abs = Math.abs(position);
-            page.setTranslationX(-position * page.getWidth() * 0.3f);
             page.setScaleY(1f - 0.1f * abs);
             page.setAlpha(1f - 0.3f * abs);
         });
@@ -78,6 +78,7 @@ public class FlashCardActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void updateCounter(int pos) {
         tvCounter.setText((pos + 1) + " / " + vocabList.size());
@@ -138,9 +139,9 @@ public class FlashCardActivity extends AppCompatActivity {
         final Handler handler = new Handler(Looper.getMainLooper());
         final Runnable task = new Runnable() {
             @Override public void run() {
-                // flip card by clicking the viewPager’s child
+
                 vp.getChildAt(0).performClick();
-                // move next
+
                 int next = (vp.getCurrentItem() + 1) % vocabList.size();
                 vp.setCurrentItem(next, true);
                 handler.postDelayed(this, 3000);

@@ -19,7 +19,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.adapter.ClassAdapter;
 import com.example.myapplication.adapter.CourseAdapter;
 import com.example.myapplication.adapter.FolderAdapter;
-import com.example.myapplication.model.ClassModel;
+import com.example.myapplication.model.Class;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Folder;
 import com.example.myapplication.screens.feature.ClassDetailActivity;
@@ -51,7 +51,7 @@ public class HomeFragment extends Fragment {
     private TextView tvEmptyFolders, tvEmptyCourses, tvEmptyClasses;
     private List<Folder> folderList = new ArrayList<>();
     private List<Course> courseList = new ArrayList<>();
-    private List<ClassModel> classList = new ArrayList<>();
+    private List<Class> classList = new ArrayList<>();
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
 
@@ -122,7 +122,7 @@ public class HomeFragment extends Fragment {
         isCoursesLoaded = false;
         isClassesLoaded = false;
 
-        loadingLayout.setVisibility(View.VISIBLE); // hiện loading
+        loadingLayout.setVisibility(View.VISIBLE);
 
         loadFolders();
         loadClasses();
@@ -150,14 +150,14 @@ public class HomeFragment extends Fragment {
                         folderRecyclerView.setVisibility(View.VISIBLE);
                     }
 
-                    // Sau khi load folder → load course cho từng folder
+
                     loadCoursesForFolders();
 
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(getContext(), "Lỗi load folders: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     isFoldersLoaded = true;
-                    isCoursesLoaded = true;  // fail luôn cả course
+                    isCoursesLoaded = true;
                     checkAllLoaded();
                 });
     }
@@ -198,7 +198,7 @@ public class HomeFragment extends Fragment {
                     }
 
                     isCoursesLoaded = true;
-                    isFoldersLoaded = true; // đánh dấu folder cũng đã load xong
+                    isFoldersLoaded = true;
                     checkAllLoaded();
                 });
     }
@@ -210,7 +210,7 @@ public class HomeFragment extends Fragment {
                 .addOnSuccessListener(docs -> {
                     classList.clear();
                     for (DocumentSnapshot doc : docs) {
-                        ClassModel cls = doc.toObject(ClassModel.class);
+                        Class cls = doc.toObject(Class.class);
                         cls.setId(doc.getId());
                         classList.add(cls);
                     }
@@ -236,7 +236,7 @@ public class HomeFragment extends Fragment {
 
     private void checkAllLoaded() {
         if (isFoldersLoaded && isCoursesLoaded && isClassesLoaded) {
-            loadingLayout.setVisibility(View.GONE); // ẩn loading khi tất cả đã xong
+            loadingLayout.setVisibility(View.GONE);
         }
     }
 

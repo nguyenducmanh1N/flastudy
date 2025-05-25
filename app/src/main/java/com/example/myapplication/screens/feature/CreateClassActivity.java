@@ -14,7 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.myapplication.R;
-import com.example.myapplication.model.ClassModel;
+import com.example.myapplication.model.Class;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -22,13 +22,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
-public class CreateClassActivity extends AppCompatActivity {
+public class  CreateClassActivity extends AppCompatActivity {
 
     private EditText edtClassName, edtDescription;
     private Switch  switchAllowMembers;
     private Button  btnSave;
-
-    private FirebaseUser   currentUser;
+    private FirebaseUser  currentUser;
     private FirebaseFirestore db;
 
     @Override
@@ -80,7 +79,7 @@ public class CreateClassActivity extends AppCompatActivity {
         String classId = classRef.getId();
 
         // 2. Khởi tạo model với folderIds & courseIds rỗng
-        ClassModel cls = new ClassModel();
+        Class cls = new Class();
         cls.setId(classId);
         cls.setName(name);
         cls.setDescription(description);

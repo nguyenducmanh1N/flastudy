@@ -2,7 +2,7 @@ package com.example.myapplication.model;
 
 import java.util.List;
 
-public class ClassModel {
+public class Class {
     private String id;
     private String name;
     private String description;
@@ -11,15 +11,15 @@ public class ClassModel {
     private List<String> members;
     private List<String> folderIds;
     private List<String> courseIds;
-    public ClassModel() { }
+    public Class() { }
 
-    public ClassModel(String name,
-                      String description,
-                      String creater,
-                      boolean allowMembersToAdd,
-                      List<String> members,
-                      List<String> folderIds,
-                      List<String> courseIds) {
+    public Class(String name,
+                 String description,
+                 String creater,
+                 boolean allowMembersToAdd,
+                 List<String> members,
+                 List<String> folderIds,
+                 List<String> courseIds) {
         this.name = name;
         this.description = description;
         this.creater = creater;

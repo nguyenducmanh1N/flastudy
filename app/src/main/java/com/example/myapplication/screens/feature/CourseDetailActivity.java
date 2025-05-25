@@ -24,6 +24,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.adapter.VocabAdapter;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
+import com.example.myapplication.screens.feature.learn.AIQuizActivity;
 import com.example.myapplication.screens.feature.learn.FillActivity;
 import com.example.myapplication.screens.feature.learn.FlashCardActivity;
 import com.example.myapplication.screens.feature.learn.ListenQuizActivity;
@@ -202,7 +203,6 @@ public class CourseDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-
         addToFolder.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             Intent intent = new Intent(this, CreateFolderActivity.class);
@@ -263,7 +263,7 @@ public class CourseDetailActivity extends AppCompatActivity {
         });
         share.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateClassActivity.class);
+            Intent intent = new Intent(this, AIQuizActivity.class);
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
             startActivity(intent);
         });

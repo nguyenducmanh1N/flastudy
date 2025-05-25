@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_sheet_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bottom_sheet_background">
+
+    <TextView
+        android:id="@+id/edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/baseline_edit_24"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Chỉnh sửa"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <TextView
+    android:id="@+id/addFolder"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:drawableLeft="@drawable/ic_folder"
+    android:drawablePadding="8dp"
+    android:padding="16dp"
+    android:text="Thêm thư mục"
+    android:textSize="16sp"
+    android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/addCourse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_folder"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Thêm thư mục"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/addMember"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/baseline_groups_24"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Thêm thành viên"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
+    <TextView
+        android:id="@+id/share"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/baseline_ios_share_24"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Chia sẻ"
+        android:textSize="16sp"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:drawableLeft="@drawable/baseline_delete_24"
+        android:text="Xóa lớp học"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+</LinearLayout>

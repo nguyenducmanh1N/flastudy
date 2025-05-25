@@ -7,18 +7,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.R;
-import com.example.myapplication.model.ClassModel;
+import com.example.myapplication.model.Class;
 import java.util.List;
 
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassVH> {
 
     public interface OnItemClickListener {
-        void onClick(ClassModel cls);
+        void onClick(Class cls);
     }
-    private List<ClassModel> data;
+    private List<Class> data;
     private OnItemClickListener listener;
 
-    public ClassAdapter(List<ClassModel> data, OnItemClickListener listener) {
+    public ClassAdapter(List<Class> data, OnItemClickListener listener) {
         this.data = data;
         this.listener = listener;
     }
@@ -32,7 +32,7 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassVH> {
 
     @Override
     public void onBindViewHolder(@NonNull ClassVH holder, int pos) {
-        ClassModel cls = data.get(pos);
+        Class cls = data.get(pos);
         holder.name.setText(cls.getName());
         int fcount = cls.getFolderIds() != null ? cls.getFolderIds().size() : 0;
         holder.fcount.setText(fcount + " thư mục");
