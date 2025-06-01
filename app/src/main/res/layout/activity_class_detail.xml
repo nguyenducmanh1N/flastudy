@@ -161,15 +161,24 @@
                 android:id="@+id/courseContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"/>
+                android:orientation="vertical"
+                android:padding="13dp"/>
         </ScrollView>
 
-        <TextView
+        <ScrollView
             android:id="@+id/containerMembers"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Danh sách thành viên"
-            android:visibility="gone"/>
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/cMembers"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Danh sách thành viên"
+                android:visibility="gone"/>
+        </ScrollView>
+
+
     </FrameLayout>
 
 

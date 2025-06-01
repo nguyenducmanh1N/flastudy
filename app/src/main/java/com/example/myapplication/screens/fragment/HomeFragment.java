@@ -1,5 +1,6 @@
 package com.example.myapplication.screens.fragment;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,15 +21,18 @@ import com.example.myapplication.R;
 import com.example.myapplication.adapter.ClassAdapter;
 import com.example.myapplication.adapter.CourseAdapter;
 import com.example.myapplication.adapter.FolderAdapter;
+import com.example.myapplication.adapter.NotificationAdapter;
 import com.example.myapplication.model.Class;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Folder;
+import com.example.myapplication.model.NotificationItem;
 import com.example.myapplication.screens.feature.ClassDetailActivity;
 import com.example.myapplication.screens.feature.CourseDetailActivity;
 import com.example.myapplication.screens.feature.FolderDetailActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
@@ -45,7 +50,7 @@ public class HomeFragment extends Fragment {
     private boolean isCoursesLoaded = false;
     private boolean isClassesLoaded = false;
 
-    private View loadingLayout;  // layout che khi loading
+    private View loadingLayout;
 
 
     private TextView tvEmptyFolders, tvEmptyCourses, tvEmptyClasses;
@@ -54,6 +59,12 @@ public class HomeFragment extends Fragment {
     private List<Class> classList = new ArrayList<>();
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
+
+    private ImageView ivNotifications;
+    private TextView tvNotifBadge;
+    private List<NotificationItem> notifList = new ArrayList<>();
+    private NotificationAdapter notifAdapter;
+
 
     @Nullable
     @Override
@@ -113,9 +124,87 @@ public class HomeFragment extends Fragment {
         });
         classRecyclerView.setAdapter(classAdapter);
 
+        ivNotifications = view.findViewById(R.id.ivNotifications);
+        tvNotifBadge    = view.findViewById(R.id.tvNotifBadge);
+
+        notifAdapter = new NotificationAdapter(notifList, this::onNotificationClicked);
+
+        loadNotifications();
+
+        ivNotifications.setOnClickListener(v -> showNotificationsDialog());
+
         loadData();
         return view;
     }
+
+    private void showNotificationsDialog() {
+        View dlgView = LayoutInflater.from(getContext())
+                .inflate(R.layout.dialog_notifications, null);
+        RecyclerView rv = dlgView.findViewById(R.id.rvNotifications);
+        rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        rv.setAdapter(notifAdapter);
+
+        new AlertDialog.Builder(getContext())
+                .setView(dlgView)
+                .setNegativeButton("Đóng", null)
+                .show();
+    }
+
+    private void onNotificationClicked(NotificationItem note) {
+
+        db.collection("classes").document(note.getClassId())
+                .update("members", FieldValue.arrayUnion(currentUser.getEmail()));
+
+        db.collection("classes")
+                .document(note.getClassId())
+                .collection("invitations")
+                .document(note.getId())
+                .update("accepted", true);
+
+        db.collection("users")
+                .document(currentUser.getUid())
+                .collection("notifications")
+                .document(note.getId())
+                .delete();
+
+        Toast.makeText(getContext(), "Bạn đã vào lớp!", Toast.LENGTH_SHORT).show();
+
+        loadNotifications();
+
+        loadClasses();
+    }
+
+
+    private void loadNotifications() {
+        String uid = currentUser.getUid();
+        db.collection("users")
+                .document(uid)
+                .collection("notifications")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(q -> {
+                    notifList.clear();
+                    int unreadCount = 0;
+                    for (DocumentSnapshot d : q) {
+                        NotificationItem note = d.toObject(NotificationItem.class);
+                        note.setId(d.getId());
+                        notifList.add(note);
+
+                        if (!note.isRead()) unreadCount++;
+                    }
+
+                    if (unreadCount > 0) {
+                        tvNotifBadge.setText(String.valueOf(Math.min(unreadCount, 99)));
+                        tvNotifBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        tvNotifBadge.setVisibility(View.GONE);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Lỗi load thông báo: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+    }
+
 
     private void loadData() {
         isFoldersLoaded = false;

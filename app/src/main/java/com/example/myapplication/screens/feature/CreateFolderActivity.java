@@ -81,7 +81,7 @@ public class CreateFolderActivity extends AppCompatActivity {
                 .set(folder)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Tạo thư mục thành công", Toast.LENGTH_SHORT).show();
-                    editFolderName.setText(""); // clear text
+                    editFolderName.setText("");
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();

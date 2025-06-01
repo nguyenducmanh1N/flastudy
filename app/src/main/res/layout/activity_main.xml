@@ -8,12 +8,11 @@
     android:background="@drawable/img_backgroud"
     tools:context=".MainActivity">
 
-    <!-- Tiêu đề -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="The best\napp for\nyour plants"
+        android:text="The best\napp for\nyour plans"
         android:textSize="36sp"
         android:textStyle="bold"
         android:textColor="#FFFFFF"
@@ -25,9 +24,6 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"/>
 
-    <!-- Nút Sign in -->
-
-    <!-- Link tạo tài khoản -->
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSignIn"

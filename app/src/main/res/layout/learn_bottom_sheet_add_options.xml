@@ -40,13 +40,13 @@
         android:textSize="16sp"
         android:textColor="@android:color/white" />
     <TextView
-        android:id="@+id/phonetic"
+        android:id="@+id/aiQuiz"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawableLeft="@drawable/baseline_ios_share_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="Điền từ theo ipa"
+        android:text="Luyện tập với AI"
         android:textSize="16sp"
         android:textColor="@android:color/white" />
 

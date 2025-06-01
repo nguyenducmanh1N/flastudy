@@ -1,17 +1,17 @@
 package com.example.myapplication.screens.feature;
 
-import static com.example.myapplication.screens.feature.CreateCourseActivity.EXTRA_FOLDER_ID;
 import static com.example.myapplication.screens.feature.CreateCourseActivity.EXTRA_IS_EDIT;
+import static com.example.myapplication.screens.feature.CreateCourseActivity.EXTRA_FOLDER_ID;
 
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,9 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
-import com.example.myapplication.adapter.CourseAdapter;
 import com.example.myapplication.adapter.CourseSelectAdapter;
-import com.example.myapplication.adapter.FolderAdapter;
 import com.example.myapplication.adapter.FolderSelectAdapter;
 import com.example.myapplication.model.Class;
 import com.example.myapplication.model.Course;
@@ -45,29 +43,25 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ClassDetailActivity extends AppCompatActivity {
-    private TextView tvTitle, tvCourseCount, tvOwner, tvDate;
-    private RecyclerView rvItems;
-    private TabLayout tabLayout;
+    private TextView tvTitle, tvCourseCount, tvOwner;
     private ImageView btnClose, btnMenu;
+    private TabLayout tabLayout;
+
+    private ScrollView folderWrapper, coursesWrapper, memberWrapper;
+    private LinearLayout folderContainer, courseContainer;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseUser currentUser;
     private String classId;
     private Class cls;
-
-    private List<Course> courseList = new ArrayList<>();
-    private CourseAdapter courseAdapter;
-
-    private List<Folder> folderList = new ArrayList<>();
-    private FolderAdapter folderAdapter;
-    private LinearLayout folderContainer;
-    private LinearLayout courseContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +69,17 @@ public class ClassDetailActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_class_detail);
 
+        tvTitle       = findViewById(R.id.titleText);
+        tvCourseCount = findViewById(R.id.subTitleText);
+        tvOwner       = findViewById(R.id.subTitleText2);
+        btnClose      = findViewById(R.id.btnExit);
+        btnMenu       = findViewById(R.id.btnMenu);
+        tabLayout     = findViewById(R.id.tvTabLayout);
+        folderWrapper = findViewById(R.id.containerFolders);
+        coursesWrapper= findViewById(R.id.containerCoursesWrapper);
+        memberWrapper = findViewById(R.id.containerMembers);
         folderContainer = findViewById(R.id.folderContainer);
-
+        courseContainer = findViewById(R.id.courseContainer);
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.detail_class_layout),
@@ -87,20 +90,8 @@ public class ClassDetailActivity extends AppCompatActivity {
                 }
         );
 
-
-        tvTitle       = findViewById(R.id.titleText);
-        tvCourseCount = findViewById(R.id.subTitleText);
-        tvOwner       = findViewById(R.id.subTitleText2);
-        tvDate        = findViewById(R.id.textViewDate);
-        //rvItems       = findViewById(R.id.recyclerView);
-        tabLayout     = findViewById(R.id.tvTabLayout);
-        btnClose      = findViewById(R.id.btnExit);
-        btnMenu       = findViewById(R.id.btnMenu);
-        courseContainer = findViewById(R.id.courseContainer);
-
-
         btnClose.setOnClickListener(v -> finish());
-
+        btnMenu.setOnClickListener(v -> showOptions());
 
         classId = getIntent().getStringExtra("classId");
         if (classId == null) {
@@ -109,50 +100,6 @@ public class ClassDetailActivity extends AppCompatActivity {
             return;
         }
 
-
-//        rvItems.setLayoutManager(
-//                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-//        );
-        courseAdapter = new CourseAdapter(courseList, c -> {
-
-        });
-        folderAdapter = new FolderAdapter(folderList);
-
-
-//        rvItems.setAdapter(folderAdapter);
-
-        btnMenu.setOnClickListener(v -> showOptions());
-
-        TabLayout tabs = findViewById(R.id.tvTabLayout);
-        ScrollView folderWrapper = findViewById(R.id.containerFolders);
-
-        View memberWrapper = findViewById(R.id.containerMembers);
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-                folderWrapper.setVisibility(View.GONE);
-                courseContainer.setVisibility(View.GONE);
-                memberWrapper.setVisibility(View.GONE);
-
-
-                switch (tab.getPosition()) {
-                    case 0:
-                        folderWrapper.setVisibility(View.VISIBLE);
-                        break;
-                    case 1:
-                        courseContainer.setVisibility(View.VISIBLE);
-                        break;
-                    case 2:
-                        memberWrapper.setVisibility(View.VISIBLE);
-                        break;
-                }
-            }
-            @Override public void onTabUnselected(TabLayout.Tab tab) { }
-            @Override public void onTabReselected(TabLayout.Tab tab) { }
-        });
-
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
@@ -160,14 +107,38 @@ public class ClassDetailActivity extends AppCompatActivity {
             return;
         }
 
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override public void onTabSelected(TabLayout.Tab tab) {
+                folderWrapper.setVisibility(View.GONE);
+                coursesWrapper.setVisibility(View.GONE);
+                memberWrapper.setVisibility(View.GONE);
+                switch (tab.getPosition()) {
+                    case 0:
+                        folderWrapper.setVisibility(View.VISIBLE);
+                        break;
+                    case 1:
+                        coursesWrapper.setVisibility(View.VISIBLE);
+                        loadCourses();
+                        break;
+                    case 2:
+                        memberWrapper.setVisibility(View.VISIBLE);
+                        loadMembers();
+                        break;
+                }
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        folderWrapper.setVisibility(View.VISIBLE);
+        coursesWrapper.setVisibility(View.GONE);
+        memberWrapper.setVisibility(View.GONE);
 
         loadClassDetail();
     }
 
     private void loadClassDetail() {
-        db.collection("classes")
-                .document(classId)
-                .get()
+        db.collection("classes").document(classId).get()
                 .addOnSuccessListener(doc -> {
                     cls = doc.toObject(Class.class);
                     if (cls == null) {
@@ -177,115 +148,100 @@ public class ClassDetailActivity extends AppCompatActivity {
                     }
                     tvTitle.setText(cls.getName());
                     tvOwner.setText("Người tạo: " + cls.getCreater());
-                    int count = cls.getCourseIds()!=null?cls.getCourseIds().size():0;
+                    int count = cls.getCourseIds() != null ? cls.getCourseIds().size() : 0;
                     tvCourseCount.setText(count + " học phần");
 
-                    loadCourses();
                     loadFolders();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Lỗi tải lớp: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi tải lớp: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
-
-    private void loadCourses() {
-
-        courseContainer.removeAllViews();
-
-
-        List<String> courseIds = cls.getCourseIds();
-        List<String> folderIds = cls.getFolderIds();
-        if (courseIds == null || courseIds.isEmpty()
-                || folderIds == null || folderIds.isEmpty()) {
-            return;
-        }
-
-        String uid = currentUser.getUid();
-        // 3. Với mỗi folderId và mỗi courseId, fetch từ users/{uid}/folders/{fid}/courses/{cid}
-        for (String fid : folderIds) {
-            for (String cid : courseIds) {
-                db.collection("users")
-                        .document(uid)
-                        .collection("folders")
-                        .document(fid)
-                        .collection("courses")
-                        .document(cid)
-                        .get()
-                        .addOnSuccessListener(d -> {
-                            Course c = d.toObject(Course.class);
-                            if (c == null) return;
-
-                            // 4. Inflate layout item
-                            View item = LayoutInflater.from(this)
-                                    .inflate(R.layout.item_course_vertical, courseContainer, false);
-
-                            TextView tvTitle   = item.findViewById(R.id.courseTitle);
-                            TextView tvCount   = item.findViewById(R.id.courseTermCount);
-                            TextView tvCreater = item.findViewById(R.id.courseCreater);
-
-                            tvTitle.setText(c.getTitle());
-                            tvCount.setText(c.getVocabularyList().size() + " thuật ngữ");
-                            tvCreater.setText("Người tạo: " + c.getCreater());
-
-                            // 5. Click vào chuyển trang detail
-                            item.setOnClickListener(v -> {
-                                Intent i = new Intent(this, CourseDetailActivity.class);
-                                i.putExtra("folderId", fid);
-                                i.putExtra("courseId", cid);
-                                startActivity(i);
-                            });
-
-                            // 6. Thêm vào container
-                            courseContainer.addView(item);
-                        })
-                        .addOnFailureListener(e -> {
-                            // có thể log hoặc show toast tuỳ ý
-                        });
-            }
-        }
-    }
-
-
 
     private void loadFolders() {
         folderContainer.removeAllViews();
-        if (cls.getFolderIds() == null) return;
 
-        for (String fid : cls.getFolderIds()) {
+        db.collection("classes")
+                .document(classId)
+                .collection("folders")
+                .get()
+                .addOnSuccessListener(query -> {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        // Giả sử bạn clone toàn bộ dữ liệu folder vào đây
+                        String fid = doc.getId();
+                        String name     = doc.getString("name");
+                        String creater  = doc.getString("creater");
 
-            db.collection("users")
-                    .document(currentUser.getUid())
-                    .collection("folders")
-                    .document(fid)
-                    .get()
-                    .addOnSuccessListener(doc -> {
-                        Folder f = doc.toObject(Folder.class);
-                        if (f == null) return;
+                        List<Map<String,Object>> courses =
+                                (List<Map<String,Object>>) doc.get("courses");
+                        int count = courses != null ? courses.size() : 0;
 
-                        View item = getLayoutInflater()
-                                .inflate(R.layout.item_folder_vertical, folderContainer, false);
-
+                        View item = LayoutInflater.from(this)
+                                .inflate(R.layout.item_folder_vertical_2, folderContainer, false);
                         TextView tvTitle   = item.findViewById(R.id.tvTitle);
                         TextView tvCount   = item.findViewById(R.id.tvCount);
                         TextView tvCreater = item.findViewById(R.id.tvCreater);
-                        CheckBox cbSelect  = item.findViewById(R.id.cbSelect);
 
-                        tvTitle.setText(f.getName());
-                        // Giả sử f.getTermCount() trả về số thuật ngữ
-                        //tvCount.setText(f.getTermCount() + " thuật ngữ");
-                        tvCreater.setText("Người tạo: " + f.getCreater());
-                        cbSelect.setVisibility(View.GONE);
+                        tvTitle.setText(name);
+                        tvCount.setText(count + " mục");
+                        tvCreater.setText("Người tạo: " + creater);
 
-                        // Bắt sự kiện click
                         item.setOnClickListener(v -> {
                             Intent i = new Intent(this, FolderDetailActivity.class);
-                            i.putExtra("folderId", f.getId());
+                            i.putExtra("folderId", fid);
                             startActivity(i);
                         });
 
                         folderContainer.addView(item);
-                    });
-        }
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi load folders: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+    }
+
+
+    private void loadCourses() {
+        courseContainer.removeAllViews();
+
+        db.collection("classes")
+                .document(classId)
+                .collection("courses")
+                .get()
+                .addOnSuccessListener(query -> {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        String cid      = doc.getId();
+                        String title    = doc.getString("title");
+                        String creater  = doc.getString("creater");
+
+                        List<Map<String,Object>> vocs =
+                                (List<Map<String,Object>>) doc.get("vocabularies");
+                        int termCount = vocs != null ? vocs.size() : 0;
+
+                        View item = LayoutInflater.from(this)
+                                .inflate(R.layout.item_course_vertical, courseContainer, false);
+                        TextView tvTitle   = item.findViewById(R.id.courseTitle);
+                        TextView tvCount   = item.findViewById(R.id.courseTermCount);
+                        TextView tvCreater = item.findViewById(R.id.courseCreater);
+
+                        tvTitle.setText(title);
+                        tvCount.setText(termCount + " thuật ngữ");
+                        tvCreater.setText("Người tạo: " + creater);
+
+                        item.setOnClickListener(v -> {
+                            Intent i = new Intent(this, CourseDetailActivity.class);
+                            i.putExtra("courseId", cid);
+
+                            i.putExtra("folderId", doc.getString("folderId"));
+                            startActivity(i);
+                        });
+
+                        courseContainer.addView(item);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi load courses: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
     }
 
 
@@ -294,185 +250,348 @@ public class ClassDetailActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(
                 R.layout.class_bottom_sheet_add_options, null);
         bs.setContentView(view);
-
         view.findViewById(R.id.edit).setOnClickListener(v -> {
             bs.dismiss();
-
             Intent i = new Intent(this, CreateClassActivity.class);
             i.putExtra("classId", classId);
             i.putExtra(EXTRA_IS_EDIT, true);
             startActivity(i);
         });
         view.findViewById(R.id.addFolder).setOnClickListener(v -> {
-            bs.dismiss();
-            showAddFoldersToClass();
+            bs.dismiss(); showAddFoldersToClass();
         });
         view.findViewById(R.id.addCourse).setOnClickListener(v -> {
-            bs.dismiss();
-            showAddCoursesToClass();
+            bs.dismiss(); showAddCoursesToClass();
         });
         view.findViewById(R.id.addMember).setOnClickListener(v -> {
-            bs.dismiss();
+            bs.dismiss(); showAddMemberDialog();
+        });
+        bs.show();
+    }
 
+    private void showAddMemberDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Mời thành viên vào lớp");
+        final EditText input = new EditText(this);
+        input.setHint("Email thành viên");
+        input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        builder.setView(input);
+
+        builder.setPositiveButton("Gửi lời mời", (dialog, which) -> {
+            String email = input.getText().toString().trim();
+            if (email.isEmpty()) {
+                Toast.makeText(this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+            db.collection("users")
+                    .whereEqualTo("email", email)
+                    .get()
+                    .addOnSuccessListener(q -> {
+                        if (q.isEmpty()) {
+                            Toast.makeText(this, "Không tìm thấy tài khoản", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        DocumentSnapshot udoc = q.getDocuments().get(0);
+                        String uid = udoc.getId();
+
+                        long now = System.currentTimeMillis();
+
+                        Map<String, Object> invite = new HashMap<>();
+                        invite.put("classId",   classId);
+                        invite.put("email",     email);
+                        invite.put("from",      currentUser.getEmail());
+                        invite.put("timestamp", now);
+                        invite.put("accepted",  false);
+
+                        db.collection("classes")
+                                .document(classId)
+                                .collection("invitations")
+                                .add(invite)
+                                .addOnSuccessListener(invRef -> {
+
+                                    Map<String, Object> note = new HashMap<>(invite);
+                                    note.put("type", "invite");
+
+                                    db.collection("users")
+                                            .document(uid)
+                                            .collection("notifications")
+                                            .add(note)
+                                            .addOnSuccessListener(nRef -> {
+                                                Toast.makeText(this, "Đã gửi lời mời thành công", Toast.LENGTH_SHORT).show();
+                                            })
+                                            .addOnFailureListener(e ->
+                                                    Toast.makeText(this, "Lỗi gửi notification: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                            );
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Lỗi tạo lời mời: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                );
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Lỗi tìm tài khoản: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                    );
         });
 
-        bs.show();
+        builder.setNegativeButton("Hủy", null);
+        builder.show();
+    }
+
+
+    private void loadMembers() {
+
+        LinearLayout memContainer = memberWrapper.findViewById(R.id.containerMembers);
+        memContainer.removeAllViews();
+        List<String> emails = cls.getMembers();
+        if (emails == null) return;
+        for (String email : emails) {
+            TextView tv = new TextView(this);
+            tv.setText(email);
+            tv.setPadding(8,8,8,8);
+            memContainer.addView(tv);
+        }
     }
 
     private void showAddFoldersToClass() {
         View sheet = getLayoutInflater().inflate(R.layout.bs_add_folders, null);
         BottomSheetDialog bsDialog = new BottomSheetDialog(this);
-
         bsDialog.setContentView(sheet);
         bsDialog.setCancelable(true);
-
         RecyclerView rv = sheet.findViewById(R.id.rvFolders);
-        Button btnAdd = sheet.findViewById(R.id.btnAddSelected);
-
-        List<Folder> allFolders = new ArrayList<>();
-        FolderSelectAdapter adapter = new FolderSelectAdapter(allFolders, selectedIds -> {
-            btnAdd.setEnabled(!selectedIds.isEmpty());
-        });
+        Button btn = sheet.findViewById(R.id.btnAddSelected);
+        List<Folder> list = new ArrayList<>();
+        FolderSelectAdapter adapter = new FolderSelectAdapter(list, ids -> btn.setEnabled(!ids.isEmpty()));
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
-
-
-        db.collection("users")
-                .document(currentUser.getUid())
-                .collection("folders")
-                .get()
+        db.collection("users").document(currentUser.getUid())
+                .collection("folders").get()
                 .addOnSuccessListener(q -> {
-                    allFolders.clear();
-                    for (DocumentSnapshot d : q.getDocuments()) {
+                    list.clear();
+                    for (DocumentSnapshot d : q) {
                         Folder f = d.toObject(Folder.class);
-                        f.setId(d.getId());
-                        allFolders.add(f);
+                        f.setId(d.getId()); list.add(f);
                     }
                     adapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Lỗi tải thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-
-
-
-
-
-        btnAdd.setOnClickListener(v -> {
+        btn.setOnClickListener(v -> {
             List<String> toAdd = new ArrayList<>(adapter.getSelectedIds());
-            if (toAdd.isEmpty()) {
-                Toast.makeText(this, "Chọn ít nhất 1 thư mục", Toast.LENGTH_SHORT).show();
-                return;
+            if (toAdd.isEmpty()) return;
+
+            String uid = currentUser.getUid();
+
+            for (String fid : toAdd) {
+                DocumentReference srcFolderRef = db.collection("users")
+                        .document(uid)
+                        .collection("folders")
+                        .document(fid);
+                srcFolderRef.get().addOnSuccessListener(folderDoc -> {
+                    Folder folder = folderDoc.toObject(Folder.class);
+                    if (folder == null) return;
+
+
+                    Map<String, Object> folderMap = new HashMap<>();
+                    folderMap.put("id", fid);
+                    folderMap.put("name", folder.getName());
+                    folderMap.put("creater", folder.getCreater());
+                    folderMap.put("createdAt", folder.getCreatedAt());
+
+                    srcFolderRef.collection("courses")
+                            .get().addOnSuccessListener(courseSnap -> {
+                                List<Map<String,Object>> courseList = new ArrayList<>();
+
+                                List<Task<?>> tasks = new ArrayList<>();
+                                for (DocumentSnapshot cDoc : courseSnap.getDocuments()) {
+                                    Course course = cDoc.toObject(Course.class);
+                                    if (course == null) continue;
+                                    String cid = cDoc.getId();
+
+
+                                    Map<String,Object> courseMap = new HashMap<>();
+                                    courseMap.put("id", cid);
+                                    courseMap.put("title", course.getTitle());
+                                    courseMap.put("creater", course.getCreater());
+
+                                    Task<?> t = srcFolderRef
+                                            .collection("courses").document(cid)
+                                            .collection("vocabularies")
+                                            .get().addOnSuccessListener(vSnap -> {
+                                                List<Map<String,Object>> vocs = new ArrayList<>();
+                                                for (DocumentSnapshot vDoc : vSnap) {
+                                                    Map<String,Object> vMap = vDoc.getData();
+                                                    vMap.put("id", vDoc.getId());
+                                                    vocs.add(vMap);
+                                                }
+                                                courseMap.put("vocabularies", vocs);
+                                            });
+                                    tasks.add(t);
+                                    courseList.add(courseMap);
+                                }
+
+                                Tasks.whenAllComplete(tasks)
+                                        .addOnSuccessListener(__ -> {
+                                            folderMap.put("courses", courseList);
+
+                                            db.collection("classes")
+                                                    .document(classId)
+                                                    .collection("folders")
+                                                    .document(fid)
+                                                    .set(folderMap)
+                                                    .addOnSuccessListener(a -> {
+                                                        Toast.makeText(this, "Đã thêm folder "+fid, Toast.LENGTH_SHORT).show();
+                                                        bsDialog.dismiss();
+                                                        loadFolders();
+                                                    })
+                                                    .addOnFailureListener(e ->
+                                                            Toast.makeText(this, "Lỗi ghi folder vào lớp: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                    );
+                                        });
+                            });
+                });
             }
-            DocumentReference clsRef = db.collection("classes").document(classId);
-            clsRef.update("folderIds", FieldValue.arrayUnion(toAdd.toArray()))
-                    .addOnSuccessListener(a -> {
-                        Toast.makeText(this, "Đã thêm thư mục", Toast.LENGTH_SHORT).show();
-                        bsDialog.dismiss();
-                        loadFolders();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-            bsDialog.dismiss();
         });
 
-
-        bsDialog.setContentView(sheet);
         bsDialog.show();
     }
 
     private void showAddCoursesToClass() {
-
         View sheet = getLayoutInflater().inflate(R.layout.bs_add_courses, null);
         BottomSheetDialog bsDialog = new BottomSheetDialog(this);
         bsDialog.setContentView(sheet);
         bsDialog.setCancelable(true);
 
-
-        EditText etSearch      = sheet.findViewById(R.id.etSearchCourses);
-        RecyclerView rv        = sheet.findViewById(R.id.rvCourses);
-        Button btnAddSelected  = sheet.findViewById(R.id.btnAddSelected);
-        btnAddSelected.setEnabled(false);
-
+        EditText etSearch = sheet.findViewById(R.id.etSearchCourses);
+        RecyclerView rvCourses = sheet.findViewById(R.id.rvCourses);
+        Button btnAdd = sheet.findViewById(R.id.btnAddSelected);
+        btnAdd.setEnabled(false);
 
         List<Course> allCourses = new ArrayList<>();
-        CourseSelectAdapter adapter = new CourseSelectAdapter(allCourses, selectedIds -> {
-            btnAddSelected.setEnabled(!selectedIds.isEmpty());
-        });
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adapter);
+        CourseSelectAdapter adapter = new CourseSelectAdapter(allCourses, selectedIds ->
+                btnAdd.setEnabled(!selectedIds.isEmpty())
+        );
+        rvCourses.setLayoutManager(new LinearLayoutManager(this));
+        rvCourses.setAdapter(adapter);
 
 
-        if (cls.getFolderIds() != null && !cls.getFolderIds().isEmpty()) {
-            List<com.google.android.gms.tasks.Task<?>> tasks = new ArrayList<>();
-            for (String fid : cls.getFolderIds()) {
-                com.google.android.gms.tasks.Task<?> t = db
-                        .collection("users")
-                        .document(currentUser.getUid())
+        String uid = currentUser.getUid();
+        db.collection("users")
+                .document(uid)
+                .collection("folders")
+                .get()
+                .addOnSuccessListener(folderSnap -> {
+                    List<Task<?>> tasks = new ArrayList<>();
+                    for (DocumentSnapshot fDoc : folderSnap.getDocuments()) {
+                        String fid = fDoc.getId();
+
+                        Task<?> t = db.collection("users")
+                                .document(uid)
+                                .collection("folders")
+                                .document(fid)
+                                .collection("courses")
+                                .get()
+                                .addOnSuccessListener(courseSnap -> {
+                                    for (DocumentSnapshot cDoc : courseSnap.getDocuments()) {
+                                        Course c = cDoc.toObject(Course.class);
+                                        c.setId(cDoc.getId());
+                                        c.setFolderId(fid);
+                                        allCourses.add(c);
+                                    }
+                                });
+                        tasks.add(t);
+                    }
+
+                    Tasks.whenAllComplete(tasks)
+                            .addOnCompleteListener(__ -> {
+                                adapter.setCourses(allCourses);
+                                adapter.notifyDataSetChanged();
+
+                                etSearch.addTextChangedListener(new TextWatcher() {
+                                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                        adapter.filter(s.toString());
+                                    }
+                                    @Override public void afterTextChanged(Editable s) {}
+                                });
+                            });
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi tải thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+
+        btnAdd.setOnClickListener(v -> {
+
+            Set<String> toAddIds = adapter.getSelectedIds();
+            if (toAddIds.isEmpty()) return;
+
+
+
+
+            List<Course> selectedCourses = new ArrayList<>();
+            for (Course c : allCourses) {
+                if (toAddIds.contains(c.getId())) {
+                    selectedCourses.add(c);
+                }
+            }
+
+
+            for (Course course : selectedCourses) {
+                String cid = course.getId();
+                String fid = course.getFolderId();
+                DocumentReference srcCourseRef = db.collection("users")
+                        .document(uid)
                         .collection("folders")
                         .document(fid)
                         .collection("courses")
-                        .get()
-                        .addOnSuccessListener(qSnap -> {
-                            for (DocumentSnapshot d : qSnap.getDocuments()) {
-                                Course c = d.toObject(Course.class);
-                                if (c != null) {
-                                    c.setId(d.getId());
-                                    c.setFolderId(fid);
-                                    allCourses.add(c);
+                        .document(cid);
+
+
+                srcCourseRef.get().addOnSuccessListener(courseDoc -> {
+                    Course fullCourse = courseDoc.toObject(Course.class);
+                    if (fullCourse == null) return;
+
+
+                    Map<String,Object> courseMap = new HashMap<>();
+                    courseMap.put("id", cid);
+                    courseMap.put("title", fullCourse.getTitle());
+                    courseMap.put("creater", fullCourse.getCreater());
+
+
+
+                    srcCourseRef.collection("vocabularies")
+                            .get().addOnSuccessListener(vSnap -> {
+                                List<Map<String,Object>> vocs = new ArrayList<>();
+                                for (DocumentSnapshot vDoc : vSnap.getDocuments()) {
+                                    Map<String,Object> vMap = vDoc.getData();
+                                    vMap.put("id", vDoc.getId());
+                                    vocs.add(vMap);
                                 }
-                            }
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(this,
-                                    "Lỗi load courses từ folder " + fid + ": " + e.getMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                        });
-                tasks.add(t);
+                                courseMap.put("vocabularies", vocs);
+
+
+                                db.collection("classes")
+                                        .document(classId)
+                                        .collection("courses")
+                                        .document(cid)
+                                        .set(courseMap)
+                                        .addOnSuccessListener(a -> {
+
+                                            Toast.makeText(this, "Đã thêm học phần "+ fullCourse.getTitle(), Toast.LENGTH_SHORT).show();
+                                            bsDialog.dismiss();
+                                            loadCourses();
+                                        })
+                                        .addOnFailureListener(e ->
+                                                Toast.makeText(this, "Lỗi ghi course: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                                        );
+                            });
+                });
             }
-
-            com.google.android.gms.tasks.Tasks.whenAllComplete(tasks)
-                    .addOnCompleteListener(task -> {
-                        adapter.setCourses(allCourses);
-                    });
-        }
-
-
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.filter(s.toString());
-            }
-            @Override public void afterTextChanged(Editable s) {}
         });
 
-        // 6. Bắt sự kiện nút "Thêm"
-        btnAddSelected.setOnClickListener(v -> {
-            List<String> toAdd = new ArrayList<>(adapter.getSelectedIds());
-            if (toAdd.isEmpty()) {
-                Toast.makeText(this, "Chọn ít nhất 1 học phần", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            DocumentReference clsRef = db.collection("classes").document(classId);
-            clsRef.update("courseIds", FieldValue.arrayUnion(toAdd.toArray()))
-                    .addOnSuccessListener(a -> {
-                        Toast.makeText(this, "Đã thêm học phần vào lớp", Toast.LENGTH_SHORT).show();
-                        bsDialog.dismiss();
-                        loadCourses();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this,
-                                "Lỗi thêm học phần: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    });
-        });
 
-        // 7. Show Bottom Sheet
+
         bsDialog.show();
     }
-
-
 
 
 }

@@ -237,7 +237,7 @@ public class CourseDetailActivity extends AppCompatActivity {
         TextView edit = view.findViewById(R.id.quiz);
         TextView addToFolder = view.findViewById(R.id.fill);
         TextView addToClass = view.findViewById(R.id.hear);
-        TextView share = view.findViewById(R.id.phonetic);
+        TextView aiQuiz = view.findViewById(R.id.aiQuiz);
         TextView delete = view.findViewById(R.id.test);
 
         edit.setOnClickListener(v -> {
@@ -261,7 +261,7 @@ public class CourseDetailActivity extends AppCompatActivity {
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
             startActivity(intent);
         });
-        share.setOnClickListener(v -> {
+        aiQuiz.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             Intent intent = new Intent(this, AIQuizActivity.class);
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));

@@ -36,7 +36,7 @@
         android:drawableLeft="@drawable/ic_folder"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="Thêm thư mục"
+        android:text="Thêm học phần "
         android:textSize="16sp"
         android:textColor="@android:color/white" />
 

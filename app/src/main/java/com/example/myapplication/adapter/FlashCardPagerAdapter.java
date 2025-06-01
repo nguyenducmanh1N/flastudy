@@ -18,9 +18,14 @@ import java.util.List;
 
 public class FlashCardPagerAdapter extends RecyclerView.Adapter<FlashCardPagerAdapter.VH> {
     private final List<Vocabulary> list;
+    private boolean showDefinitionFront = false;
 
     public FlashCardPagerAdapter(List<Vocabulary> list) {
         this.list = list;
+    }
+
+    public void setShowDefinitionFront(boolean showDef) {
+        this.showDefinitionFront = showDef;
     }
 
     @Override
@@ -33,8 +38,13 @@ public class FlashCardPagerAdapter extends RecyclerView.Adapter<FlashCardPagerAd
     @Override
     public void onBindViewHolder(VH holder, int position) {
         Vocabulary vocab = list.get(position);
-        holder.tvTerm.setText(vocab.getWord());
-        holder.tvDefinition.setText(vocab.getMeaning());
+        if (showDefinitionFront) {
+            holder.tvTerm.setText(vocab.getMeaning());
+            holder.tvDefinition.setText(vocab.getWord());
+        } else {
+            holder.tvTerm.setText(vocab.getWord());
+            holder.tvDefinition.setText(vocab.getMeaning());
+        }
         holder.tvExample.setText("Example : " + vocab.getExample());
         holder.bindFlip();
     }
@@ -51,7 +61,7 @@ public class FlashCardPagerAdapter extends RecyclerView.Adapter<FlashCardPagerAd
             back  = itemView.findViewById(R.id.card_back);
             tvTerm = itemView.findViewById(R.id.tvTerm);
             tvDefinition = itemView.findViewById(R.id.tvDefinition);
-            tvExample = itemView.findViewById(R.id.tvExample);  // Initialize example
+            tvExample = itemView.findViewById(R.id.tvExample);
             itemView.getViewTreeObserver()
                     .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                         @Override
@@ -93,17 +103,4 @@ public class FlashCardPagerAdapter extends RecyclerView.Adapter<FlashCardPagerAd
             });
         }
     }
-    public Vocabulary removeAt(int position) {
-        Vocabulary removed = list.remove(position);
-        notifyItemRemoved(position);
-        return removed;
-    }
-
-    // Thêm một item vào vị trí position, thông báo cho ViewPager
-    public void addAt(int position, Vocabulary vocab) {
-        list.add(position, vocab);
-        notifyItemInserted(position);
-    }
-
-
 }

@@ -22,9 +22,9 @@ public class QuizActivity extends AppCompatActivity {
     private TextView tvWord;
     private Button[] answerButtons = new Button[4];
 
-    // Danh sách từ vựng gốc (để reset lại nếu làm lại wrongAnswers)
+
     private List<Vocabulary> originalList;
-    // Danh sách hiện tại đang quiz
+
     private List<Vocabulary> vocabularyList;
     private List<Vocabulary> wrongAnswers = new ArrayList<>();
 
@@ -32,7 +32,6 @@ public class QuizActivity extends AppCompatActivity {
     private Vocabulary correctVocabulary;
     private Random random = new Random();
 
-    // Cờ xem đang ở chế độ làm lại wrongAnswers hay không
     private boolean isReviewMode = false;
 
     @Override
@@ -46,7 +45,7 @@ public class QuizActivity extends AppCompatActivity {
         answerButtons[2] = findViewById(R.id.btnAnswer3);
         answerButtons[3] = findViewById(R.id.btnAnswer4);
 
-        // Nhận danh sách từ vựng từ Intent
+
         originalList = getIntent().getParcelableArrayListExtra("vocabList");
         if (originalList == null || originalList.size() < 4) {
             Toast.makeText(this,
@@ -55,7 +54,7 @@ public class QuizActivity extends AppCompatActivity {
             finish();
             return;
         }
-        // Tạo bản sao để quiz lần đầu
+
         vocabularyList = new ArrayList<>(originalList);
         Collections.shuffle(vocabularyList);
 
@@ -64,12 +63,12 @@ public class QuizActivity extends AppCompatActivity {
 
     private void loadNextQuestion() {
         if (currentQuestionIndex >= vocabularyList.size()) {
-            // Hết câu hỏi lượt này
+
             if (!isReviewMode && !wrongAnswers.isEmpty()) {
-                // Nếu có từ sai và chưa ở chế độ review => hỏi có làm lại không
+
                 showRetryDialog();
             } else {
-                // Đóng Activity (hoặc bạn có thể hiển thị summary)
+
                 Toast.makeText(this,
                         "Kết thúc trắc nghiệm!",
                         Toast.LENGTH_SHORT).show();
@@ -78,11 +77,11 @@ public class QuizActivity extends AppCompatActivity {
             return;
         }
 
-        // Hiển thị câu hỏi mới
+
         correctVocabulary = vocabularyList.get(currentQuestionIndex);
         tvWord.setText(correctVocabulary.getWord());
 
-        // Tạo 3 nghĩa sai ngẫu nhiên
+
         List<String> options = new ArrayList<>();
         options.add(correctVocabulary.getMeaning());
 
@@ -118,7 +117,7 @@ public class QuizActivity extends AppCompatActivity {
             if (!wrongAnswers.contains(correctVocabulary)) {
                 wrongAnswers.add(correctVocabulary);
             }
-            // Tô màu đáp án đúng
+
             for (Button btn : answerButtons) {
                 if (btn.getText().equals(correctVocabulary.getMeaning())) {
                     btn.setBackgroundColor(getResources().getColor(R.color.green));
@@ -153,7 +152,7 @@ public class QuizActivity extends AppCompatActivity {
                     loadNextQuestion();
                 })
                 .setNegativeButton("Không", (dialog, which) -> {
-                    // Kết thúc
+
                     finish();
                 })
                 .setCancelable(false)

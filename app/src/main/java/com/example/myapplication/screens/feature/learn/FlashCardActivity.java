@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import com.example.myapplication.model.Vocabulary;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FlashCardActivity extends AppCompatActivity {
@@ -28,6 +30,10 @@ public class FlashCardActivity extends AppCompatActivity {
     private List<Vocabulary> vocabList;
     private List<String> masteredIds   = new ArrayList<>();
     private List<String> notMasteredIds = new ArrayList<>();
+
+    private ImageView btnBack,btnMenu;
+    private boolean showDefinitionFront = false;
+    private FlashCardPagerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +44,12 @@ public class FlashCardActivity extends AppCompatActivity {
         tvCounter     = findViewById(R.id.tvCounter);
         tvMastered    = findViewById(R.id.masteredIds);
         tvNotMastered = findViewById(R.id.notMasteredIds);
+        btnBack       = findViewById(R.id.btnBack);
+        btnMenu       = findViewById(R.id.btnMenu);
+
+        btnBack.setOnClickListener(v -> finish());
+        btnMenu.setOnClickListener(v -> showPopupMenu());
+
 
         ImageButton btnNotMastered = findViewById(R.id.btnNotMastered);
         ImageButton btnMastered    = findViewById(R.id.btnMastered);
@@ -54,6 +66,33 @@ public class FlashCardActivity extends AppCompatActivity {
         btnMastered   .setOnClickListener(v -> markMastered());
         btnHeadCard   .setOnClickListener(v -> playCurrentAudio());
         btnAutoScroll .setOnClickListener(v -> startAutoScroll(btnAutoScroll));
+    }
+
+    private void showPopupMenu() {
+        PopupMenu popup = new PopupMenu(this, btnMenu);
+        popup.getMenu().add("Đảo thuật ngữ");
+        popup.getMenu().add("Đảo định nghĩa");
+        popup.setOnMenuItemClickListener(item -> {
+            String title = item.getTitle().toString();
+            if (title.equals("Đảo thuật ngữ")) {
+                Collections.shuffle(vocabList);
+                adapter.notifyDataSetChanged();
+                vp.setCurrentItem(0, false);
+                updateCounter(0);
+                Toast.makeText(this, "Đã đảo thuật ngữ", Toast.LENGTH_SHORT).show();
+            } else if (title.equals("Đảo định nghĩa")) {
+                showDefinitionFront = !showDefinitionFront;
+                adapter.setShowDefinitionFront(showDefinitionFront);
+                adapter.notifyDataSetChanged();
+                vp.setCurrentItem(0, false);
+                updateCounter(0);
+                Toast.makeText(this,
+                        showDefinitionFront ? "Hiển thị định nghĩa trước" : "Hiển thị thuật ngữ trước",
+                        Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        });
+        popup.show();
     }
 
     private void setupViewPager() {
