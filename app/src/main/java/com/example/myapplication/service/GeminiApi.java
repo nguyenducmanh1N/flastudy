@@ -13,7 +13,7 @@ public class GeminiApi {
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage";
     private static final String API_KEY = "AIzaSyA5O1HTYscF4EVCXoIzsv1ca4_NbU_0N-U";
 
-    // Callback interface
+
     public interface GeminiCallback {
         void onResponse(String json);
         void onFailure(String error);
@@ -22,7 +22,7 @@ public class GeminiApi {
     public static void sendPrompt(String prompt, GeminiCallback cb) {
         OkHttpClient client = new OkHttpClient();
 
-        // Build JSON payload
+
         String jsonPayload = "{\"prompt\": " +
                 new com.google.gson.Gson().toJson(prompt) +
                 ", \"temperature\":0.7}";

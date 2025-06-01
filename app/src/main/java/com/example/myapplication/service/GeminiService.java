@@ -20,10 +20,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-/**
- * GeminiService phiên bản mới (dùng GenerativeModelFutures) –
- * chỉ khác là đổi addText(...) thành setText(...)
- */
 public class GeminiService {
 
     public interface GeminiCallback {
@@ -31,35 +27,34 @@ public class GeminiService {
         void onFailure(String errorMessage);
     }
 
-    // Một executor đơn giản để chạy callback của Future
+
     private static final Executor executor = Executors.newSingleThreadExecutor();
 
-    /**
-     * Tạo 2 câu hỏi (meaning + tense) cho mỗi vocabulary.
-     * Sử dụng GenerativeModelFutures thay cho OkHttp/REST.
-     */
+
     public static void generateQuestionsWithGemini(List<Vocabulary> vocabList, GeminiCallback callback) {
-        // 1. Khởi tạo GenerativeModel (model name và API key)
         GenerativeModel gm = new GenerativeModel(
                 /* modelName */ "gemini-1.5-flash",
                 /* apiKey    */ BuildConfig.GEMINI_API_KEY
         );
         GenerativeModelFutures model = GenerativeModelFutures.from(gm);
 
-        // 2. Xây dựng prompt giống như trước, nhưng dùng Content(role="user")
+
         StringBuilder prompt = new StringBuilder();
-        prompt.append("You are an AI that creates multiple-choice fill-in-the-blank questions. ")
-                .append("For each vocabulary word provided, generate 2 questions:\n")
-                .append("1. A question to choose the correct meaning of the word in context.\n")
-                .append("2. A question to choose the correct verb tense/form of the word in a sentence.\n\n")
-                .append("Each question must have exactly these keys:\n")
+        prompt.append("You are an AI that creates multiple-choice fill-in-the-blank questions for learning vocabulary. ")
+                .append("For each vocabulary word provided, generate 3 questions:\n")
+                .append("1. A 'meaning' question: choose the correct meaning of the word in context.\n")
+                .append("2. A 'tense' question: choose the correct verb tense/form of the word in a sentence.\n")
+                .append("3. A 'fill' question: choose the correct vocabulary word to fill in the blank from 4 options ")
+                .append("(all options must be distinct words taken from the provided vocabulary list, including the target word itself).\n\n")
+                .append("Each question object must have exactly these keys:\n")
                 .append("- \"word\": the original vocabulary word (string)\n")
-                .append("- \"type\": either \"meaning\" or \"tense\"\n")
+                .append("- \"type\": one of \"meaning\", \"tense\", or \"fill\"\n")
                 .append("- \"question\": the sentence with a blank and instruction (string)\n")
                 .append("- \"options\": an array of exactly 4 choices (list of strings)\n")
                 .append("- \"correctAnswer\": the exact correct choice text (string)\n")
-                .append("- \"explanation\": a short explanation why that choice is correct (string)\n\n")
-                .append("Return a JSON array of question objects. No extra fields, no commentary, no markdown. ")
+                .append("- \"explanation_en\": a short explanation in English why that choice is correct (string)\n")
+                .append("- \"explanation_vi\": a short explanation in Vietnamese why that choice is correct (string)\n\n")
+                .append("Return a JSON array of question objects and nothing else. Do not include any extra fields, commentary, or markdown. ")
                 .append("Example format:\n")
                 .append("[\n")
                 .append("  {\n")
@@ -68,7 +63,8 @@ public class GeminiService {
                 .append("    \"question\": \"What does 'run' mean in the sentence: 'I like to ____ every morning.'?\",\n")
                 .append("    \"options\": [\"to move quickly on feet\", \"to cook food\", \"to build\", \"to read\"],\n")
                 .append("    \"correctAnswer\": \"to move quickly on feet\",\n")
-                .append("    \"explanation\": \"In this sentence, 'run' means 'to move quickly on feet'.\"\n")
+                .append("    \"explanation_en\": \"In this sentence, 'run' means 'to move quickly on feet.'\",\n")
+                .append("    \"explanation_vi\": \"Trong câu này, 'run' nghĩa là 'chạy nhanh trên đôi chân.'\"\n")
                 .append("  },\n")
                 .append("  {\n")
                 .append("    \"word\": \"run\",\n")
@@ -76,59 +72,57 @@ public class GeminiService {
                 .append("    \"question\": \"Choose the correct form of 'run' in the past tense for: 'I ____ fast yesterday.'\",\n")
                 .append("    \"options\": [\"ran\", \"runs\", \"running\", \"runned\"],\n")
                 .append("    \"correctAnswer\": \"ran\",\n")
-                .append("    \"explanation\": \"The past tense of 'run' is 'ran'.\"\n")
+                .append("    \"explanation_en\": \"The past tense of 'run' is 'ran.'\",\n")
+                .append("    \"explanation_vi\": \"Quá khứ của 'run' là 'ran.'\"\n")
+                .append("  },\n")
+                .append("  {\n")
+                .append("    \"word\": \"run\",\n")
+                .append("    \"type\": \"fill\",\n")
+                .append("    \"question\": \"Select the correct word to fill in: 'She loves to ____ in the park every evening.'\",\n")
+                .append("    \"options\": [\"run\", \"eat\", \"sleep\", \"write\"],\n")
+                .append("    \"correctAnswer\": \"run\",\n")
+                .append("    \"explanation_en\": \"In this context, 'run' means to move quickly on feet, which fits the sentence about a daily activity.\",\n")
+                .append("    \"explanation_vi\": \"Trong ngữ cảnh này, 'run' nghĩa là 'chạy nhanh trên đôi chân,' phù hợp với câu nói về hoạt động hằng ngày.\"\n")
                 .append("  }\n")
-                .append("  // ... and so on for each word\n")
                 .append("]\n\n")
-                .append("Now generate questions for these vocabularies:\n");
+                .append("Now generate questions for these vocabularies (only output JSON array!):\n");
         for (Vocabulary v : vocabList) {
             prompt.append("- Word: ").append(v.getWord())
                     .append(", Meaning: ").append(v.getMeaning())
                     .append("\n");
         }
 
-        // 3. Đóng gói prompt vào Content(role="user")
+
         Content.Builder contentBuilder = new Content.Builder();
         contentBuilder.setRole("user");
         contentBuilder.addText(prompt.toString());
         Content userContent = contentBuilder.build();
-        // 4. Tạo history và bắt đầu chat
+
+
         List<Content> history = new ArrayList<>();
         history.add(userContent);
         ChatFutures chat = model.startChat(history);
 
-        // 5. Gửi prompt tới Gemini
         ListenableFuture<GenerateContentResponse> future = chat.sendMessage(userContent);
 
-        // 6. Khi có phản hồi, parse JSON rồi trả callback
         Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse response) {
-                String json = response.getText();
-
                 String raw = response.getText();
-                android.util.Log.d("GeminiService", "RAW_AI_RESPONSE=\n" + json);
-                // Parse JSON thành List<AIQuestion>
-                // 6.2. Nếu có code fence ``` hoặc ```json, chúng ta phải loại bỏ
-                //     Ví dụ raw có thể bắt đầu bằng "```json\n[...]" và kết thúc bằng "```"
-                //     Ta sẽ strip các ký tự fence ở đầu và cuối.
+
+                android.util.Log.d("GeminiService", "RAW_AI_RESPONSE=\n" + raw);
                 if (raw.startsWith("```")) {
-                    // Xóa phần fence mở đầu, ví dụ "```json\n"
                     int firstNewline = raw.indexOf('\n');
                     if (firstNewline != -1) {
                         raw = raw.substring(firstNewline + 1);
                     }
                 }
-                // Bây giờ raw có thể đang kết thúc bằng "```"
                 if (raw.endsWith("```")) {
-                    // Xóa toàn bộ phần fence đóng ở cuối
                     int fenceIdx = raw.lastIndexOf("```");
                     if (fenceIdx != -1) {
                         raw = raw.substring(0, fenceIdx);
                     }
                 }
-
-                // 6.3. Tiếp tục tìm đến JSON array: từ dấu '[' đầu tiên đến ']' cuối cùng
                 int startIdx = raw.indexOf('[');
                 int endIdx   = raw.lastIndexOf(']');
                 if (startIdx == -1 || endIdx == -1 || endIdx <= startIdx) {
@@ -136,8 +130,6 @@ public class GeminiService {
                     return;
                 }
                 String jsonArrayOnly = raw.substring(startIdx, endIdx + 1);
-
-                // 6.4. Parse JSON array thành List<AIQuestion>
                 try {
                     Gson gson = new Gson();
                     Type listType = new TypeToken<List<AIQuestion>>() {}.getType();
@@ -158,4 +150,5 @@ public class GeminiService {
             }
         }, executor);
     }
+
 }

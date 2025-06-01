@@ -3,8 +3,10 @@ package com.example.myapplication.screens.feature.learn;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +27,8 @@ public class AIQuizActivity extends AppCompatActivity {
     private RadioGroup optionsGroup;
     private Button btnSubmit, btnNext;
     private TextView tvExplanation;
+    private ProgressBar progressBar;
+    private ScrollView scrollContent;
 
     private List<Vocabulary> vocabList;
     private List<AIQuestion> questionList = new ArrayList<>();
@@ -40,6 +44,8 @@ public class AIQuizActivity extends AppCompatActivity {
         btnSubmit     = findViewById(R.id.btnSubmit);
         tvExplanation = findViewById(R.id.tvExplanation);
         btnNext       = findViewById(R.id.btnNext);
+        progressBar   = findViewById(R.id.progressBar);
+        scrollContent = findViewById(R.id.scrollContent);
 
         vocabList = getIntent().getParcelableArrayListExtra("vocabList");
         if (vocabList == null || vocabList.isEmpty()) {
@@ -48,10 +54,18 @@ public class AIQuizActivity extends AppCompatActivity {
             return;
         }
 
+        scrollContent.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+
         GeminiService.generateQuestionsWithGemini(vocabList, new GeminiService.GeminiCallback() {
             @Override
             public void onSuccess(List<AIQuestion> questions) {
                 runOnUiThread(() -> {
+
+                    progressBar.setVisibility(View.GONE);
+
+                    scrollContent.setVisibility(View.VISIBLE);
+
                     if (questions == null || questions.isEmpty()) {
                         Toast.makeText(AIQuizActivity.this,
                                 "Không có câu hỏi nào được tạo.", Toast.LENGTH_SHORT).show();
@@ -66,6 +80,9 @@ public class AIQuizActivity extends AppCompatActivity {
             @Override
             public void onFailure(String errorMessage) {
                 runOnUiThread(() -> {
+
+                    progressBar.setVisibility(View.GONE);
+
                     Toast.makeText(AIQuizActivity.this,
                             "Lỗi khi tạo câu hỏi: " + errorMessage, Toast.LENGTH_LONG).show();
                     finish();
@@ -85,13 +102,22 @@ public class AIQuizActivity extends AppCompatActivity {
             String chosenAnswer = selectedRb.getText().toString();
             AIQuestion currentQ = questionList.get(currentIndex);
 
+            String en = currentQ.getExplanationEn();
+            String vi = currentQ.getExplanationVi();
             tvExplanation.setVisibility(View.VISIBLE);
             if (chosenAnswer.equals(currentQ.getCorrectAnswer())) {
-                tvExplanation.setText("Chính xác! " + currentQ.getExplanation());
+                tvExplanation.setText("Chính xác!\n\n" +
+                        "Giải thích :"+"\n\n"+
+                        "English: " + en + "\n\n" +
+                        "Tiếng Việt: " + vi);
             } else {
                 tvExplanation.setText("Sai rồi! Đáp án đúng: " +
-                        currentQ.getCorrectAnswer() + "\n" + currentQ.getExplanation());
+                        currentQ.getCorrectAnswer() + "\n\n" +
+                        "Giải thích :"+"\n\n"+
+                        "English: " + en + "\n\n" +
+                        "Tiếng Việt: " + vi);
             }
+
 
             for (int i = 0; i < optionsGroup.getChildCount(); i++) {
                 optionsGroup.getChildAt(i).setEnabled(false);
@@ -113,9 +139,6 @@ public class AIQuizActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Hiển thị câu hỏi currentIndex trong questionList
-     */
     private void displayCurrentQuestion() {
         AIQuestion q = questionList.get(currentIndex);
 

@@ -12,7 +12,8 @@ public class AIQuestion implements Parcelable {
     private String question;            // Nội dung câu hỏi (đã có chỗ điền ... hoặc tương tự)
     private List<String> options;       // Danh sách 4 đáp án
     private String correctAnswer;       // Đáp án đúng
-    private String explanation;         // Giải thích
+    private String explanation_en;
+    private String explanation_vi;
 
     // Constructor
     public AIQuestion(String word, String type, String question,
@@ -22,7 +23,8 @@ public class AIQuestion implements Parcelable {
         this.question = question;
         this.options = options;
         this.correctAnswer = correctAnswer;
-        this.explanation = explanation;
+        this.explanation_en= explanation_en;
+        this.explanation_vi = explanation_vi;
     }
 
     protected AIQuestion(Parcel in) {
@@ -31,7 +33,8 @@ public class AIQuestion implements Parcelable {
         question = in.readString();
         options = in.createStringArrayList();
         correctAnswer = in.readString();
-        explanation = in.readString();
+        explanation_en = in.readString();
+        explanation_vi = in.readString();
     }
 
     public static final Creator<AIQuestion> CREATOR = new Creator<AIQuestion>() {
@@ -65,10 +68,15 @@ public class AIQuestion implements Parcelable {
     public String getCorrectAnswer() {
         return correctAnswer;
     }
-
-    public String getExplanation() {
-        return explanation;
+    public String getExplanationEn() {
+        return explanation_en;
     }
+
+    public String getExplanationVi() {
+        return explanation_vi;
+    }
+
+
 
     @Override
     public int describeContents() {
@@ -82,6 +90,8 @@ public class AIQuestion implements Parcelable {
         parcel.writeString(question);
         parcel.writeStringList(options);
         parcel.writeString(correctAnswer);
-        parcel.writeString(explanation);
+        parcel.writeString(explanation_en);
+        parcel.writeString(explanation_vi);
+
     }
 }
