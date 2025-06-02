@@ -238,7 +238,7 @@ public class CourseDetailActivity extends AppCompatActivity {
         TextView addToFolder = view.findViewById(R.id.fill);
         TextView addToClass = view.findViewById(R.id.hear);
         TextView aiQuiz = view.findViewById(R.id.aiQuiz);
-        TextView delete = view.findViewById(R.id.test);
+        //TextView delete = view.findViewById(R.id.test);
 
         edit.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
@@ -267,12 +267,12 @@ public class CourseDetailActivity extends AppCompatActivity {
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
             startActivity(intent);
         });
-        delete.setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateClassActivity.class);
-            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
-            startActivity(intent);
-        });
+//        delete.setOnClickListener(v -> {
+//            bottomSheetDialog.dismiss();
+//            Intent intent = new Intent(this, CreateClassActivity.class);
+//            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+//            startActivity(intent);
+//        });
 
 
         bottomSheetDialog.show();

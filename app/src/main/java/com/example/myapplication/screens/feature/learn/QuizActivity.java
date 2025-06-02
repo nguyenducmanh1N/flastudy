@@ -3,6 +3,7 @@ package com.example.myapplication.screens.feature.learn;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,9 +23,9 @@ public class QuizActivity extends AppCompatActivity {
     private TextView tvWord;
     private Button[] answerButtons = new Button[4];
 
-
     private List<Vocabulary> originalList;
 
+    private ImageView btnBack;
     private List<Vocabulary> vocabularyList;
     private List<Vocabulary> wrongAnswers = new ArrayList<>();
 
@@ -44,7 +45,8 @@ public class QuizActivity extends AppCompatActivity {
         answerButtons[1] = findViewById(R.id.btnAnswer2);
         answerButtons[2] = findViewById(R.id.btnAnswer3);
         answerButtons[3] = findViewById(R.id.btnAnswer4);
-
+        btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> finish());
 
         originalList = getIntent().getParcelableArrayListExtra("vocabList");
         if (originalList == null || originalList.size() < 4) {
@@ -77,10 +79,8 @@ public class QuizActivity extends AppCompatActivity {
             return;
         }
 
-
         correctVocabulary = vocabularyList.get(currentQuestionIndex);
         tvWord.setText(correctVocabulary.getWord());
-
 
         List<String> options = new ArrayList<>();
         options.add(correctVocabulary.getMeaning());

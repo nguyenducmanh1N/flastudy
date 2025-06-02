@@ -8,7 +8,6 @@
     android:layout_marginTop="8dp"
     android:layout_above="@id/edtTerm"
     android:background="@drawable/bg_card">
-
 <!--    <EditText-->
 <!--        android:id="@+id/edtTerm"-->
 <!--        android:layout_width="match_parent"-->

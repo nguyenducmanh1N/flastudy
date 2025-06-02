@@ -36,7 +36,6 @@ public class  CreateClassActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_create_class);
 
-        // xử lý inset
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.create_class_layout),
                 (v, insets) -> {
                     Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -44,14 +43,12 @@ public class  CreateClassActivity extends AppCompatActivity {
                     return insets;
                 });
 
-        // UI
         findViewById(R.id.btnClose).setOnClickListener(v -> finish());
         edtClassName     = findViewById(R.id.class_name);
         edtDescription   = findViewById(R.id.class_description);
         switchAllowMembers = findViewById(R.id.class_switch);
         btnSave          = findViewById(R.id.addClassButton);
 
-        // Firebase
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db          = FirebaseFirestore.getInstance();
 
@@ -74,11 +71,9 @@ public class  CreateClassActivity extends AppCompatActivity {
 
         String creator = currentUser.getEmail();
 
-        // 1. Tạo document ref để lấy ID trước
         DocumentReference classRef = db.collection("classes").document();
         String classId = classRef.getId();
 
-        // 2. Khởi tạo model với folderIds & courseIds rỗng
         Class cls = new Class();
         cls.setId(classId);
         cls.setName(name);
@@ -86,20 +81,16 @@ public class  CreateClassActivity extends AppCompatActivity {
         cls.setCreater(creator);
         cls.setAllowMembersToAdd(allowAdd);
 
-        // Ban đầu, chỉ creator là member
         ArrayList<String> members   = new ArrayList<>();
         members.add(creator);
         cls.setMembers(members);
 
-        // Hai list này khởi tạo trống, sẽ thêm sau
         cls.setFolderIds(new ArrayList<>());
         cls.setCourseIds(new ArrayList<>());
 
-        // 3. Lưu model
         classRef.set(cls)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Tạo lớp thành công!", Toast.LENGTH_SHORT).show();
-                    // Truyền ID qua Intent
                     Intent intent = new Intent(this, ClassDetailActivity.class);
                     intent.putExtra("classId", classId);
                     startActivity(intent);

@@ -37,12 +37,12 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up); // hoặc tên file XML bạn đã tạo
+        setContentView(R.layout.activity_sign_up);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Ánh xạ view
+
         edtFullName = findViewById(R.id.edtFullName);
         signupEmail = findViewById(R.id.signupEmail);
         signupPassword = findViewById(R.id.signupPassword);
@@ -52,7 +52,6 @@ public class SignUpActivity extends AppCompatActivity {
         txtForgotPassword = findViewById(R.id.txtForgotPassword);
         txtSignUp = findViewById(R.id.txtSignUp);
 
-        // Xử lý nút đăng ký
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -65,7 +64,6 @@ public class SignUpActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Đăng ký với Firebase
                 auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
@@ -97,17 +95,12 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
-
-        // Quay về
         btnBack.setOnClickListener(v -> finish());
 
-        // Quên mật khẩu
         txtForgotPassword.setOnClickListener(v -> {
-            // Mở màn hình quên mật khẩu (nếu có)
             Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show();
         });
 
-        // Chuyển sang màn hình login nếu đã có tài khoản
         txtSignUp.setOnClickListener(v -> {
             startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
             finish();

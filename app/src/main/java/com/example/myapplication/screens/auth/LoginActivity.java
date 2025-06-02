@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String KEY_EMAIL    = "email";
     private static final String KEY_PASS     = "password";
 
-    // Google Sign-In
+
     private static final int RC_SIGN_IN = 100;
     private GoogleSignInClient googleSignInClient;
 
@@ -56,41 +56,35 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        // xử lý edge-to-edge inset
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login), (v, insets) -> {
             Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(sys.left, sys.top, sys.right, sys.bottom);
             return insets;
         });
 
-        // init Firebase Auth
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // init UI
         loginEmail    = findViewById(R.id.loginEmail);
         loginPassword = findViewById(R.id.loginPassword);
         loginButton   = findViewById(R.id.loginButton);
         rememberMe    = findViewById(R.id.checkboxRemember);
         prefs         = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        // nếu trước đó remember, tự điền và check
         boolean rem = prefs.getBoolean(KEY_REMEMBER, false);
         if (rem) {
             loginEmail.setText(   prefs.getString(KEY_EMAIL, "") );
             loginPassword.setText(prefs.getString(KEY_PASS,  "") );
             rememberMe.setChecked(true);
-            // nếu muốn tự động login:
-            // loginWithEmail(loginEmail.getText().toString(), loginPassword.getText().toString());
+
+//            loginWithEmail(loginEmail.getText().toString(), loginPassword.getText().toString());
         }
 
-        // click login
         loginButton.setOnClickListener(v -> {
             String email = loginEmail.getText().toString().trim();
             String pass  = loginPassword.getText().toString().trim();
             if (!isValid(email, pass)) return;
 
-            // lưu prefs
             if (rememberMe.isChecked()) {
                 prefs.edit()
                         .putBoolean(KEY_REMEMBER, true)
@@ -101,11 +95,11 @@ public class LoginActivity extends AppCompatActivity {
                 prefs.edit().clear().apply();
             }
 
-            // login với Firebase
+
             loginWithEmail(email, pass);
         });
 
-        // cấu hình Google Sign-In
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.web_client_id))
                 .requestEmail()
@@ -115,11 +109,9 @@ public class LoginActivity extends AppCompatActivity {
         findViewById(R.id.googleSignInButton)
                 .setOnClickListener(v -> signInWithGoogle());
 
-        // back button
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // chuyển đến SignUp
         TextView btnSignUp = findViewById(R.id.btn_SignUp_screen);
         btnSignUp.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
@@ -150,7 +142,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // Google Sign-In flow
     private void signInWithGoogle() {
         googleSignInClient.signOut().addOnCompleteListener(t -> {
             Intent intent = googleSignInClient.getSignInIntent();
@@ -179,7 +170,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user); // ⬅️ Lưu người dùng vào Firestore
+                            saveUserToFirestore(user);
                             Toast.makeText(this, "Welcome " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(this, HomeActivity.class));
                             finish();
@@ -198,9 +189,9 @@ public class LoginActivity extends AppCompatActivity {
 
         db.collection("users")
                 .document(uid)
-                .set(userData, SetOptions.merge()) // merge tránh ghi đè nếu đã tồn tại
+                .set(userData, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> {
-                    // thành công, không cần toast ở đây vì đã có ở trên
+
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to save user to Firestore", Toast.LENGTH_SHORT).show();

@@ -44,7 +44,7 @@ public class NotificationAdapter
                         ? "Lời mời vào lớp " + n.getClassId()
                         : "Thông báo mới"
         );
-        // nếu invite thì show nút Accept
+
         h.btnAccept.setVisibility(
                 n.getType().equals("invite") && !n.isAccepted()
                         ? View.VISIBLE
@@ -52,7 +52,7 @@ public class NotificationAdapter
         );
         h.btnAccept.setOnClickListener(v -> listener.onClick(n));
         h.itemView.setOnClickListener(v -> {
-            // có thể show detail nếu cần
+
         });
     }
 

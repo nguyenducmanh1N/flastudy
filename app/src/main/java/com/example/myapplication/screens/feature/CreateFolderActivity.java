@@ -34,7 +34,6 @@ public class CreateFolderActivity extends AppCompatActivity {
         editFolderName = findViewById(R.id.editText);
         addFolderButton = findViewById(R.id.addFolderButton);
 
-        // Init Firebase
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -74,7 +73,6 @@ public class CreateFolderActivity extends AppCompatActivity {
 
         Folder folder = new Folder(folderName, System.currentTimeMillis(), 0, creater);
         folder.setId(folderId);
-
 
         db.collection("users").document(uid)
                 .collection("folders").document(folderId)

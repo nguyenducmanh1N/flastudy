@@ -11,7 +11,7 @@
         android:id="@+id/quiz"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/baseline_edit_24"
+        android:drawableLeft="@drawable/baseline_gps_fixed_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
         android:text="Chọn nghĩa đúng"
@@ -22,7 +22,7 @@
         android:id="@+id/fill"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_folder"
+        android:drawableLeft="@drawable/baseline_edit_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
         android:text="Điền từ"
@@ -33,12 +33,13 @@
         android:id="@+id/hear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/baseline_groups_24"
+        android:drawableLeft="@drawable/baseline_hearing_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
         android:text="Nghe và chọn"
         android:textSize="16sp"
         android:textColor="@android:color/white" />
+
     <TextView
         android:id="@+id/aiQuiz"
         android:layout_width="match_parent"
@@ -47,11 +48,21 @@
         android:drawablePadding="8dp"
         android:padding="16dp"
         android:text="Luyện tập với AI"
-        android:textSize="16sp"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/test"
+        android:id="@+id/match"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:drawableLeft="@drawable/baseline_delete_24"
+        android:text="Nối từ"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+    <TextView
+        android:id="@+id/uu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawablePadding="8dp"

@@ -45,12 +45,10 @@ public class VocabAdapter extends RecyclerView.Adapter<VocabAdapter.FlashcardVH>
         holder.frontText.setText(vocab.getWord());
         holder.backMeaning.setText(vocab.getMeaning());
 
-        // camera distance
         float scale = holder.container.getResources().getDisplayMetrics().density;
         holder.front.setCameraDistance(8000 * scale);
         holder.back.setCameraDistance(8000 * scale);
 
-        // thiết lập mặt sau
         if (vocab.getExample() != null && !vocab.getExample().isEmpty()) {
             holder.backExample.setVisibility(View.VISIBLE);
             holder.backExample.setText(vocab.getExample());

@@ -74,7 +74,6 @@ public class CameraActivity extends AppCompatActivity {
         });
     }
 
-    // Kiểm tra đã có quyền chưa
     private boolean allPermissionsGranted() {
         for (String perm : REQUIRED_PERMISSIONS) {
             if (ContextCompat.checkSelfPermission(this, perm)
@@ -85,7 +84,6 @@ public class CameraActivity extends AppCompatActivity {
         return true;
     }
 
-    // Kết quả xin quyền
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions,
@@ -102,7 +100,6 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    // Khởi camera intent, lưu file tạm trong cache
     private void dispatchTakePictureIntent() {
         Intent takePic = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePic.resolveActivity(getPackageManager()) != null) {
@@ -128,7 +125,6 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    // OCR với ML Kit
     private void runTextRecognition(Uri uri) {
         try {
             InputImage image = InputImage.fromFilePath(this, uri);
@@ -153,7 +149,6 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    // Tách từ tiếng Anh
     private List<String> extractEnglishWords(String text) {
         List<String> result = new ArrayList<>();
         String cleaned = text.replaceAll("[^A-Za-z ]", " ");

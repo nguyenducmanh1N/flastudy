@@ -26,7 +26,7 @@ public class CourseAdapter extends RecyclerView.Adapter<CourseAdapter.CourseVH> 
         this.data = data;
         this.listener = listener;
     }
-    // New constructor allows specifying custom layout
+
     public CourseAdapter(List<Course> data, OnItemClickListener listener, int layoutRes) {
         this.data = data;
         this.listener = listener;

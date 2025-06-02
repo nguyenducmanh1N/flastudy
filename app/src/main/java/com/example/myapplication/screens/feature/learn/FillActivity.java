@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +22,7 @@ public class FillActivity extends AppCompatActivity {
     private TextView tvPrompt, tvCorrect;
     private EditText etAnswer;
     private Button btnCheck, btnNext;
+    private ImageView btnBack;
 
     private List<Vocabulary> originalList;
     private List<Vocabulary> quizList;
@@ -40,6 +42,9 @@ public class FillActivity extends AppCompatActivity {
         tvCorrect = findViewById(R.id.tvCorrect);
         btnCheck  = findViewById(R.id.btnCheck);
         btnNext   = findViewById(R.id.btnNext);
+        btnBack   = findViewById(R.id.btnBack);
+
+        btnBack.setOnClickListener(v -> finish());
 
         originalList = getIntent().getParcelableArrayListExtra("vocabList");
         if (originalList == null || originalList.isEmpty()) {
@@ -69,7 +74,6 @@ public class FillActivity extends AppCompatActivity {
         Vocabulary vocab = quizList.get(index);
         tvPrompt.setText(vocab.getMeaning());
 
-        // reset input style
         etAnswer.setEnabled(true);
         etAnswer.setText("");
         etAnswer.setBackgroundResource(android.R.drawable.edit_text);
@@ -83,7 +87,7 @@ public class FillActivity extends AppCompatActivity {
         Vocabulary vocab = quizList.get(index);
         String input = etAnswer.getText().toString().trim();
         if (input.equalsIgnoreCase(vocab.getWord())) {
-            // highlight correct input
+
             etAnswer.setBackgroundResource(R.drawable.input_correct);
             Toast.makeText(this, "Đúng rồi!", Toast.LENGTH_SHORT).show();
             etAnswer.setEnabled(false);

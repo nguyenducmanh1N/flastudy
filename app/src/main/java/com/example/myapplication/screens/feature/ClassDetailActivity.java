@@ -167,7 +167,6 @@ public class ClassDetailActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(query -> {
                     for (DocumentSnapshot doc : query.getDocuments()) {
-                        // Giả sử bạn clone toàn bộ dữ liệu folder vào đây
                         String fid = doc.getId();
                         String name     = doc.getString("name");
                         String creater  = doc.getString("creater");

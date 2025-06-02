@@ -22,7 +22,7 @@ import java.util.Random;
 
 public class ListenQuizActivity extends AppCompatActivity {
 
-    private ImageButton btnPlayAudio;
+    private ImageButton btnPlayAudio , btnBack;
     private Button[] opts = new Button[4];
     private List<Vocabulary> quizList;
     private Vocabulary correctVocab;
@@ -41,6 +41,9 @@ public class ListenQuizActivity extends AppCompatActivity {
         opts[1] = findViewById(R.id.btnAnswer2);
         opts[2] = findViewById(R.id.btnAnswer3);
         opts[3] = findViewById(R.id.btnAnswer4);
+        btnBack = findViewById(R.id.btnBack);
+
+        btnBack.setOnClickListener(v -> finish());
 
         List<Vocabulary> original = getIntent().getParcelableArrayListExtra("vocabList");
         if (original == null || original.size() < 4) {
@@ -63,7 +66,6 @@ public class ListenQuizActivity extends AppCompatActivity {
             return;
         }
         correctVocab = quizList.get(idx);
-        // sample 3 wrong + correct
         List<String> texts = new ArrayList<>();
         texts.add(correctVocab.getWord());
         while (texts.size() < 4) {

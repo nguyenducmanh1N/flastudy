@@ -72,7 +72,7 @@
 
             <EditText
                 android:id="@+id/inputTitle"
-                android:layout_width="match_parent"
+                android:layout_width="320dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="28dp"
                 android:background="@null"
@@ -89,13 +89,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tiêu đề"
-                    android:textColor="@android:color/white"
-                    android:textStyle="bold" />
+                <ImageView
+                    android:id="@+id/aiGenerate"
+                    android:layout_width="55dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="12dp"
+                    android:src="@drawable/baseline_android_24"
+                    app:tint="#FFCC00" />
 
                 <ImageView
                     android:id="@+id/btnScan"
@@ -114,7 +114,7 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="end"
                     android:text="+ Mô tả"

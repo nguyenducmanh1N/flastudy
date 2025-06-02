@@ -36,18 +36,15 @@ public class FolderDetailActivity extends AppCompatActivity {
     private CourseAdapter courseAdapter;
     private List<Course> courseList = new ArrayList<>();
 
-
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
     private String folderId;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_folder_detail);
-
 
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
@@ -61,13 +58,11 @@ public class FolderDetailActivity extends AppCompatActivity {
             return;
         }
 
-
         TextView textViewName = findViewById(R.id.folderNameTextView);
         TextView textViewDate = findViewById(R.id.folderDateTextView);
         ImageView btnBack     = findViewById(R.id.btnBack);
         ImageView btnAdd      = findViewById(R.id.btnAdd);
         courseRecycler        = findViewById(R.id.courseRecyclerView);
-
 
         btnBack.setOnClickListener(v -> finish());
         btnAdd.setOnClickListener(v -> {
@@ -235,8 +230,5 @@ public class FolderDetailActivity extends AppCompatActivity {
                 .setNegativeButton("Hủy", null)
                 .show();
     }
-
-
-
 
 }

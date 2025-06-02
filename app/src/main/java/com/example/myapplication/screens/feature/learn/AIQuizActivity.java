@@ -3,6 +3,7 @@ package com.example.myapplication.screens.feature.learn;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -29,6 +30,7 @@ public class AIQuizActivity extends AppCompatActivity {
     private TextView tvExplanation;
     private ProgressBar progressBar;
     private ScrollView scrollContent;
+    private ImageView btnBack;
 
     private List<Vocabulary> vocabList;
     private List<AIQuestion> questionList = new ArrayList<>();
@@ -46,6 +48,9 @@ public class AIQuizActivity extends AppCompatActivity {
         btnNext       = findViewById(R.id.btnNext);
         progressBar   = findViewById(R.id.progressBar);
         scrollContent = findViewById(R.id.scrollContent);
+        btnBack = findViewById(R.id.btnBack);
+
+        btnBack.setOnClickListener(v -> finish());
 
         vocabList = getIntent().getParcelableArrayListExtra("vocabList");
         if (vocabList == null || vocabList.isEmpty()) {

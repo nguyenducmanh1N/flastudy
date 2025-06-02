@@ -73,9 +73,10 @@
         android:layout_height="53dp"
         android:background="#0E0D3D"
         android:paddingHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="12dp"
-        tools:layout_editor_absoluteY="35dp">
+        tools:layout_editor_absoluteY="16dp">
 
         <!-- Back button -->
 
@@ -88,10 +89,10 @@
             android:contentDescription="Back"
             android:src="@drawable/baseline_arrow_back_24"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@android:color/white"
-            tools:ignore="MissingConstraints"
-            tools:layout_editor_absoluteX="1dp" />
+            tools:ignore="MissingConstraints" />
 
         <ImageView
             android:id="@+id/btnMenu"
@@ -102,7 +103,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
 
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/btnBack"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.551"
             app:tint="@android:color/white" />
 
         <!-- Add button -->
@@ -118,8 +122,6 @@
         <!--            app:tint="@color/white" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

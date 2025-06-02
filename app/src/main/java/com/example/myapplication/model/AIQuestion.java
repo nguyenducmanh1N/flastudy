@@ -7,15 +7,15 @@ import android.os.Parcelable;
 
 
 public class AIQuestion implements Parcelable {
-    private String word;                // Từ vựng gốc (không bắt buộc nhưng hữu ích để debug)
-    private String type;                // "meaning" hoặc "tense"
-    private String question;            // Nội dung câu hỏi (đã có chỗ điền ... hoặc tương tự)
-    private List<String> options;       // Danh sách 4 đáp án
-    private String correctAnswer;       // Đáp án đúng
+    private String word;
+    private String type;
+    private String question;
+    private List<String> options;
+    private String correctAnswer;
     private String explanation_en;
     private String explanation_vi;
 
-    // Constructor
+
     public AIQuestion(String word, String type, String question,
                       List<String> options, String correctAnswer, String explanation) {
         this.word = word;
