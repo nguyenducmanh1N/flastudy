@@ -87,4 +87,11 @@ dependencies {
     // Required for streaming operations (to use `Publisher` from Reactive Streams)
     implementation("org.reactivestreams:reactive-streams:1.0.4")
 
+    // JSON Parsing (Gson)
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Coroutines cho xử lý bất đồng bộ (dùng với Java)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
 }

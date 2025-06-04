@@ -58,6 +58,7 @@
             android:id="@+id/edit_message"
             android:layout_width="0dp"
             android:inputType="text"
+            android:imeOptions="actionSend"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Nhập tin nhắn..."

@@ -23,7 +23,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 public class HomeActivity extends AppCompatActivity {
 
 
-//    private BottomNavigationView bottomNavigationView;
+    //    private BottomNavigationView bottomNavigationView;
 //    @Override
 //    protected void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
@@ -37,7 +37,7 @@ public class HomeActivity extends AppCompatActivity {
 //
 //
 //    }
-private BottomNavigationView bottomNavigationView;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +82,7 @@ private BottomNavigationView bottomNavigationView;
         }
         return false;
     }
+
     private void showAddOptions() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet_add_options, null);
@@ -111,9 +112,4 @@ private BottomNavigationView bottomNavigationView;
 
         bottomSheetDialog.show();
     }
-
-
-
-
-
 }
