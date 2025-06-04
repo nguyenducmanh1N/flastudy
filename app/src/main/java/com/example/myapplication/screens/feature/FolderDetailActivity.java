@@ -60,9 +60,9 @@ public class FolderDetailActivity extends AppCompatActivity {
 
         TextView textViewName = findViewById(R.id.folderNameTextView);
         TextView textViewDate = findViewById(R.id.folderDateTextView);
-        ImageView btnBack     = findViewById(R.id.btnBack);
-        ImageView btnAdd      = findViewById(R.id.btnAdd);
-        courseRecycler        = findViewById(R.id.courseRecyclerView);
+        ImageView btnBack = findViewById(R.id.btnBack);
+        ImageView btnAdd = findViewById(R.id.btnAdd);
+        courseRecycler = findViewById(R.id.courseRecyclerView);
 
         btnBack.setOnClickListener(v -> finish());
         btnAdd.setOnClickListener(v -> {
@@ -116,6 +116,7 @@ public class FolderDetailActivity extends AppCompatActivity {
         loadCourses();
 
     }
+
     private void loadFolderInfo(TextView tvName, TextView tvDate) {
         db.collection("users")
                 .document(currentUser.getUid())
@@ -162,9 +163,10 @@ public class FolderDetailActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show()
                 );
     }
+
     private void showEditNameDialog() {
         final EditText input = new EditText(this);
-        input.setText(((TextView)findViewById(R.id.folderNameTextView)).getText());
+        input.setText(((TextView) findViewById(R.id.folderNameTextView)).getText());
         new AlertDialog.Builder(this)
                 .setTitle("Sửa tên thư mục")
                 .setView(input)
@@ -181,7 +183,7 @@ public class FolderDetailActivity extends AppCompatActivity {
                             .document(folderId)
                             .update("name", newName)
                             .addOnSuccessListener(aVoid -> {
-                                ((TextView)findViewById(R.id.folderNameTextView)).setText(newName);
+                                ((TextView) findViewById(R.id.folderNameTextView)).setText(newName);
                                 Toast.makeText(this, "Đổi tên thành công", Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e ->
@@ -195,7 +197,7 @@ public class FolderDetailActivity extends AppCompatActivity {
     private void shareFolder() {
 
         String shareText = "Mình chia sẻ thư mục: "
-                + ((TextView)findViewById(R.id.folderNameTextView)).getText()
+                + ((TextView) findViewById(R.id.folderNameTextView)).getText()
                 + "\nID: " + folderId;
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
@@ -231,4 +233,9 @@ public class FolderDetailActivity extends AppCompatActivity {
                 .show();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadCourses();
+    }
 }

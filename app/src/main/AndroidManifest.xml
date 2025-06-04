@@ -82,6 +82,7 @@
             android:label="@string/title_activity_bottom_navigation" />
         <activity
             android:name=".screens.HomeActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="true" />
         <activity
             android:name=".screens.auth.LoginActivity"

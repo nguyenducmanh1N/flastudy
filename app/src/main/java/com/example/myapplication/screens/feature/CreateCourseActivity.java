@@ -17,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +26,6 @@ import com.example.myapplication.R;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.screens.feature.act.CameraActivity;
-import com.example.myapplication.screens.feature.learn.FlashCardActivity;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.ChatFutures;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
@@ -38,13 +36,10 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,7 +47,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,22 +63,22 @@ import okhttp3.Response;
 
 public class CreateCourseActivity extends AppCompatActivity {
 
-    public static final String EXTRA_FOLDER_ID   = "folderId";
-    public static final String EXTRA_IS_EDIT     = "isEdit";
-    public static final String EXTRA_COURSE_ID   = "courseId";
+    public static final String EXTRA_FOLDER_ID = "folderId";
+    public static final String EXTRA_IS_EDIT = "isEdit";
+    public static final String EXTRA_COURSE_ID = "courseId";
     private static final Executor aiExecutor = Executors.newSingleThreadExecutor();
 
-    private LinearLayout    containerTerms;
-    private ImageButton     btnAdd;
-    private EditText        inputCourseTitle;
-    private ImageView       btnScan, btnSave, btnClose ,aiGenerate;
+    private LinearLayout containerTerms;
+    private ImageButton btnAdd;
+    private EditText inputCourseTitle;
+    private ImageView btnScan, btnSave, btnClose, aiGenerate;
     private FirebaseFirestore db;
-    private FirebaseUser     currentUser;
-    private Handler          uiHandler;
-    private String           folderId;
+    private FirebaseUser currentUser;
+    private Handler uiHandler;
+    private String folderId;
 
     private boolean isEditMode;
-    private String  editCourseId;
+    private String editCourseId;
 
     private static class DictionaryData {
         List<String> meanings;
@@ -102,21 +96,20 @@ public class CreateCourseActivity extends AppCompatActivity {
 
 
         inputCourseTitle = findViewById(R.id.inputTitle);
-        containerTerms    = findViewById(R.id.containerTerms);
-        btnAdd            = findViewById(R.id.btnAdd);
-        btnScan           = findViewById(R.id.btnScan);
-        btnSave           = findViewById(R.id.btnSave);
-        btnClose          = findViewById(R.id.btnCloseCreateCourse);
-        aiGenerate     = findViewById(R.id.aiGenerate);
+        containerTerms = findViewById(R.id.containerTerms);
+        btnAdd = findViewById(R.id.btnAdd);
+        btnScan = findViewById(R.id.btnScan);
+        btnSave = findViewById(R.id.btnSave);
+        btnClose = findViewById(R.id.btnCloseCreateCourse);
+        aiGenerate = findViewById(R.id.aiGenerate);
 
 
-                uiHandler      = new Handler(Looper.getMainLooper());
-        db             = FirebaseFirestore.getInstance();
-        currentUser    = FirebaseAuth.getInstance().getCurrentUser();
-        folderId       = getIntent().getStringExtra(EXTRA_FOLDER_ID);
-        isEditMode     = getIntent().getBooleanExtra(EXTRA_IS_EDIT, false);
-        editCourseId   = getIntent().getStringExtra(EXTRA_COURSE_ID);
-
+        uiHandler = new Handler(Looper.getMainLooper());
+        db = FirebaseFirestore.getInstance();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        folderId = getIntent().getStringExtra(EXTRA_FOLDER_ID);
+        isEditMode = getIntent().getBooleanExtra(EXTRA_IS_EDIT, false);
+        editCourseId = getIntent().getStringExtra(EXTRA_COURSE_ID);
 
 
         if (folderId == null) {
@@ -173,10 +166,10 @@ public class CreateCourseActivity extends AppCompatActivity {
 
                         View termView = LayoutInflater.from(CreateCourseActivity.this)
                                 .inflate(R.layout.item_term, containerTerms, false);
-                        AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+                        AutoCompleteTextView edtTerm = termView.findViewById(R.id.edtTerm);
                         AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
-                        ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
-                        ImageView   btnRead                = termView.findViewById(R.id.btnRead);
+                        ImageButton btnRemove = termView.findViewById(R.id.btnRemoveTerm);
+                        ImageView btnRead = termView.findViewById(R.id.btnRead);
 
                         edtTerm.setText(aiVocab.getWord());
                         edtDefinition.setText(aiVocab.getMeaning());
@@ -189,8 +182,8 @@ public class CreateCourseActivity extends AppCompatActivity {
 
                         fetchDefinitionsDictionary(aiVocab.getWord(), data -> {
                             dictData.meanings = data.meanings;
-                            dictData.example  = data.example;
-                            dictData.audio    = data.audio;
+                            dictData.example = data.example;
+                            dictData.audio = data.audio;
                             dictData.phonetic = data.phonetic;
                             termView.setTag(R.id.tag_definition_data, dictData);
                         });
@@ -244,31 +237,31 @@ public class CreateCourseActivity extends AppCompatActivity {
             inputCourseTitle.setText(course.getTitle());
             for (Vocabulary v : course.getVocabularyList()) {
                 addTermLayout();
-                View termView = containerTerms.getChildAt(containerTerms.getChildCount()-1);
-                AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+                View termView = containerTerms.getChildAt(containerTerms.getChildCount() - 1);
+                AutoCompleteTextView edtTerm = termView.findViewById(R.id.edtTerm);
                 AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
 
                 edtTerm.setText(v.getWord());
                 edtDefinition.setText(v.getMeaning());
 
                 DictionaryData dict = new DictionaryData();
-                dict.example  = v.getExample();
-                dict.audio    = v.getAudio();
+                dict.example = v.getExample();
+                dict.audio = v.getAudio();
                 dict.phonetic = v.getPhonetic();
                 termView.setTag(R.id.tag_definition_data, dict);
             }
         }).addOnFailureListener(e ->
-                Toast.makeText(this, "Lỗi load Course: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Lỗi load Course: " + e.getMessage(), Toast.LENGTH_SHORT).show()
         );
     }
 
     private void addTermLayout() {
         View termView = LayoutInflater.from(this)
                 .inflate(R.layout.item_term, containerTerms, false);
-        AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+        AutoCompleteTextView edtTerm = termView.findViewById(R.id.edtTerm);
         AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
-        ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
-        ImageView   btnRead                = termView.findViewById(R.id.btnRead);
+        ImageButton btnRemove = termView.findViewById(R.id.btnRemoveTerm);
+        ImageView btnRead = termView.findViewById(R.id.btnRead);
 
         ArrayAdapter<String> termAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
@@ -276,9 +269,16 @@ public class CreateCourseActivity extends AppCompatActivity {
         edtTerm.setThreshold(1);
 
         TextWatcher watcher = new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
-            @Override public void afterTextChanged(Editable s) {}
-            @Override public void onTextChanged(CharSequence s, int st, int before, int count) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int st, int c, int a) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int st, int before, int count) {
                 String q = s.toString().trim();
                 if (q.length() >= 1) {
                     fetchSuggestions(q, suggestions -> uiHandler.post(() -> {
@@ -327,7 +327,7 @@ public class CreateCourseActivity extends AppCompatActivity {
                 Toast.makeText(this, "Chưa có audio", Toast.LENGTH_SHORT).show();
                 return;
             }
-            String audioUrl = ((DictionaryData)tag).audio;
+            String audioUrl = ((DictionaryData) tag).audio;
             if (audioUrl == null || audioUrl.isEmpty()) {
                 Toast.makeText(this, "Audio rỗng", Toast.LENGTH_SHORT).show();
                 return;
@@ -359,15 +359,15 @@ public class CreateCourseActivity extends AppCompatActivity {
         List<Vocabulary> vocabList = new ArrayList<>();
         for (int i = 0; i < containerTerms.getChildCount(); i++) {
             View v = containerTerms.getChildAt(i);
-            String w = ((EditText)v.findViewById(R.id.edtTerm))
+            String w = ((EditText) v.findViewById(R.id.edtTerm))
                     .getText().toString().trim();
-            String m = ((EditText)v.findViewById(R.id.edtDefinition))
+            String m = ((EditText) v.findViewById(R.id.edtDefinition))
                     .getText().toString().trim();
             if (!w.isEmpty() && !m.isEmpty()) {
-                Vocabulary vocab = new Vocabulary(w,m,"","","");
+                Vocabulary vocab = new Vocabulary(w, m, "", "", "");
                 Object tag = v.getTag(R.id.tag_definition_data);
                 if (tag instanceof DictionaryData) {
-                    DictionaryData d = (DictionaryData)tag;
+                    DictionaryData d = (DictionaryData) tag;
                     vocab.setExample(d.example);
                     vocab.setAudio(d.audio);
                     vocab.setPhonetic(d.phonetic);
@@ -407,12 +407,12 @@ public class CreateCourseActivity extends AppCompatActivity {
                                                 finish();
                                             })
                                             .addOnFailureListener(e -> Toast.makeText(this,
-                                                    "Lỗi lưu từ vựng: "+e.getMessage(),
+                                                    "Lỗi lưu từ vựng: " + e.getMessage(),
                                                     Toast.LENGTH_SHORT).show());
                                 });
                     })
                     .addOnFailureListener(e -> Toast.makeText(this,
-                            "Lỗi update Course: "+e.getMessage(),
+                            "Lỗi update Course: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show());
         } else {
             String newId = db.collection("users").document(uid)
@@ -425,9 +425,9 @@ public class CreateCourseActivity extends AppCompatActivity {
                     .collection("folders").document(folderId)
                     .collection("courses").document(newId);
             courseRef.set(course)
-                    .addOnSuccessListener(a -> commitVocabBatch(courseRef,vocabList))
+                    .addOnSuccessListener(a -> commitVocabBatch(courseRef, vocabList))
                     .addOnFailureListener(e -> Toast.makeText(this,
-                            "Lỗi lưu Course: "+e.getMessage(),
+                            "Lỗi lưu Course: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show());
         }
     }
@@ -440,10 +440,13 @@ public class CreateCourseActivity extends AppCompatActivity {
             batch.set(vr, v);
         }
         batch.commit()
-                .addOnSuccessListener(a -> Toast.makeText(this,
-                        "Tạo Course và lưu từ vựng thành công", Toast.LENGTH_SHORT).show())
+                .addOnSuccessListener(a -> {
+                    Toast.makeText(this,
+                            "Tạo Course và lưu từ vựng thành công", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
                 .addOnFailureListener(e -> Toast.makeText(this,
-                        "Lỗi lưu từ vựng: "+e.getMessage(),
+                        "Lỗi lưu từ vựng: " + e.getMessage(),
                         Toast.LENGTH_SHORT).show());
     }
 
@@ -453,8 +456,13 @@ public class CreateCourseActivity extends AppCompatActivity {
         String url = "https://api.datamuse.com/sug?s=" + input;
         Request request = new Request.Builder().url(url).build();
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) { e.printStackTrace(); }
-            @Override public void onResponse(Call call, Response response) throws IOException {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) return;
                 List<String> list = new ArrayList<>();
                 try {
@@ -462,14 +470,16 @@ public class CreateCourseActivity extends AppCompatActivity {
                     for (int i = 0; i < arr.length() && i < 5; i++) {
                         list.add(arr.getJSONObject(i).getString("word"));
                     }
-                } catch (JSONException e) { e.printStackTrace(); }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 callback.accept(list);
             }
         });
     }
 
 
-//    private void fetchDefinitionsDictionary(String term, Consumer<List<String>> callback) {
+    //    private void fetchDefinitionsDictionary(String term, Consumer<List<String>> callback) {
 //        OkHttpClient client = new OkHttpClient();
 //        String url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + term;
 //        Request request = new Request.Builder()
@@ -509,84 +519,84 @@ public class CreateCourseActivity extends AppCompatActivity {
 //            }
 //        });
 //    }
-private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> callback) {
-    OkHttpClient client = new OkHttpClient();
-    String url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + term;
-    Request request = new Request.Builder()
-            .url(url)
-            .addHeader("Accept", "application/json")
-            .build();
+    private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> callback) {
+        OkHttpClient client = new OkHttpClient();
+        String url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + term;
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Accept", "application/json")
+                .build();
 
-    client.newCall(request).enqueue(new Callback() {
-        @Override public void onFailure(Call call, IOException e) {
-            e.printStackTrace();
-            DictionaryData err = new DictionaryData();
-            err.meanings = Collections.singletonList("Không có kết nối");
-            err.example = "";
-            err.audio = "";
-            err.phonetic = "";
-            callback.accept(err);
-        }
-
-        @Override public void onResponse(Call call, Response response) throws IOException {
-            DictionaryData data = new DictionaryData();
-            data.meanings = new ArrayList<>();
-            data.example = "";
-            data.audio = "";
-            data.phonetic = "";
-
-            if (!response.isSuccessful()) {
-                data.meanings = Collections.singletonList("Lỗi server: " + response.code());
-                callback.accept(data);
-                return;
-            }
-
-            try {
-                JSONArray arr = new JSONArray(response.body().string());
-                JSONObject entry = arr.getJSONObject(0);
-
-                data.phonetic = entry.optString("phonetic", "");
-
-                JSONArray phonetics = entry.optJSONArray("phonetics");
-                if (phonetics != null) {
-                    for (int i = 0; i < phonetics.length(); i++) {
-                        String audioUrl = phonetics.getJSONObject(i).optString("audio", "");
-                        if (!audioUrl.isEmpty()) {
-                            data.audio = audioUrl;
-                            break;
-                        }
-                    }
-                }
-
-                JSONArray meaningsArr = entry.getJSONArray("meanings");
-                outer:
-                for (int i = 0; i < meaningsArr.length() && data.meanings.size() < 5; i++) {
-                    JSONObject m = meaningsArr.getJSONObject(i);
-                    JSONArray defs = m.getJSONArray("definitions");
-                    for (int j = 0; j < defs.length() && data.meanings.size() < 5; j++) {
-                        JSONObject defObj = defs.getJSONObject(j);
-                        data.meanings.add(defObj.getString("definition"));
-                        if (data.example.isEmpty() && defObj.has("example")) {
-                            data.example = defObj.getString("example");
-                        }
-                        if (!data.example.isEmpty() && data.meanings.size() >= 5) {
-                            break outer;
-                        }
-                    }
-                }
-                if (data.meanings.isEmpty()) {
-                    data.meanings.add("Chưa có định nghĩa");
-                }
-            } catch (JSONException e) {
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
-                data.meanings = Collections.singletonList("Lỗi phân tích dữ liệu");
+                DictionaryData err = new DictionaryData();
+                err.meanings = Collections.singletonList("Không có kết nối");
+                err.example = "";
+                err.audio = "";
+                err.phonetic = "";
+                callback.accept(err);
             }
-            callback.accept(data);
-        }
-    });
-}
 
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                DictionaryData data = new DictionaryData();
+                data.meanings = new ArrayList<>();
+                data.example = "";
+                data.audio = "";
+                data.phonetic = "";
 
+                if (!response.isSuccessful()) {
+                    data.meanings = Collections.singletonList("Lỗi server: " + response.code());
+                    callback.accept(data);
+                    return;
+                }
+
+                try {
+                    JSONArray arr = new JSONArray(response.body().string());
+                    JSONObject entry = arr.getJSONObject(0);
+
+                    data.phonetic = entry.optString("phonetic", "");
+
+                    JSONArray phonetics = entry.optJSONArray("phonetics");
+                    if (phonetics != null) {
+                        for (int i = 0; i < phonetics.length(); i++) {
+                            String audioUrl = phonetics.getJSONObject(i).optString("audio", "");
+                            if (!audioUrl.isEmpty()) {
+                                data.audio = audioUrl;
+                                break;
+                            }
+                        }
+                    }
+
+                    JSONArray meaningsArr = entry.getJSONArray("meanings");
+                    outer:
+                    for (int i = 0; i < meaningsArr.length() && data.meanings.size() < 5; i++) {
+                        JSONObject m = meaningsArr.getJSONObject(i);
+                        JSONArray defs = m.getJSONArray("definitions");
+                        for (int j = 0; j < defs.length() && data.meanings.size() < 5; j++) {
+                            JSONObject defObj = defs.getJSONObject(j);
+                            data.meanings.add(defObj.getString("definition"));
+                            if (data.example.isEmpty() && defObj.has("example")) {
+                                data.example = defObj.getString("example");
+                            }
+                            if (!data.example.isEmpty() && data.meanings.size() >= 5) {
+                                break outer;
+                            }
+                        }
+                    }
+                    if (data.meanings.isEmpty()) {
+                        data.meanings.add("Chưa có định nghĩa");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    data.meanings = Collections.singletonList("Lỗi phân tích dữ liệu");
+                }
+                callback.accept(data);
+            }
+        });
+    }
 
 
     private void fetchDefinitions(String term, Consumer<List<String>> callback) {
@@ -598,12 +608,14 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
+            @Override
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
                 callback.accept(Collections.singletonList("Không có kết nối"));
             }
 
-            @Override public void onResponse(Call call, Response response) throws IOException {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     callback.accept(Collections.singletonList("Lỗi server: " + response.code()));
                     return;
@@ -631,7 +643,6 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
     }
 
 
-
     private void fetchTranslationSuggestions(String term, Consumer<List<String>> callback) {
         OkHttpClient client = new OkHttpClient();
         String encoded;
@@ -650,12 +661,14 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
+            @Override
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
                 callback.accept(Collections.singletonList("Không có kết nối"));
             }
 
-            @Override public void onResponse(Call call, Response response) throws IOException {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
                 List<String> results = new ArrayList<>();
                 if (!response.isSuccessful()) {
                     results.add("Lỗi server: " + response.code());
@@ -690,7 +703,7 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
     private void generateVocabFromTopic(String topic, Consumer<List<Vocabulary>> callback) {
 
         GenerativeModel gm = new GenerativeModel(
-               "gemini-1.5-flash",
+                "gemini-1.5-flash",
                 BuildConfig.GEMINI_API_KEY
         );
         GenerativeModelFutures model = GenerativeModelFutures.from(gm);
@@ -744,7 +757,7 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
                 raw = raw.trim();
 
                 int startIdx = raw.indexOf('[');
-                int endIdx   = raw.lastIndexOf(']');
+                int endIdx = raw.lastIndexOf(']');
                 if (startIdx == -1 || endIdx == -1 || endIdx <= startIdx) {
                     android.util.Log.e("CreateCourseAI",
                             "Cannot find JSON array boundaries. startIdx=" + startIdx + ", endIdx=" + endIdx);
@@ -760,7 +773,7 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
                     List<Vocabulary> result = new ArrayList<>();
                     for (int i = 0; i < arr.length(); i++) {
                         JSONObject obj = arr.getJSONObject(i);
-                        String word    = obj.optString("word", "").trim();
+                        String word = obj.optString("word", "").trim();
                         String meaning = obj.optString("meaning", "").trim();
                         if (!word.isEmpty() && !meaning.isEmpty()) {
                             result.add(new Vocabulary(word, meaning, "", "", ""));

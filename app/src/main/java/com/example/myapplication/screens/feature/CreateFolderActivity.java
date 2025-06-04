@@ -1,5 +1,6 @@
 package com.example.myapplication.screens.feature;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -48,7 +49,9 @@ public class CreateFolderActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         ImageView btnSave = findViewById(R.id.btnSave);
-        btnSave.setOnClickListener(v -> createFolder());
+        btnSave.setOnClickListener(v -> {
+            createFolder();
+        });
     }
 
     private void createFolder() {
@@ -79,7 +82,10 @@ public class CreateFolderActivity extends AppCompatActivity {
                 .set(folder)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Tạo thư mục thành công", Toast.LENGTH_SHORT).show();
-                    editFolderName.setText("");
+                    Intent intent = new Intent(CreateFolderActivity.this, FolderDetailActivity.class);
+                    intent.putExtra("folderId", folderId);
+                    startActivity(intent);
+                    finish();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();

@@ -16,5 +16,13 @@ public class Message {
     public boolean isUser() {
         return isUser;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "message='" + message + '\'' +
+                ", isUser=" + isUser +
+                '}';
+    }
 }
 

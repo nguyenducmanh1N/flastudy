@@ -22,12 +22,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
-public class  CreateClassActivity extends AppCompatActivity {
+public class CreateClassActivity extends AppCompatActivity {
 
     private EditText edtClassName, edtDescription;
-    private Switch  switchAllowMembers;
-    private Button  btnSave;
-    private FirebaseUser  currentUser;
+    private Switch switchAllowMembers;
+    private Button btnSave;
+    private FirebaseUser currentUser;
     private FirebaseFirestore db;
 
     @Override
@@ -44,21 +44,21 @@ public class  CreateClassActivity extends AppCompatActivity {
                 });
 
         findViewById(R.id.btnClose).setOnClickListener(v -> finish());
-        edtClassName     = findViewById(R.id.class_name);
-        edtDescription   = findViewById(R.id.class_description);
+        edtClassName = findViewById(R.id.class_name);
+        edtDescription = findViewById(R.id.class_description);
         switchAllowMembers = findViewById(R.id.class_switch);
-        btnSave          = findViewById(R.id.addClassButton);
+        btnSave = findViewById(R.id.addClassButton);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        db          = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         btnSave.setOnClickListener(v -> createClass());
     }
 
     private void createClass() {
-        String name        = edtClassName.getText().toString().trim();
+        String name = edtClassName.getText().toString().trim();
         String description = edtDescription.getText().toString().trim();
-        boolean allowAdd   = switchAllowMembers.isChecked();
+        boolean allowAdd = switchAllowMembers.isChecked();
 
         if (name.isEmpty()) {
             edtClassName.setError("Tên lớp không được để trống");
@@ -81,7 +81,7 @@ public class  CreateClassActivity extends AppCompatActivity {
         cls.setCreater(creator);
         cls.setAllowMembersToAdd(allowAdd);
 
-        ArrayList<String> members   = new ArrayList<>();
+        ArrayList<String> members = new ArrayList<>();
         members.add(creator);
         cls.setMembers(members);
 

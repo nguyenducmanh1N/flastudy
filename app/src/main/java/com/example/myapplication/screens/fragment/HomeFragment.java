@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +53,7 @@ public class HomeFragment extends Fragment {
 
     private View loadingLayout;
 
-
+    private SwipeRefreshLayout swipeRefreshLayoutHomeFragment;
     private TextView tvEmptyFolders, tvEmptyCourses, tvEmptyClasses;
     private List<Folder> folderList = new ArrayList<>();
     private List<Course> courseList = new ArrayList<>();
@@ -84,6 +85,13 @@ public class HomeFragment extends Fragment {
         tvEmptyFolders = view.findViewById(R.id.tvEmptyFolders);
         tvEmptyCourses = view.findViewById(R.id.tvEmptyCourses);
         tvEmptyClasses = view.findViewById(R.id.tvEmptyClasses);
+
+        swipeRefreshLayoutHomeFragment = view.findViewById(R.id.swipeRefreshLayoutHomeFragment);
+        swipeRefreshLayoutHomeFragment.setOnRefreshListener(() -> {
+            loadNotifications();
+            loadData();
+            swipeRefreshLayoutHomeFragment.setRefreshing(false);
+        });
 
 
         folderRecyclerView = view.findViewById(R.id.folderRecyclerView);
@@ -230,6 +238,7 @@ public class HomeFragment extends Fragment {
                         folderList.add(f);
                     }
                     folderAdapter.notifyDataSetChanged();
+                    folderRecyclerView.scrollToPosition(0);
 
                     if (folderList.isEmpty()) {
                         tvEmptyFolders.setVisibility(View.VISIBLE);
@@ -278,6 +287,7 @@ public class HomeFragment extends Fragment {
         com.google.android.gms.tasks.Tasks.whenAllComplete(courseTasks)
                 .addOnCompleteListener(t -> {
                     courseAdapter.notifyDataSetChanged();
+                    courseRecyclerView.scrollToPosition(0);
                     if (courseList.isEmpty()) {
                         tvEmptyCourses.setVisibility(View.VISIBLE);
                         courseRecyclerView.setVisibility(View.GONE);
@@ -304,6 +314,7 @@ public class HomeFragment extends Fragment {
                         classList.add(cls);
                     }
                     classAdapter.notifyDataSetChanged();
+                    classRecyclerView.scrollToPosition(0);
 
                     if (classList.isEmpty()) {
                         tvEmptyClasses.setVisibility(View.VISIBLE);
@@ -329,4 +340,10 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadNotifications();
+        loadData();
+    }
 }
