@@ -41,6 +41,17 @@
         android:textColor="@android:color/white" />
 
     <TextView
+        android:id="@+id/hearandfill"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/baseline_delete_24"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Nghe và điền từ "
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+    <TextView
         android:id="@+id/aiQuiz"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,16 +62,6 @@
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/match"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawablePadding="8dp"
-        android:padding="16dp"
-        android:drawableLeft="@drawable/baseline_delete_24"
-        android:text="Nối từ"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
     <TextView
         android:id="@+id/uu"
         android:layout_width="match_parent"

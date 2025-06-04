@@ -21,6 +21,12 @@
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
         <activity
+            android:name=".screens.feature.learn.ListenFillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.feature.learn.AIQuizResultActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.feature.learn.AIQuizActivity"
             android:exported="false" />
         <activity

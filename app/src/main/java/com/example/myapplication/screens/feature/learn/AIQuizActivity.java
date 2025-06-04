@@ -1,5 +1,6 @@
 package com.example.myapplication.screens.feature.learn;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -20,10 +21,15 @@ import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.service.GeminiService;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AIQuizActivity extends AppCompatActivity {
 
+    public static final String EXTRA_FOLDER_ID = "folderId";
+    public static final String EXTRA_COURSE_ID = "courseId";
+    private String folderId, courseId;
     private TextView tvQuestion;
     private RadioGroup optionsGroup;
     private Button btnSubmit, btnNext;
@@ -35,6 +41,10 @@ public class AIQuizActivity extends AppCompatActivity {
     private List<Vocabulary> vocabList;
     private List<AIQuestion> questionList = new ArrayList<>();
     private int currentIndex = 0;
+
+    private int correctCount = 0;
+
+    private Set<String> wrongWords = new LinkedHashSet<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,6 +59,9 @@ public class AIQuizActivity extends AppCompatActivity {
         progressBar   = findViewById(R.id.progressBar);
         scrollContent = findViewById(R.id.scrollContent);
         btnBack = findViewById(R.id.btnBack);
+
+        folderId = getIntent().getStringExtra(EXTRA_FOLDER_ID);
+        courseId = getIntent().getStringExtra(EXTRA_COURSE_ID);
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -107,6 +120,13 @@ public class AIQuizActivity extends AppCompatActivity {
             String chosenAnswer = selectedRb.getText().toString();
             AIQuestion currentQ = questionList.get(currentIndex);
 
+            if (chosenAnswer.equals(currentQ.getCorrectAnswer())) {
+                correctCount++;
+            } else {
+
+                wrongWords.add(currentQ.getWord());
+            }
+
             String en = currentQ.getExplanationEn();
             String vi = currentQ.getExplanationVi();
             tvExplanation.setVisibility(View.VISIBLE);
@@ -137,11 +157,24 @@ public class AIQuizActivity extends AppCompatActivity {
             if (currentIndex < questionList.size()) {
                 displayCurrentQuestion();
             } else {
-                Toast.makeText(AIQuizActivity.this,
-                        "Bạn đã hoàn thành tất cả câu hỏi!", Toast.LENGTH_SHORT).show();
+                int totalCount = questionList.size();
+
+                Intent intent = new Intent(AIQuizActivity.this, AIQuizResultActivity.class);
+                intent.putExtra("correctCount", correctCount);
+                intent.putExtra("totalCount", totalCount);
+                intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+                intent.putStringArrayListExtra("wrongWords", new ArrayList<>(wrongWords));
+
+                intent.putExtra("folderId", folderId);
+                intent.putExtra("courseId", courseId);
+                startActivity(intent);
+                finish();
+
+                startActivity(intent);
                 finish();
             }
         });
+
     }
 
     private void displayCurrentQuestion() {

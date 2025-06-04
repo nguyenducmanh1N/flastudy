@@ -27,6 +27,7 @@ import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.screens.feature.learn.AIQuizActivity;
 import com.example.myapplication.screens.feature.learn.FillActivity;
 import com.example.myapplication.screens.feature.learn.FlashCardActivity;
+import com.example.myapplication.screens.feature.learn.ListenFillActivity;
 import com.example.myapplication.screens.feature.learn.ListenQuizActivity;
 import com.example.myapplication.screens.feature.learn.QuizActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -234,13 +235,14 @@ public class CourseDetailActivity extends AppCompatActivity {
         View view = getLayoutInflater().inflate(R.layout.learn_bottom_sheet_add_options, null);
         bottomSheetDialog.setContentView(view);
 
-        TextView edit = view.findViewById(R.id.quiz);
-        TextView addToFolder = view.findViewById(R.id.fill);
-        TextView addToClass = view.findViewById(R.id.hear);
+        TextView quiz = view.findViewById(R.id.quiz);
+        TextView fill = view.findViewById(R.id.fill);
+        TextView hear = view.findViewById(R.id.hear);
         TextView aiQuiz = view.findViewById(R.id.aiQuiz);
+        TextView hearandfill = view.findViewById(R.id.hearandfill);
         //TextView delete = view.findViewById(R.id.test);
 
-        edit.setOnClickListener(v -> {
+        quiz.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             Intent intent = new Intent(this, QuizActivity.class);
 
@@ -248,23 +250,33 @@ public class CourseDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        addToFolder.setOnClickListener(v -> {
+        fill.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             Intent intent = new Intent(this, FillActivity.class);
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
             startActivity(intent);
         });
 
-        addToClass.setOnClickListener(v -> {
+        hear.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             Intent intent = new Intent(this, ListenQuizActivity.class);
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
             startActivity(intent);
         });
+
+        hearandfill.setOnClickListener(v ->{
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, ListenFillActivity.class);
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            startActivity(intent);
+        } );
+
         aiQuiz.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             Intent intent = new Intent(this, AIQuizActivity.class);
             intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            intent.putExtra("courseId", courseId);
+            intent.putExtra("folderId",folderId);
             startActivity(intent);
         });
 //        delete.setOnClickListener(v -> {

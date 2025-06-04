@@ -4,10 +4,13 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,38 +22,36 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
-public class ListenQuizActivity extends AppCompatActivity {
+public class ListenFillActivity extends AppCompatActivity {
 
     private ImageButton btnPlayAudio;
-
     private ImageView btnBack;
-    private Button[] opts = new Button[4];
+    private EditText inputAnswer;
+    private Button btnConfirm;
+    private TextView tvResult;
+
     private List<Vocabulary> quizList;
     private Vocabulary correctVocab;
-    private Random rnd = new Random();
     private int idx = 0;
     private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_listen_quiz);
+        setContentView(R.layout.activity_listen_fill);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         btnPlayAudio = findViewById(R.id.btnPlayAudio);
-        opts[0] = findViewById(R.id.btnAnswer1);
-        opts[1] = findViewById(R.id.btnAnswer2);
-        opts[2] = findViewById(R.id.btnAnswer3);
-        opts[3] = findViewById(R.id.btnAnswer4);
         btnBack = findViewById(R.id.btnBack);
+        inputAnswer = findViewById(R.id.inputAnswer);
+        tvResult = findViewById(R.id.tvResult);
+        btnConfirm = findViewById(R.id.btnConfirm);
 
         btnBack.setOnClickListener(v -> finish());
 
         List<Vocabulary> original = getIntent().getParcelableArrayListExtra("vocabList");
-        if (original == null || original.size() < 4) {
+        if (original == null || original.size() < 1) {
             Toast.makeText(this, "Không đủ dữ liệu để quiz!", Toast.LENGTH_LONG).show();
             finish();
             return;
@@ -61,6 +62,7 @@ public class ListenQuizActivity extends AppCompatActivity {
         loadQuestion();
 
         btnPlayAudio.setOnClickListener(v -> playAudio());
+        btnConfirm.setOnClickListener(v -> checkAnswer());
     }
 
     private void loadQuestion() {
@@ -70,22 +72,11 @@ public class ListenQuizActivity extends AppCompatActivity {
             return;
         }
         correctVocab = quizList.get(idx);
-        List<String> texts = new ArrayList<>();
-        texts.add(correctVocab.getWord());
-        while (texts.size() < 4) {
-            String w = quizList.get(rnd.nextInt(quizList.size())).getWord();
-            if (!texts.contains(w)) texts.add(w);
-        }
-        Collections.shuffle(texts);
-
-        for (int i = 0; i < 4; i++) {
-            Button b = opts[i];
-            String t = texts.get(i);
-            b.setText(t);
-            b.setBackgroundColor(getResources().getColor(R.color.teal_700)); 
-            b.setEnabled(true);
-            b.setOnClickListener(v -> checkAnswer(b, t));
-        }
+        inputAnswer.setText("");
+        tvResult.setText("");
+        tvResult.setVisibility(View.GONE);
+        inputAnswer.setBackgroundResource(R.drawable.input_background);
+        tvResult.setBackgroundResource(R.drawable.input_correct);
     }
 
     private void playAudio() {
@@ -108,25 +99,24 @@ public class ListenQuizActivity extends AppCompatActivity {
         }
     }
 
-    private void checkAnswer(Button selected, String text) {
-        boolean ok = text.equals(correctVocab.getWord());
-        if (ok) {
-            selected.setBackgroundColor(getResources().getColor(R.color.green));
-            Toast.makeText(this, "Đúng rồi!", Toast.LENGTH_SHORT).show();
-        } else {
-            selected.setBackgroundColor(getResources().getColor(R.color.red));
-            Toast.makeText(this, "Sai rồi!", Toast.LENGTH_SHORT).show();
-            for (Button b : opts) {
-                if (b.getText().equals(correctVocab.getWord())) {
-                    b.setBackgroundColor(getResources().getColor(R.color.green));
-                    break;
-                }
-            }
+    private void checkAnswer() {
+        String userAnswer = inputAnswer.getText().toString().trim();
+        if (userAnswer.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập từ", Toast.LENGTH_SHORT).show();
+            return;
         }
-        for (Button b : opts) b.setEnabled(false);
+        if (userAnswer.equalsIgnoreCase(correctVocab.getWord())) {
+            tvResult.setText("Đúng rồi!");
+            inputAnswer.setBackgroundResource(R.drawable.input_correct);
+        } else {
+            inputAnswer.setBackgroundResource(R.drawable.input_wrong);
+            tvResult.setText("Sai rồi! Đáp án đúng là: " + correctVocab.getWord());
+            tvResult.setVisibility(View.VISIBLE);
+            tvResult.setBackgroundResource(R.drawable.input_correct);
+        }
         handler.postDelayed(() -> {
             idx++;
             loadQuestion();
-        }, 1500);
+        }, 5000);
     }
 }

@@ -131,7 +131,9 @@ public class CreateCourseActivity extends AppCompatActivity {
         }
 
         btnScan.setOnClickListener(v -> {
-            startActivity(new Intent(this, CameraActivity.class));
+            Intent intent = new Intent(CreateCourseActivity.this, CameraActivity.class);
+            intent.putExtra(CameraActivity.EXTRA_FOLDER_ID, folderId);
+            startActivity(intent);
         });
 
         btnAdd.setOnClickListener(v -> addTermLayout());
@@ -146,6 +148,75 @@ public class CreateCourseActivity extends AppCompatActivity {
             loadCourseForEdit();
         } else {
             addTermLayout();
+        }
+
+        ArrayList<Vocabulary> aiList =
+                getIntent().getParcelableArrayListExtra("aiGeneratedVocabList");
+        if (aiList != null && !aiList.isEmpty()) {
+            containerTerms.removeAllViews();
+            for (Vocabulary aiV : aiList) {
+                View termView = LayoutInflater.from(this)
+                        .inflate(R.layout.item_term, containerTerms, false);
+                AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+                AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
+                ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
+                ImageView   btnRead                = termView.findViewById(R.id.btnRead);
+
+                edtTerm.setText(aiV.getWord());
+                edtDefinition.setText(aiV.getMeaning());
+                edtDefinition.setVisibility(View.VISIBLE);
+
+                DictionaryData dictData = new DictionaryData();
+                dictData.meanings = new ArrayList<>();
+                dictData.example  = "";
+                dictData.audio    = "";
+                dictData.phonetic = "";
+                termView.setTag(R.id.tag_definition_data, dictData);
+
+                fetchDefinitionsDictionary(aiV.getWord(), data -> {
+                    dictData.meanings = data.meanings;
+                    dictData.example  = data.example;
+                    dictData.audio    = data.audio;
+                    dictData.phonetic = data.phonetic;
+                    termView.setTag(R.id.tag_definition_data, dictData);
+                });
+
+                btnRemove.setOnClickListener(rem -> containerTerms.removeView(termView));
+                btnRead.setOnClickListener(r -> {
+                    Object tagObj = termView.getTag(R.id.tag_definition_data);
+                    if (!(tagObj instanceof DictionaryData)) {
+                        Toast.makeText(this, "Chưa có audio", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String audioUrl = ((DictionaryData) tagObj).audio;
+                    if (audioUrl == null || audioUrl.isEmpty()) {
+                        Toast.makeText(this, "Audio rỗng", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    MediaPlayer mp = new MediaPlayer();
+                    try {
+                        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        mp.setDataSource(audioUrl);
+                        mp.prepareAsync();
+                        mp.setOnPreparedListener(MediaPlayer::start);
+                        mp.setOnCompletionListener(MediaPlayer::release);
+                    } catch (IOException e) {
+                        Toast.makeText(this, "Không thể phát audio", Toast.LENGTH_SHORT).show();
+                        mp.release();
+                    }
+                });
+
+                containerTerms.addView(termView);
+            }
+
+        } else {
+            if (isEditMode && editCourseId != null) {
+                btnSave.setImageResource(android.R.drawable.ic_menu_edit);
+                containerTerms.removeAllViews();
+                loadCourseForEdit();
+            } else {
+                addTermLayout();
+            }
         }
 
         aiGenerate.setOnClickListener(v -> {
