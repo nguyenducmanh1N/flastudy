@@ -10,15 +10,15 @@ public class Vocabulary implements Parcelable {
     private String audio;
     private String phonetic;
 
-    public String getTense() {
-        return tense;
-    }
-
-    public void setTense(String tense) {
-        this.tense = tense;
-    }
-
-    private String tense;
+//    public String getTense() {
+//        return tense;
+//    }
+//
+//    public void setTense(String tense) {
+//        this.tense = tense;
+//    }
+//
+//    private String tense;
 
     public Vocabulary() {}
 

@@ -46,25 +46,25 @@ public class LoginActivity extends AppCompatActivity {
     private static final String KEY_EMAIL    = "email";
     private static final String KEY_PASS     = "password";
 
-
     private static final int RC_SIGN_IN = 100;
     private GoogleSignInClient googleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+            return;
+        }
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.login), (v, insets) -> {
-            Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(sys.left, sys.top, sys.right, sys.bottom);
-            return insets;
-        });
-
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
         loginEmail    = findViewById(R.id.loginEmail);
         loginPassword = findViewById(R.id.loginPassword);
         loginButton   = findViewById(R.id.loginButton);
@@ -73,11 +73,9 @@ public class LoginActivity extends AppCompatActivity {
 
         boolean rem = prefs.getBoolean(KEY_REMEMBER, false);
         if (rem) {
-            loginEmail.setText(   prefs.getString(KEY_EMAIL, "") );
-            loginPassword.setText(prefs.getString(KEY_PASS,  "") );
+            loginEmail.setText(prefs.getString(KEY_EMAIL, ""));
+            loginPassword.setText(prefs.getString(KEY_PASS, ""));
             rememberMe.setChecked(true);
-
-//            loginWithEmail(loginEmail.getText().toString(), loginPassword.getText().toString());
         }
 
         loginButton.setOnClickListener(v -> {
@@ -89,16 +87,23 @@ public class LoginActivity extends AppCompatActivity {
                 prefs.edit()
                         .putBoolean(KEY_REMEMBER, true)
                         .putString(KEY_EMAIL, email)
-                        .putString(KEY_PASS,  pass)
+                        .putString(KEY_PASS, pass)
                         .apply();
             } else {
                 prefs.edit().clear().apply();
             }
 
-
-            loginWithEmail(email, pass);
+            auth.signInWithEmailAndPassword(email, pass)
+                    .addOnSuccessListener(res -> {
+                        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(this, HomeActivity.class));
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Login Failed: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    });
         });
-
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.web_client_id))
@@ -107,15 +112,17 @@ public class LoginActivity extends AppCompatActivity {
         googleSignInClient = GoogleSignIn.getClient(this, gso);
 
         findViewById(R.id.googleSignInButton)
-                .setOnClickListener(v -> signInWithGoogle());
+                .setOnClickListener(v -> {
+                    googleSignInClient.signOut().addOnCompleteListener(t -> {
+                        Intent intent = googleSignInClient.getSignInIntent();
+                        startActivityForResult(intent, RC_SIGN_IN);
+                    });
+                });
 
-        ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> finish());
-
-        TextView btnSignUp = findViewById(R.id.btn_SignUp_screen);
-        btnSignUp.setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
-        });
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btn_SignUp_screen).setOnClickListener(v ->
+                startActivity(new Intent(this, SignUpActivity.class))
+        );
     }
 
     private boolean isValid(String email, String pass) {
@@ -130,25 +137,6 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    private void loginWithEmail(String email, String pass) {
-        auth.signInWithEmailAndPassword(email, pass)
-                .addOnSuccessListener(res -> {
-                    Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(this, HomeActivity.class));
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private void signInWithGoogle() {
-        googleSignInClient.signOut().addOnCompleteListener(t -> {
-            Intent intent = googleSignInClient.getSignInIntent();
-            startActivityForResult(intent, RC_SIGN_IN);
-        });
-    }
-
     @Override
     protected void onActivityResult(int rc, int resultCode, Intent data) {
         super.onActivityResult(rc, resultCode, data);
@@ -156,46 +144,40 @@ public class LoginActivity extends AppCompatActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount acct = task.getResult(ApiException.class);
-                if (acct != null) firebaseAuthWithGoogle(acct.getIdToken());
+                if (acct != null) {
+                    AuthCredential cred = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+                    auth.signInWithCredential(cred)
+                            .addOnCompleteListener(this, t -> {
+                                if (t.isSuccessful()) {
+                                    FirebaseUser user = auth.getCurrentUser();
+                                    if (user != null) {
+                                        saveUserToFirestore(user);
+                                        Toast.makeText(this,
+                                                "Welcome " + user.getDisplayName(),
+                                                Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(this, HomeActivity.class));
+                                        finish();
+                                    }
+                                } else {
+                                    Toast.makeText(this,
+                                            "Authentication Failed", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
             } catch (ApiException e) {
                 Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential cred = GoogleAuthProvider.getCredential(idToken, null);
-        auth.signInWithCredential(cred)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = auth.getCurrentUser();
-                        if (user != null) {
-                            saveUserToFirestore(user);
-                            Toast.makeText(this, "Welcome " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(this, HomeActivity.class));
-                            finish();
-                        }
-                    } else {
-                        Toast.makeText(this, "Authentication Failed", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-
     private void saveUserToFirestore(FirebaseUser user) {
         String uid = user.getUid();
-
         User userData = new User(uid, user.getDisplayName(), user.getEmail());
-
         db.collection("users")
                 .document(uid)
                 .set(userData, SetOptions.merge())
-                .addOnSuccessListener(aVoid -> {
-
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Failed to save user to Firestore", Toast.LENGTH_SHORT).show();
-                });
+                .addOnSuccessListener(aVoid -> { /* OK */ })
+                .addOnFailureListener(e -> Toast.makeText(this,
+                        "Failed to save user to Firestore", Toast.LENGTH_SHORT).show());
     }
-
 }

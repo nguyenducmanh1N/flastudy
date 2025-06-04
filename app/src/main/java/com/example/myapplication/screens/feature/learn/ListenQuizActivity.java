@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,7 +23,9 @@ import java.util.Random;
 
 public class ListenQuizActivity extends AppCompatActivity {
 
-    private ImageButton btnPlayAudio , btnBack;
+    private ImageButton btnPlayAudio;
+
+    private ImageView btnBack;
     private Button[] opts = new Button[4];
     private List<Vocabulary> quizList;
     private Vocabulary correctVocab;
@@ -33,6 +36,7 @@ public class ListenQuizActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_listen_quiz);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
