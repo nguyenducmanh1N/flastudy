@@ -96,12 +96,7 @@ public class CameraActivity extends AppCompatActivity {
         containerWords    = findViewById(R.id.containerWords);
         btnAddToCourse    = findViewById(R.id.btnAddToCourse);
 
-        // Nhận folderId từ Intent
         folderId = getIntent().getStringExtra(EXTRA_FOLDER_ID);
-
-        // Ẩn nút “Lấy nghĩa các từ” (nếu có trong layout cũ), không dùng nữa
-        // Giờ layout chỉ có btnTakePhoto và btnAddToCourse
-
         btnTakePhoto.setOnClickListener(v -> {
             if (allPermissionsGranted()) {
                 dispatchTakePictureIntent();
@@ -187,7 +182,6 @@ public class CameraActivity extends AppCompatActivity {
             recognizer.process(image)
                     .addOnSuccessListener(visionText -> {
                         String fullText = visionText.getText();
-                        // Chuyển sang hiển thị danh sách words + nghĩa luôn
                         extractedWords = extractEnglishWords(fullText);
                         if (extractedWords.isEmpty()) {
                             tvOcrResult.setText("Không tìm thấy từ tiếng Anh nào trên ảnh.");
@@ -204,7 +198,6 @@ public class CameraActivity extends AppCompatActivity {
                                 fetchedVocabList.clear();
                                 fetchedVocabList.addAll(resultList);
 
-                                // Hiển thị danh sách word + meaning trong containerWords
                                 containerWords.removeAllViews();
                                 LayoutInflater inflater = LayoutInflater.from(this);
                                 for (Vocabulary vbocab : fetchedVocabList) {
@@ -246,7 +239,6 @@ public class CameraActivity extends AppCompatActivity {
                 result.add(tok.toLowerCase());
             }
         }
-        // Lọc trùng
         return new ArrayList<>(new LinkedHashSet<>(result));
     }
 
@@ -288,7 +280,6 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onSuccess(GenerateContentResponse response) {
                 String raw = response.getText().trim();
-                // Loại bỏ fence nếu có
                 if (raw.startsWith("```")) {
                     int idx = raw.indexOf('\n');
                     if (idx != -1) raw = raw.substring(idx + 1).trim();
