@@ -9,7 +9,7 @@
     <!-- Top Bar -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="387dp"
+        android:layout_width="match_parent"
         android:layout_height="53dp"
         android:layout_marginBottom="8dp"
         android:background="#0E0D3D"
@@ -159,7 +159,7 @@
 
     <FrameLayout
         android:id="@+id/flashcard_container"
-        android:layout_width="381dp"
+        android:layout_width="match_parent"
         android:layout_height="511dp"
         android:layout_margin="16dp"
         android:clipChildren="false"
@@ -194,7 +194,7 @@
     <!-- Bottom Controls -->
     <LinearLayout
         android:id="@+id/bottomControls"
-        android:layout_width="411dp"
+        android:layout_width="match_parent"
         android:layout_height="96dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"

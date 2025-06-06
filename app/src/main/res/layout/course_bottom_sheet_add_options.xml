@@ -14,7 +14,7 @@
         android:drawableLeft="@drawable/baseline_edit_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="sửa học phần"
+        android:text="Sửa học phần"
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 
@@ -36,7 +36,7 @@
         android:drawableLeft="@drawable/baseline_groups_24"
         android:drawablePadding="8dp"
         android:padding="16dp"
-        android:text="Thêm va lớp học"
+        android:text="Thêm vào lớp học"
         android:textSize="16sp"
         android:textColor="@android:color/white" />
     <TextView
@@ -57,7 +57,7 @@
         android:drawablePadding="8dp"
         android:padding="16dp"
         android:drawableLeft="@drawable/baseline_delete_24"
-        android:text="Xoa hoc phan"
+        android:text="Xoá học phần"
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 </LinearLayout>

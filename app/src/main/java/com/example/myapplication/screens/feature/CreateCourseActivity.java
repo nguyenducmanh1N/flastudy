@@ -511,8 +511,11 @@ public class CreateCourseActivity extends AppCompatActivity {
             batch.set(vr, v);
         }
         batch.commit()
-                .addOnSuccessListener(a -> Toast.makeText(this,
-                        "Tạo Course và lưu từ vựng thành công", Toast.LENGTH_SHORT).show())
+                .addOnSuccessListener(a -> {
+                    Toast.makeText(this,
+                            "Tạo Course và lưu từ vựng thành công", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
                 .addOnFailureListener(e -> Toast.makeText(this,
                         "Lỗi lưu từ vựng: "+e.getMessage(),
                         Toast.LENGTH_SHORT).show());

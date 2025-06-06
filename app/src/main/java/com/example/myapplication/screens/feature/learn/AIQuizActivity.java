@@ -189,6 +189,7 @@ public class AIQuizActivity extends AppCompatActivity {
             RadioButton rb = new RadioButton(this);
             rb.setText(option);
             rb.setTextSize(16f);
+            rb.setTextColor(getResources().getColor(R.color.white));
             rb.setPadding(8, 16, 8, 16);
             optionsGroup.addView(rb);
         }

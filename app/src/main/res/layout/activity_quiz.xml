@@ -8,120 +8,137 @@
     android:background="#0E0D3D"
     tools:context=".screens.feature.learn.QuizActivity">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="418dp"
-        android:layout_height="601dp"
-        android:background="#0E0D3D"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="24dp"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="-4dp"
-        tools:layout_editor_absoluteY="132dp">
-
-        <TextView
-            android:id="@+id/tvQuizWord"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:text="English Word"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvQuizWord2"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:text="Chọn đáp án"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/btnAnswer1"
-            android:layout_width="357dp"
-            android:layout_height="60dp"
-            android:layout_marginBottom="12dp"
-            android:text="Meaning 1" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout4"
+                android:layout_width="match_parent"
+                android:layout_height="53dp"
+                android:background="#0E0D3D"
+                android:paddingHorizontal="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/btnAnswer2"
-            android:layout_width="357dp"
-            android:layout_height="60dp"
-            android:layout_marginBottom="12dp"
-            android:text="Meaning 1" />
+                <!-- Back button -->
 
-        <Button
-            android:id="@+id/btnAnswer3"
-            android:layout_width="360dp"
-            android:layout_height="60dp"
-            android:layout_marginBottom="12dp"
-            android:text="Meaning 1" />
+                <!-- Menu button (3 dots) -->
 
-        <Button
-            android:id="@+id/btnAnswer4"
-            android:layout_width="360dp"
-            android:layout_height="60dp"
-            android:layout_marginBottom="12dp"
-            android:text="Meaning 1" />
+                <ImageView
+                    android:id="@+id/btnBack"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Back"
+                    android:src="@drawable/baseline_arrow_back_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@android:color/white"
+                    tools:ignore="MissingConstraints" />
 
-    </LinearLayout>
+                <ImageView
+                    android:id="@+id/btnMenu"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Menu"
+                    android:src="@drawable/baseline_density_medium_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="387dp"
-        android:layout_height="53dp"
-        android:background="#0E0D3D"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteY="16dp">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintStart_toEndOf="@+id/btnBack"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.551"
+                    app:tint="@android:color/white" />
 
-        <!-- Back button -->
+                <!-- Add button -->
+                <!--        <ImageView-->
+                <!--            android:id="@+id/btnAdd"-->
+                <!--            android:layout_width="24dp"-->
+                <!--            android:layout_height="24dp"-->
+                <!--            android:contentDescription="Add"-->
+                <!--            android:src="@drawable/baseline_add_24"-->
+                <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+                <!--            app:layout_constraintEnd_toEndOf="parent"-->
+                <!--            app:layout_constraintTop_toTopOf="parent"-->
+                <!--            app:tint="@color/white" />-->
 
-        <!-- Menu button (3 dots) -->
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="Back"
-            android:src="@drawable/baseline_arrow_back_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@android:color/white"
-            tools:ignore="MissingConstraints" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="601dp"
+                android:background="#0E0D3D"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout4">
 
-        <ImageView
-            android:id="@+id/btnMenu"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="Menu"
-            android:src="@drawable/baseline_density_medium_24"
-            app:layout_constraintBottom_toBottomOf="parent"
+                <TextView
+                    android:id="@+id/tvQuizWord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:text="English Word"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/btnBack"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.551"
-            app:tint="@android:color/white" />
+                <TextView
+                    android:id="@+id/tvQuizWord2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:text="Chọn đáp án"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-        <!-- Add button -->
-        <!--        <ImageView-->
-        <!--            android:id="@+id/btnAdd"-->
-        <!--            android:layout_width="24dp"-->
-        <!--            android:layout_height="24dp"-->
-        <!--            android:contentDescription="Add"-->
-        <!--            android:src="@drawable/baseline_add_24"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            app:layout_constraintTop_toTopOf="parent"-->
-        <!--            app:tint="@color/white" />-->
+                <Button
+                    android:id="@+id/btnAnswer1"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="Meaning 1" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <Button
+                    android:id="@+id/btnAnswer2"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="Meaning 1" />
+
+                <Button
+                    android:id="@+id/btnAnswer3"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="Meaning 1" />
+
+                <Button
+                    android:id="@+id/btnAnswer4"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="Meaning 1" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+
+
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

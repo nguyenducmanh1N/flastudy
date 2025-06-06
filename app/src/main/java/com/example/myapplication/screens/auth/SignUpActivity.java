@@ -11,7 +11,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.myapplication.R;
 import com.example.myapplication.model.User;
@@ -37,7 +41,15 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sign_up);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.sign_up), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -60,7 +72,7 @@ public class SignUpActivity extends AppCompatActivity {
                 String fullName = edtFullName.getText().toString().trim();
 
                 if (email.isEmpty() || password.isEmpty() || fullName.isEmpty()) {
-                    Toast.makeText(SignUpActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpActivity.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -78,13 +90,13 @@ public class SignUpActivity extends AppCompatActivity {
                                             .set(userData)
                                             .addOnSuccessListener(aVoid -> {
                                                 Log.d("SIGN_UP", "User saved to Firestore");
-                                                Toast.makeText(SignUpActivity.this, "Sign up successful", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(SignUpActivity.this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
                                                 startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
                                                 finish();
                                             })
                                             .addOnFailureListener(e -> {
                                                 Log.e("SIGN_UP", "Firestore write failed", e);
-                                                Toast.makeText(SignUpActivity.this, "Failed to save user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(SignUpActivity.this, "Lưu thông tin người dùng thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                             });
                                 } else {
                                     Log.e("SIGN_UP", "FirebaseUser is null");
@@ -98,7 +110,7 @@ public class SignUpActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         txtForgotPassword.setOnClickListener(v -> {
-            Toast.makeText(this, "Forgot password clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Quên mật khẩu chưa được cài đặt", Toast.LENGTH_SHORT).show();
         });
 
         txtSignUp.setOnClickListener(v -> {
