@@ -2,19 +2,17 @@ package com.example.myapplication.screens.auth;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.myapplication.R;
 import com.example.myapplication.model.User;
@@ -34,10 +32,14 @@ import com.google.firebase.firestore.SetOptions;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private boolean isPasswordVisible = false;
+
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private EditText loginEmail, loginPassword;
     private Button loginButton;
+
+    private ImageView imgShowPassword;
     private CheckBox rememberMe;
     private SharedPreferences prefs;
 
@@ -69,7 +71,25 @@ public class LoginActivity extends AppCompatActivity {
         loginPassword = findViewById(R.id.loginPassword);
         loginButton   = findViewById(R.id.loginButton);
         rememberMe    = findViewById(R.id.checkboxRemember);
+        imgShowPassword = findViewById(R.id.imgShowPassword);
         prefs         = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        imgShowPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isPasswordVisible) {
+                    // Ẩn mật khẩu
+                    loginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    imgShowPassword.setImageResource(R.drawable.show_password);
+                } else {
+                    // Hiện mật khẩu
+                    loginPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                    imgShowPassword.setImageResource(R.drawable.hide_password);
+                }
+                isPasswordVisible = !isPasswordVisible;
+                loginPassword.setSelection(loginPassword.getText().length());
+            }
+        });
 
         boolean rem = prefs.getBoolean(KEY_REMEMBER, false);
         if (rem) {
@@ -95,12 +115,12 @@ public class LoginActivity extends AppCompatActivity {
 
             auth.signInWithEmailAndPassword(email, pass)
                     .addOnSuccessListener(res -> {
-                        Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(this, HomeActivity.class));
                         finish();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Login Failed: " + e.getMessage(),
+                        Toast.makeText(this, "Đăng nhập thất bại: " + e.getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     });
         });
@@ -127,11 +147,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean isValid(String email, String pass) {
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            loginEmail.setError("Please enter a valid email");
+            loginEmail.setError("Vui lòng nhập email hợp lệ!");
             return false;
         }
         if (pass.isEmpty()) {
-            loginPassword.setError("Password cannot be empty");
+            loginPassword.setError("Mật khẩu không được để trống!");
             return false;
         }
         return true;
@@ -153,19 +173,19 @@ public class LoginActivity extends AppCompatActivity {
                                     if (user != null) {
                                         saveUserToFirestore(user);
                                         Toast.makeText(this,
-                                                "Welcome " + user.getDisplayName(),
+                                                "Chào mừng " + user.getDisplayName(),
                                                 Toast.LENGTH_SHORT).show();
                                         startActivity(new Intent(this, HomeActivity.class));
                                         finish();
                                     }
                                 } else {
                                     Toast.makeText(this,
-                                            "Authentication Failed", Toast.LENGTH_SHORT).show();
+                                            "Xác thực thất bại", Toast.LENGTH_SHORT).show();
                                 }
                             });
                 }
             } catch (ApiException e) {
-                Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Đăng nhập bằng Google thất bại", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -178,6 +198,6 @@ public class LoginActivity extends AppCompatActivity {
                 .set(userData, SetOptions.merge())
                 .addOnSuccessListener(aVoid -> { /* OK */ })
                 .addOnFailureListener(e -> Toast.makeText(this,
-                        "Failed to save user to Firestore", Toast.LENGTH_SHORT).show());
+                        "Lưu thông tin người dùng thất bại", Toast.LENGTH_SHORT).show());
     }
 }

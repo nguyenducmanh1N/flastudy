@@ -76,7 +76,7 @@ public class FillActivity extends AppCompatActivity {
 
         etAnswer.setEnabled(true);
         etAnswer.setText("");
-        etAnswer.setBackgroundResource(android.R.drawable.edit_text);
+        etAnswer.setBackgroundResource(R.drawable.input_background);
 
         btnCheck.setEnabled(true);
         btnNext.setVisibility(View.GONE);

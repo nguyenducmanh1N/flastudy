@@ -57,7 +57,7 @@
             <TextView
                 android:id="@+id/tvPrompt"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="wrap_content"
                 android:text="Định nghĩa tiếng Việt"
                 android:textColor="#FDFBFB"
                 android:textSize="18sp" />
@@ -70,7 +70,8 @@
             <EditText
                 android:id="@+id/etAnswer"
                 android:layout_width="match_parent"
-                android:layout_height="49dp"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/input_background"
                 android:hint="Nhập thuật ngữ tiếng Anh"

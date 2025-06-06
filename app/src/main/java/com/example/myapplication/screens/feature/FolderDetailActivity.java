@@ -231,4 +231,9 @@ public class FolderDetailActivity extends AppCompatActivity {
                 .show();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadCourses();
+    }
 }

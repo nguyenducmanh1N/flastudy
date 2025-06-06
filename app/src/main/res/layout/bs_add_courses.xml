@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:padding="16dp"
+    android:background="#0E0D3D"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -21,6 +22,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Tìm kiếm học phần..."
+        android:textColor="@color/white"
+        android:textColorHint="#AAAAAA"
         android:drawableStart="@android:drawable/ic_menu_search"
         android:padding="8dp"
         android:background="@drawable/bg_search_bar" />
