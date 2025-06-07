@@ -110,8 +110,34 @@ public class SignUpActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         txtForgotPassword.setOnClickListener(v -> {
-            Toast.makeText(this, "Quên mật khẩu chưa được cài đặt", Toast.LENGTH_SHORT).show();
+            // Tạo một dialog để nhập email
+            EditText emailInput = new EditText(SignUpActivity.this);
+            emailInput.setHint("Nhập email của bạn");
+
+            new android.app.AlertDialog.Builder(SignUpActivity.this)
+                    .setTitle("Quên mật khẩu")
+                    .setMessage("Nhập email để nhận liên kết đặt lại mật khẩu")
+                    .setView(emailInput)
+                    .setPositiveButton("Gửi", (dialog, which) -> {
+                        String email = emailInput.getText().toString().trim();
+                        if (email.isEmpty()) {
+                            Toast.makeText(SignUpActivity.this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        auth.sendPasswordResetEmail(email)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(SignUpActivity.this, "Đã gửi liên kết đặt lại mật khẩu tới email", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(SignUpActivity.this, "Lỗi: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
         });
+
 
         txtSignUp.setOnClickListener(v -> {
             startActivity(new Intent(SignUpActivity.this, LoginActivity.class));

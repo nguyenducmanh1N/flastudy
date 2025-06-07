@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -37,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private EditText loginEmail, loginPassword;
+
+    private TextView txtForgotPassword;
     private Button loginButton;
 
     private ImageView imgShowPassword;
@@ -70,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
         loginEmail    = findViewById(R.id.loginEmail);
         loginPassword = findViewById(R.id.loginPassword);
         loginButton   = findViewById(R.id.loginButton);
+        txtForgotPassword = findViewById(R.id.txtForgotPassword);
         rememberMe    = findViewById(R.id.checkboxRemember);
         imgShowPassword = findViewById(R.id.imgShowPassword);
         prefs         = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -89,6 +93,35 @@ public class LoginActivity extends AppCompatActivity {
                 isPasswordVisible = !isPasswordVisible;
                 loginPassword.setSelection(loginPassword.getText().length());
             }
+        });
+
+        txtForgotPassword.setOnClickListener(v -> {
+            // Tạo một dialog để nhập email
+            EditText emailInput = new EditText(LoginActivity.this);
+            emailInput.setHint("Nhập email của bạn");
+
+            new android.app.AlertDialog.Builder(LoginActivity.this)
+                    .setTitle("Quên mật khẩu")
+                    .setMessage("Nhập email để nhận liên kết đặt lại mật khẩu")
+                    .setView(emailInput)
+                    .setPositiveButton("Gửi", (dialog, which) -> {
+                        String email = emailInput.getText().toString().trim();
+                        if (email.isEmpty()) {
+                            Toast.makeText(LoginActivity.this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        auth.sendPasswordResetEmail(email)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(LoginActivity.this, "Đã gửi liên kết đặt lại mật khẩu tới email", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(LoginActivity.this, "Lỗi: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
         });
 
         boolean rem = prefs.getBoolean(KEY_REMEMBER, false);
