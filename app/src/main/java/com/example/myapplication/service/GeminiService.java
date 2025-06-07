@@ -39,58 +39,33 @@ public class GeminiService {
         GenerativeModelFutures model = GenerativeModelFutures.from(gm);
 
 
+
         StringBuilder prompt = new StringBuilder();
-        prompt.append("You are an AI that creates multiple-choice fill-in-the-blank questions for learning vocabulary. ")
-                .append("For each vocabulary word provided, generate 3 questions:\n")
-                .append("1. A 'meaning' question: choose the correct meaning of the word in context.\n")
-                .append("2. A 'tense' question: choose the correct verb tense/form of the word in a sentence.\n")
-                .append("3. A 'fill' question: choose the correct vocabulary word to fill in the blank from 4 options ")
-                .append("(all options must be distinct words taken from the provided vocabulary list, including the target word itself).\n\n")
-                .append("Each question object must have exactly these keys:\n")
-                .append("- \"word\": the original vocabulary word (string)\n")
-                .append("- \"type\": one of \"meaning\", \"tense\", or \"fill\"\n")
-                .append("- \"question\": the sentence with a blank and instruction (string)\n")
-                .append("- \"options\": an array of exactly 4 choices (list of strings)\n")
-                .append("- \"correctAnswer\": the exact correct choice text (string)\n")
-                .append("- \"explanation_en\": a short explanation in English why that choice is correct (string)\n")
-                .append("- \"explanation_vi\": a short explanation in Vietnamese why that choice is correct (string)\n\n")
-                .append("Return a JSON array of question objects and nothing else. Do not include any extra fields, commentary, or markdown. ")
-                .append("Example format:\n")
-                .append("[\n")
-                .append("  {\n")
-                .append("    \"word\": \"run\",\n")
-                .append("    \"type\": \"meaning\",\n")
-                .append("    \"question\": \"What does 'run' mean in the sentence: 'I like to ____ every morning.'?\",\n")
-                .append("    \"options\": [\"to move quickly on feet\", \"to cook food\", \"to build\", \"to read\"],\n")
-                .append("    \"correctAnswer\": \"to move quickly on feet\",\n")
-                .append("    \"explanation_en\": \"In this sentence, 'run' means 'to move quickly on feet.'\",\n")
-                .append("    \"explanation_vi\": \"Trong câu này, 'run' nghĩa là 'chạy nhanh trên đôi chân.'\"\n")
-                .append("  },\n")
-                .append("  {\n")
-                .append("    \"word\": \"run\",\n")
-                .append("    \"type\": \"tense\",\n")
-                .append("    \"question\": \"Choose the correct form of 'run' in the past tense for: 'I ____ fast yesterday.'\",\n")
-                .append("    \"options\": [\"ran\", \"runs\", \"running\", \"runned\"],\n")
-                .append("    \"correctAnswer\": \"ran\",\n")
-                .append("    \"explanation_en\": \"The past tense of 'run' is 'ran.'\",\n")
-                .append("    \"explanation_vi\": \"Quá khứ của 'run' là 'ran.'\"\n")
-                .append("  },\n")
-                .append("  {\n")
-                .append("    \"word\": \"run\",\n")
-                .append("    \"type\": \"fill\",\n")
-                .append("    \"question\": \"Select the correct word to fill in: 'She loves to ____ in the park every evening.'\",\n")
-                .append("    \"options\": [\"run\", \"eat\", \"sleep\", \"write\"],\n")
-                .append("    \"correctAnswer\": \"run\",\n")
-                .append("    \"explanation_en\": \"In this context, 'run' means to move quickly on feet, which fits the sentence about a daily activity.\",\n")
-                .append("    \"explanation_vi\": \"Trong ngữ cảnh này, 'run' nghĩa là 'chạy nhanh trên đôi chân,' phù hợp với câu nói về hoạt động hằng ngày.\"\n")
-                .append("  }\n")
-                .append("]\n\n")
-                .append("Now generate questions for these vocabularies (only output JSON array!):\n");
+        prompt.append("You are a vocabulary-quiz-generation AI. ")
+                .append("Create multiple-choice questions that are: high-quality, varied, and shuffled so that no two questions for the same word appear consecutively. ")
+                .append("Across all questions, interleave the three types (“meaning”, “tense”, “fill”) in random order. ")
+                .append("Each question object must have EXACTLY these fields: ")
+                .append("[\"word\", \"type\", \"question\", \"options\", \"correctAnswer\", \"explanation_en\", \"explanation_vi\"].\n\n")
+                .append("Requirements:\n")
+                .append("1. Do NOT reveal the correct answer in the question text or adjacent context.\n")
+                .append("2. Shuffle the order of the four options randomly.\n")
+                .append("3. Ensure no option list repeats any word across all questions.\n")
+                .append("4. Avoid using the exact same distractors or sentence structures you generated previously.\n")
+                .append("5. Output ONLY a single JSON array of question objects—no markdown, no commentary.\n\n")
+                .append("Example output:\n")
+                .append("[{ \"word\":\"run\",\"type\":\"meaning\",\"question\":\"In “She decided to ___ a marathon next month,” what does the blank mean?\",")
+                .append("\"options\":[\"to move quickly\",\"to read books\",\"to build houses\",\"to cook food\"],")
+                .append("\"correctAnswer\":\"to move quickly\",")
+                .append("\"explanation_en\":\"Here, 'run' means 'to move quickly' in the context of a marathon.\",")
+                .append("\"explanation_vi\":\"Trong ngữ cảnh chạy marathon, 'run' nghĩa là 'chạy nhanh'.\" }]\n\n")
+                .append("Now generate for the following vocabularies. ")
+                .append("Intermix types and words randomly, and do not group same-word questions together:\n");
+
         for (Vocabulary v : vocabList) {
-            prompt.append("- Word: ").append(v.getWord())
-                    .append(", Meaning: ").append(v.getMeaning())
-                    .append("\n");
+            prompt.append("- \"").append(v.getWord())
+                    .append("\" (meaning: ").append(v.getMeaning()).append(")\n");
         }
+
 
 
         Content.Builder contentBuilder = new Content.Builder();

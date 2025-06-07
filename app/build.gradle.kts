@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.firebase.firestore)
+    implementation(libs.swiperefreshlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -91,6 +92,6 @@ dependencies {
 
     implementation ("com.google.firebase:firebase-messaging:24.1.0")
 
-    implementation ("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
 
 }

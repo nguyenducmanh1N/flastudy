@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import androidx.appcompat.app.AlertDialog;
 
 public class CourseDetailActivity extends AppCompatActivity {
     public static final String EXTRA_FOLDER_ID = "folderId";
@@ -62,16 +63,10 @@ public class CourseDetailActivity extends AppCompatActivity {
     private ImageView[] dots;
 
 
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_detail);
-
-
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
 
@@ -222,13 +217,41 @@ public class CourseDetailActivity extends AppCompatActivity {
         });
         delete.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateClassActivity.class);
-            startActivity(intent);
+            new AlertDialog.Builder(this)
+                    .setTitle("Xác nhận xóa")
+                    .setMessage("Bạn có chắc muốn xóa khóa học này không? Hành động này không thể hoàn tác.")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+                        deleteCourse();
+                    })
+                    .setNegativeButton("Hủy", null)
+                    .show();
         });
-
 
         bottomSheetDialog.show();
     }
+
+    private void deleteCourse() {
+        String uid = currentUser.getUid();
+        if (uid == null || folderId == null || courseId == null) {
+            Toast.makeText(this, "Không thể xác định course để xóa.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        DocumentReference courseRef = db.collection("users")
+                .document(uid)
+                .collection("folders")
+                .document(folderId)
+                .collection("courses")
+                .document(courseId);
+        courseRef.delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Xóa khóa học thành công.", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Xóa thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
 
     private void showAddOptionsLearn() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);

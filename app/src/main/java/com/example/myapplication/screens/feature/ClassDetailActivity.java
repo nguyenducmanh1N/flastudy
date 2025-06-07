@@ -180,7 +180,6 @@ public class ClassDetailActivity extends AppCompatActivity {
                         TextView tvTitle   = item.findViewById(R.id.tvTitle);
                         TextView tvCount   = item.findViewById(R.id.tvCount);
                         TextView tvCreater = item.findViewById(R.id.tvCreater);
-
                         tvTitle.setText(name);
                         tvCount.setText(count + " mục");
                         tvCreater.setText("Người tạo: " + creater);

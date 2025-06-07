@@ -12,6 +12,7 @@ public class Course {
     private String creater;
     private List<Vocabulary> vocabularyList;
     private String folderId;
+    private List<AIQuestion> questionList;
 
     public Course() {}
 
@@ -21,6 +22,14 @@ public class Course {
         this.vocabularyList = vocabularyList;
         this.folderId = folderId;
         this.creater= creater;
+    }
+
+    public List<AIQuestion> getQuestionList() {
+        return questionList;
+    }
+
+    public void setQuestionList(List<AIQuestion> questionList) {
+        this.questionList = questionList;
     }
 
     public String getCreater() {

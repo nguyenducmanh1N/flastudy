@@ -160,6 +160,8 @@ public class AIQuizActivity extends AppCompatActivity {
                 int totalCount = questionList.size();
 
                 Intent intent = new Intent(AIQuizActivity.this, AIQuizResultActivity.class);
+
+                intent.putParcelableArrayListExtra("aiQuestions", new ArrayList<>(questionList));
                 intent.putExtra("correctCount", correctCount);
                 intent.putExtra("totalCount", totalCount);
                 intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
@@ -176,6 +178,8 @@ public class AIQuizActivity extends AppCompatActivity {
         });
 
     }
+
+
 
     private void displayCurrentQuestion() {
         AIQuestion q = questionList.get(currentIndex);

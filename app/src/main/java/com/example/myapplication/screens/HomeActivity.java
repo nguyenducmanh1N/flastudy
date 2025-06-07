@@ -3,13 +3,20 @@ package com.example.myapplication.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
+import com.example.myapplication.adapter.FolderSelectAdapter;
+import com.example.myapplication.model.Folder;
 import com.example.myapplication.screens.feature.CreateClassActivity;
 import com.example.myapplication.screens.feature.CreateCourseActivity;
 import com.example.myapplication.screens.feature.CreateFolderActivity;
@@ -19,6 +26,14 @@ import com.example.myapplication.screens.fragment.MessengerFragment;
 import com.example.myapplication.screens.fragment.UserFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -93,9 +108,9 @@ private BottomNavigationView bottomNavigationView;
 
         createSubject.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateCourseActivity.class);
-            startActivity(intent);
+            showSelectFolderForCourse();
         });
+
 
         createFolder.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
@@ -112,8 +127,50 @@ private BottomNavigationView bottomNavigationView;
         bottomSheetDialog.show();
     }
 
+    private void showSelectFolderForCourse() {
+        BottomSheetDialog dlg = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bs_add_folders, null);
+        dlg.setContentView(view);
 
+        TextView addFolder = view.findViewById(R.id.addFolder);
 
+        addFolder.setOnClickListener(v -> {
+            dlg.dismiss();
+            startActivity(new Intent(this, CreateFolderActivity.class));
+        });
 
+        RecyclerView rv = view.findViewById(R.id.rvFolders);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore.getInstance()
+                .collection("users").document(uid)
+                .collection("folders")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(q -> {
+                    List<Folder> list = new ArrayList<>();
+                    for (DocumentSnapshot d : q) {
+                        Folder f = d.toObject(Folder.class);
+                        f.setId(d.getId());
+                        list.add(f);
+                    }
+                    FolderSelectAdapter adapter = new FolderSelectAdapter(list, selectedIds -> {
+                        if (!selectedIds.isEmpty()) {
+                            String folderId = selectedIds.iterator().next();
+                            Intent i = new Intent(HomeActivity.this, CreateCourseActivity.class);
+                            i.putExtra(CreateCourseActivity.EXTRA_FOLDER_ID, folderId);
+                            startActivity(i);
+                            dlg.dismiss();
+                        }
+                    });
+                    rv.setAdapter(adapter);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi load thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+
+        dlg.show();
+    }
 
 }

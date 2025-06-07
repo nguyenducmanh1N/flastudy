@@ -57,6 +57,12 @@
             android:orientation="horizontal"
             android:paddingTop="24dp"
             android:gravity="center">
+            <Button
+                android:id="@+id/btnSaveQuestions"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Lưu câu hỏi" />
 
             <Button
                 android:id="@+id/btnFlashcards"

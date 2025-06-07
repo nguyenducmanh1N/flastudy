@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0E0D3D">
 
     <TextView
-
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,89 +15,89 @@
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.tabs.TabLayout
-
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:background="@android:color/transparent"
-        app:layout_constraintEnd_toEndOf="parent"
-
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@id/textView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintEnd_toEndOf="parent"
         app:tabIndicatorColor="#CCCCFF"
         app:tabSelectedTextColor="#FFFFFF"
-        app:tabTextColor="#8888AA"
-        tools:ignore="MissingConstraints">
+        app:tabTextColor="#8888AA">
 
-        <com.google.android.material.tabs.TabItem android:text="Học phần" />
-
-        <com.google.android.material.tabs.TabItem android:text="Thư mục" />
-        <com.google.android.material.tabs.TabItem android:text="Bài kiểm tra thử" />
-
-        <com.google.android.material.tabs.TabItem android:text="Lớp học" />
-
-
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tabCourses"
+            android:text="Học phần" />
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tabFolders"
+            android:text="Thư mục" />
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/tabClasses"
+            android:text="Lớp học" />
     </com.google.android.material.tabs.TabLayout>
 
-    <EditText
-
-        android:id="@+id/editText"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/transparent"
-        android:drawableStart="@android:drawable/ic_menu_search"
-        android:hint="Lọc học phần"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#AAAAAA"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tabLayout"
-        tools:ignore="MissingConstraints" />
-
-    <LinearLayout
-        android:layout_width="363dp"
-        android:layout_height="92dp"
-        android:layout_marginTop="36dp"
-        android:background="@drawable/bg_card"
-        android:orientation="vertical"
-        android:padding="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="40 thuật ngữ"
-            android:textColor="#AAAAAA"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-
+    <!-- Wrappers for each list -->
+    <ScrollView
+        android:id="@+id/coursesWrapper"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="16dp"
-
+        android:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@id/tabLayout"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/courseContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp" />
+
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/foldersWrapper"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tabLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/folderContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp" />
+
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/classesWrapper"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tabLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:id="@+id/classContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp" />
+
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

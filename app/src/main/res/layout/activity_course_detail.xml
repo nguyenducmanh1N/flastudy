@@ -183,61 +183,8 @@
             android:textSize="16sp"
             android:layout_marginStart="12dp" />
     </LinearLayout>
-    <LinearLayout
-        android:id="@+id/graft"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/bg_rounded_button_ripple"
 
-        android:padding="16dp"
-        android:layout_marginTop="12dp"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:focusable="true">
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-
-            app:tint="#2196F3" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Ghép thẻ"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginStart="12dp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/listen"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@drawable/bg_rounded_button_ripple"
-
-        android:padding="16dp"
-        android:layout_marginTop="12dp"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:focusable="true">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-
-            app:tint="#2196F3" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nghe và điền từ "
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_marginStart="12dp" />
-    </LinearLayout>
     <LinearLayout
         android:id="@+id/d"
         android:layout_width="match_parent"

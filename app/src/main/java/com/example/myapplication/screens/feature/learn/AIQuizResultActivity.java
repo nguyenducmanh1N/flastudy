@@ -13,18 +13,31 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
+import com.example.myapplication.model.AIQuestion;
 import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.screens.feature.CourseDetailActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AIQuizResultActivity extends AppCompatActivity {
 
     private TextView tvScore;
+
     private LinearLayout wrongListContainer;
     private Button btnFlashcards, btnCourseDetail;
 
     private ArrayList<Vocabulary> vocabList;
+    private ArrayList<AIQuestion> aiQuestions;
+    private Button btnSaveQuestions;
+    private FirebaseUser currentUser;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,6 +49,10 @@ public class AIQuizResultActivity extends AppCompatActivity {
         btnFlashcards = findViewById(R.id.btnFlashcards);
         btnCourseDetail = findViewById(R.id.btnCourseDetail);
 
+        db = FirebaseFirestore.getInstance();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        aiQuestions = getIntent().getParcelableArrayListExtra("aiQuestions");
         int correctCount = getIntent().getIntExtra("correctCount", 0);
         int totalCount   = getIntent().getIntExtra("totalCount", 0);
         ArrayList<String> wrongWords = getIntent().getStringArrayListExtra("wrongWords");
@@ -112,5 +129,63 @@ public class AIQuizResultActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        btnSaveQuestions = findViewById(R.id.btnSaveQuestions);
+        btnSaveQuestions.setOnClickListener(v -> {
+            if (aiQuestions == null || aiQuestions.isEmpty()) {
+                Toast.makeText(this, "Không có câu hỏi để lưu.", Toast.LENGTH_SHORT).show();
+            } else {
+                saveQuestionsToFirestore();
+            }
+        });
+
+
+        if (currentUser == null) {
+            btnSaveQuestions.setVisibility(View.GONE);
+        }
     }
+    private void saveQuestionsToFirestore() {
+        String uid = currentUser.getUid();
+        String folderId = getIntent().getStringExtra("folderId");
+        String courseId = getIntent().getStringExtra("courseId");
+        if (folderId == null || courseId == null) {
+            Toast.makeText(this, "Không xác định được Course để lưu.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (aiQuestions == null || aiQuestions.isEmpty()) {
+            Toast.makeText(this, "Không có câu hỏi để lưu.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        DocumentReference courseRef = db.collection("users")
+                .document(uid)
+                .collection("folders")
+                .document(folderId)
+                .collection("courses")
+                .document(courseId);
+
+        DocumentReference batchRef = courseRef
+                .collection("questions")
+                .document();
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("questions", aiQuestions);
+        payload.put("createdAt", System.currentTimeMillis());
+
+        batchRef.set(payload)
+                .addOnSuccessListener(v -> {
+                    String batchId = batchRef.getId();
+                    Toast.makeText(this,
+                            "Đã lưu câu hỏi id : " + batchId,
+                            Toast.LENGTH_SHORT).show();
+                    btnSaveQuestions.setEnabled(false);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this,
+                                "Lưu thất bại: " + e.getMessage(),
+                                Toast.LENGTH_LONG).show()
+                );
+    }
+
+
 }
