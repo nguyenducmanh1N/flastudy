@@ -1,5 +1,6 @@
 package com.example.myapplication.screens.auth;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -114,7 +115,7 @@ public class SignUpActivity extends AppCompatActivity {
             EditText emailInput = new EditText(SignUpActivity.this);
             emailInput.setHint("Nhập email của bạn");
 
-            new android.app.AlertDialog.Builder(SignUpActivity.this)
+            new AlertDialog.Builder(SignUpActivity.this)
                     .setTitle("Quên mật khẩu")
                     .setMessage("Nhập email để nhận liên kết đặt lại mật khẩu")
                     .setView(emailInput)

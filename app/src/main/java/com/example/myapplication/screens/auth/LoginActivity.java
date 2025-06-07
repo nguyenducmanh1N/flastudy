@@ -1,4 +1,5 @@
 package com.example.myapplication.screens.auth;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -73,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
         loginEmail    = findViewById(R.id.loginEmail);
         loginPassword = findViewById(R.id.loginPassword);
         loginButton   = findViewById(R.id.loginButton);
-        txtForgotPassword = findViewById(R.id.txtForgotPassword);
+        txtForgotPassword = findViewById(R.id.txtForgotPasswordLogin);
         rememberMe    = findViewById(R.id.checkboxRemember);
         imgShowPassword = findViewById(R.id.imgShowPassword);
         prefs         = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -100,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
             EditText emailInput = new EditText(LoginActivity.this);
             emailInput.setHint("Nhập email của bạn");
 
-            new android.app.AlertDialog.Builder(LoginActivity.this)
+            new AlertDialog.Builder(LoginActivity.this)
                     .setTitle("Quên mật khẩu")
                     .setMessage("Nhập email để nhận liên kết đặt lại mật khẩu")
                     .setView(emailInput)
