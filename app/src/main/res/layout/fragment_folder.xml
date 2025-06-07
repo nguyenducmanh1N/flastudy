@@ -29,7 +29,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:tabIndicatorColor="#CCCCFF"
         app:tabSelectedTextColor="#FFFFFF"
-        app:tabTextColor="#8888AA">
+        app:tabTextColor="#8888AA"
+        android:background="#0E0D3D">
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabCourses"
