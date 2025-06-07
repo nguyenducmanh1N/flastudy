@@ -2,12 +2,16 @@ package com.example.myapplication.utils;
 
 import android.util.Log;
 
+import com.example.myapplication.model.Folder;
+import com.example.myapplication.model.Class;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,5 +107,73 @@ public class FirestoreRepository {
         }
         return classId;
     }
+
+    public String createFolderBlocking(String folderName) {
+        if (currentUser == null) {
+            return "Lỗi: Người dùng chưa đăng nhập";
+        }
+
+        String uid = currentUser.getUid();
+        String creater = currentUser.getEmail();
+
+        String folderId = db.collection("users")
+                .document(uid)
+                .collection("folders")
+                .document()
+                .getId();
+
+        Folder folder = new Folder(folderName, System.currentTimeMillis(), 0, creater);
+        folder.setId(folderId);
+
+        try {
+            // Tasks.await trả về Void khi thành công
+            Tasks.await(db.collection("users")
+                    .document(uid)
+                    .collection("folders")
+                    .document(folderId)
+                    .set(folder, SetOptions.merge()));  // SetOptions.merge() để tránh ghi đè toàn bộ document nếu cần
+
+            return "Tạo thư mục " + folderName + " thành công"; // trả về id folder khi thành công
+        } catch (Exception e) {
+            Log.e("Firestore", "Lỗi khi tạo thư mục: ", e);
+            return "Tạo thư mục " + folderName + " thất bại:";
+        }
+    }
+
+    public String createClassBlocking(String name) {
+        if (currentUser == null) {
+            return "Lỗi: Bạn chưa đăng nhập";
+        }
+
+        String creator = currentUser.getEmail();
+
+        DocumentReference classRef = db.collection("classes").document();
+        String classId = classRef.getId();
+
+        // Tạo đối tượng Class
+        Class cls = new Class();
+        cls.setId(classId);
+        cls.setName(name);
+        cls.setDescription(""); // fallback
+        cls.setCreater(creator);
+        cls.setAllowMembersToAdd(true);
+
+        ArrayList<String> members = new ArrayList<>();
+        members.add(creator);
+        cls.setMembers(members);
+
+        cls.setFolderIds(new ArrayList<>());
+        cls.setCourseIds(new ArrayList<>());
+
+        try {
+            Tasks.await(classRef.set(cls));
+            return "Tạo lớp " + name + " thành công";
+        } catch (Exception e) {
+            Log.e("Firestore", "Lỗi tạo lớp học: ", e);
+            return "Tạo lớp " + name + " thất bại:";
+        }
+    }
+
+
 
 }

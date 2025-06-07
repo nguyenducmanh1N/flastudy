@@ -11,9 +11,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import okhttp3.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GeminiFunctionCalling {
@@ -27,29 +34,6 @@ public class GeminiFunctionCalling {
     public GeminiFunctionCalling(String apiKey, Context context) {
         this.apiKey = apiKey;
         this.context = context;
-    }
-
-    private JsonObject getWeatherFunctionDeclaration() {
-        JsonObject parameters = new JsonObject();
-        parameters.addProperty("type", "object");
-
-        JsonObject properties = new JsonObject();
-        JsonObject locationParam = new JsonObject();
-        locationParam.addProperty("type", "string");
-        locationParam.addProperty("description", "Địa điểm cần tra thời tiết, ví dụ: 'Hà Nội'");
-        properties.add("location", locationParam);
-
-        parameters.add("properties", properties);
-        JsonArray required = new JsonArray();
-        required.add("location");
-        parameters.add("required", required);
-
-        JsonObject functionDecl = new JsonObject();
-        functionDecl.addProperty("name", "get_weather");
-        functionDecl.addProperty("description", "Lấy thông tin thời tiết tại một địa điểm cụ thể.");
-        functionDecl.add("parameters", parameters);
-
-        return functionDecl;
     }
 
     private JsonObject getFolderNamesFunctionDeclaration() {
@@ -130,6 +114,75 @@ public class GeminiFunctionCalling {
         return functionDecl;
     }
 
+    private JsonObject translateEnglishToVietnameseFunctionDeclaration() {
+        JsonObject parameters = new JsonObject();
+        parameters.addProperty("type", "object");
+
+        JsonObject properties = new JsonObject();
+        JsonObject englishTextParam = new JsonObject();
+        englishTextParam.addProperty("type", "string");
+        englishTextParam.addProperty("description", "Văn bản tiếng việt cần dịch, ví dụ: 'Tiger'");
+        properties.add("englishText", englishTextParam);
+
+        parameters.add("properties", properties);
+        JsonArray required = new JsonArray();
+        required.add("englishText");
+        parameters.add("required", required);
+
+        JsonObject functionDecl = new JsonObject();
+        functionDecl.addProperty("name", "translate_english_to_vietnamese");
+        functionDecl.addProperty("description", "Dịch văn bản tiếng anh sang tiếng việt.");
+        functionDecl.add("parameters", parameters);
+
+        return functionDecl;
+    }
+
+    private JsonObject createFolderFunctionDeclaration() {
+        JsonObject parameters = new JsonObject();
+        parameters.addProperty("type", "object");
+
+        JsonObject properties = new JsonObject();
+        JsonObject folderNameParam = new JsonObject();
+        folderNameParam.addProperty("type", "string");
+        folderNameParam.addProperty("description", "Tên thư mục cần tạo, ví dụ: 'Toán'");
+        properties.add("folderName", folderNameParam);
+
+        parameters.add("properties", properties);
+        JsonArray required = new JsonArray();
+        required.add("folderName");
+        parameters.add("required", required);
+
+        JsonObject functionDecl = new JsonObject();
+        functionDecl.addProperty("name", "create_folder");
+        functionDecl.addProperty("description", "Tạo thư mục mới.");
+        functionDecl.add("parameters", parameters);
+
+        return functionDecl;
+    }
+
+    private JsonObject createClassFunctionDeclaration() {
+        JsonObject parameters = new JsonObject();
+        parameters.addProperty("type", "object");
+
+        JsonObject properties = new JsonObject();
+        JsonObject classNameParam = new JsonObject();
+        classNameParam.addProperty("type", "string");
+        classNameParam.addProperty("description", "Tên lớp học cần tạo, ví dụ: 'Cấu trúc dữ liệu và giải thuật'");
+        properties.add("className", classNameParam);
+
+        parameters.add("properties", properties);
+        JsonArray required = new JsonArray();
+        required.add("className");
+        parameters.add("required", required);
+
+        JsonObject functionDecl = new JsonObject();
+        functionDecl.addProperty("name", "create_class");
+        functionDecl.addProperty("description", "Tạo lớp học mới.");
+        functionDecl.add("parameters", parameters);
+
+        return functionDecl;
+    }
+
     public String callGeminiWithFunction(List<Message> messageList) throws IOException {
         JsonArray contents = new JsonArray();
         for (Message message : messageList) {
@@ -148,11 +201,13 @@ public class GeminiFunctionCalling {
         JsonArray tools = new JsonArray();
         JsonObject tool = new JsonObject();
         JsonArray functionDeclarations = new JsonArray();
-        functionDeclarations.add(getWeatherFunctionDeclaration());
         functionDeclarations.add(getFolderNamesFunctionDeclaration());
+        functionDeclarations.add(createFolderFunctionDeclaration());
         functionDeclarations.add(getClassNamesFunctionDeclaration());
+        functionDeclarations.add(createClassFunctionDeclaration());
         functionDeclarations.add(navigateToFolderDetailActivityByNameFunctionDeclaration());
         functionDeclarations.add(navigateToClassDetailActivityByNameFunctionDeclaration());
+        functionDeclarations.add(translateEnglishToVietnameseFunctionDeclaration());
         tool.add("functionDeclarations", functionDeclarations);
         tools.add(tool);
 
@@ -223,15 +278,16 @@ public class GeminiFunctionCalling {
 
     private String handleFunctionCall(String functionName, JsonObject args) {
         switch (functionName) {
-            case "get_weather":
-                String location = args.get("location").getAsString();
-                return fetchWeatherFromAPI(location);
             case "get_folder_names":
                 List<String> folderNames = firestoreRepository.getFolderNamesBlocking();
                 return "Danh sách thư mục hiện có của người dùng gồm: " + String.join(", ", folderNames);
+            case "create_folder":
+                return firestoreRepository.createFolderBlocking(args.get("folderName").getAsString());
             case "get_class_names":
                 List<String> classNames = firestoreRepository.getClassNamesBlocking();
                 return "Danh sách lớp học hiện có của người dùng gồm: " + String.join(", ", classNames);
+            case "create_class":
+                return firestoreRepository.createClassBlocking(args.get("className").getAsString());
             case "navigate_to_folder_detail_activity_by_name":
                 String folderName = args.get("name").getAsString();
                 String folderId = firestoreRepository.findFolderIdByNameBlocking(folderName);
@@ -242,6 +298,9 @@ public class GeminiFunctionCalling {
                 String classId = firestoreRepository.findClassIdByNameBlocking(className);
                 context.startActivity(new Intent(context, ClassDetailActivity.class).putExtra("classId", classId));
                 return "Đã điều hướng đến màn hình chi tiết lớp học " + className + ".";
+            case "translate_english_to_vietnamese":
+                String englishText = args.get("englishText").getAsString();
+                return translateEnglishToVietnameseSync(englishText);
             default:
                 return "Không xác định được hàm.";
         }
@@ -297,38 +356,55 @@ public class GeminiFunctionCalling {
         return message;
     }
 
-    private String fetchWeatherFromAPI(String location) {
-        String weatherApiKey = "70278c7d926ff875503f2677a926c4e5";
-        String url = "https://api.openweathermap.org/data/2.5/weather?q=" + location +
-                "&appid=" + weatherApiKey + "&units=metric&lang=vi";
+    private String translateEnglishToVietnameseSync(String englishText) {
+        OkHttpClient client = new OkHttpClient();
+        String encodedText;
 
+        try {
+            encodedText = URLEncoder.encode(englishText, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            encodedText = englishText;
+        }
+
+        String url = "https://api.mymemory.translated.net/get?q=" + encodedText + "&langpair=en|vi";
         Request request = new Request.Builder()
                 .url(url)
-                .get()
+                .addHeader("Accept", "application/json")
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                return "Không thể lấy dữ liệu thời tiết (mã lỗi: " + response.code() + ")";
+                return "Lỗi dịch vụ: " + response.code();
             }
 
-            String responseBody = response.body().string();
-            JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
+            JSONObject jsonResponse = new JSONObject(response.body().string());
+            JSONObject responseData = jsonResponse.getJSONObject("responseData");
+            String mainTranslation = responseData.getString("translatedText").trim();
 
-            String weatherDescription = json.getAsJsonArray("weather")
-                    .get(0).getAsJsonObject()
-                    .get("description").getAsString();
+            List<String> translations = new ArrayList<>();
+            if (!mainTranslation.isEmpty()) {
+                translations.add(mainTranslation);
+            }
 
-            double temp = json.getAsJsonObject("main")
-                    .get("temp").getAsDouble();
+            // Thêm các bản dịch từ matches[]
+            if (jsonResponse.has("matches")) {
+                JSONArray matches = jsonResponse.getJSONArray("matches");
+                for (int i = 0; i < matches.length(); i++) {
+                    JSONObject match = matches.getJSONObject(i);
+                    String translation = match.getString("translation").trim();
+                    if (!translations.contains(translation)) {
+                        translations.add(translation);
+                    }
+                }
+            }
 
-            double feelLike = json.getAsJsonObject("main")
-                    .get("feels_like").getAsDouble();
-
-            return String.format("%.1f°C, nhiệt độ cảm nhận %.1f°C, %s", temp, feelLike, weatherDescription);
-        } catch (IOException e) {
+            return "Nghĩa của từ '" + englishText + "' là: " + String.join(", ", translations);
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
-            return "Lỗi khi gọi API thời tiết: " + e.getMessage();
+            return "Lỗi khi dịch văn bản.";
         }
     }
+
+
+
 }

@@ -106,24 +106,38 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btnLogout"
+            android:id="@+id/btnUpdateInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:text="Đăng xuất"
+            android:text="Cập nhật thông tin"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/btnDeleteAccount"
+            android:backgroundTint="@color/teal_700"
+            app:layout_constraintBottom_toTopOf="@+id/btnChangePassword"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
-            android:id="@+id/btnDeleteAccount"
+            android:id="@+id/btnChangePassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:text="Xoá tài khoản"
+            android:layout_marginBottom="10dp"
+            android:text="Đổi mật khẩu"
             android:textSize="18sp"
+            android:backgroundTint="@color/teal_700"
+            app:layout_constraintBottom_toTopOf="@+id/btnLogout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đăng xuất"
+            android:textSize="18sp"
+            android:layout_marginBottom="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"

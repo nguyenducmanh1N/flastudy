@@ -132,7 +132,9 @@
                         android:textColor="#2C5F2D" />
 
                     <TextView
+                        android:id="@+id/txtForgotPasswordLogin"
                         android:layout_width="0dp"
+                        android:padding="10dp"
                         android:layout_height="wrap_content"
                         android:gravity="end|center_vertical"
                         android:layout_weight="1"
