@@ -2,6 +2,7 @@ package com.example.myapplication.screens.feature;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -51,7 +52,7 @@ public class CourseDetailActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
-    private String folderId, courseId;
+    private String folderId, courseId, from, classId;
 
     private TextView tvTitle, tvCreatedAt;
 
@@ -72,6 +73,8 @@ public class CourseDetailActivity extends AppCompatActivity {
 
         folderId = getIntent().getStringExtra(EXTRA_FOLDER_ID);
         courseId = getIntent().getStringExtra(EXTRA_COURSE_ID);
+        from = getIntent().getStringExtra("from");
+        classId = getIntent().getStringExtra("classId");
 
         tvTitle = findViewById(R.id.tvCourseName);
         tvCreatedAt = findViewById(R.id.tvCourseDate);
@@ -104,7 +107,14 @@ public class CourseDetailActivity extends AppCompatActivity {
             intent.putExtra("courseId", courseId);
             startActivity(intent);
         });
-        loadCourseDetail();
+
+
+        if ("class".equals(from)) {
+            btnMenu.setVisibility(View.GONE);
+            loadCourseDetailFromClass();
+        } else {
+            loadCourseDetail();
+        }
 
 
         LinearLayout learn = findViewById(R.id.learn);
@@ -124,6 +134,37 @@ public class CourseDetailActivity extends AppCompatActivity {
                 .document(currentUser.getUid())
                 .collection("folders")
                 .document(folderId)
+                .collection("courses")
+                .document(courseId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Course c = doc.toObject(Course.class);
+                    if (c != null) {
+                        tvTitle.setText(c.getTitle());
+                        String date = new SimpleDateFormat(
+                                "dd/MM/yyyy HH:mm", Locale.getDefault()
+                        ).format(new Date(c.getCreatedAt()));
+                        tvCreatedAt.setText(date);
+
+                        vocabList.clear();
+                        vocabList.addAll(c.getVocabularyList());
+                        vocabAdapter.notifyDataSetChanged();
+                        setupDots(vocabList.size());
+                        vpCards.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                            @Override
+                            public void onPageSelected(int position) {
+                                updateDots(position);
+                            }
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
+    }
+
+    private void loadCourseDetailFromClass() {
+        db.collection("classes")
+                .document(classId)
                 .collection("courses")
                 .document(courseId)
                 .get()
@@ -251,7 +292,6 @@ public class CourseDetailActivity extends AppCompatActivity {
                     Toast.makeText(this, "Xóa thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
-
 
     private void showAddOptionsLearn() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);

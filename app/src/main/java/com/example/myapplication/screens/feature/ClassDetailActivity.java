@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -227,8 +228,9 @@ public class ClassDetailActivity extends AppCompatActivity {
                         item.setOnClickListener(v -> {
                             Intent i = new Intent(this, CourseDetailActivity.class);
                             i.putExtra("courseId", cid);
-
-                            i.putExtra("folderId", doc.getString("folderId"));
+                            i.putExtra("classId", classId);
+                            i.putExtra("from", "class");
+                            Log.d("courseId, classId, from", cid + ", " + classId + ", " + "class");
                             startActivity(i);
                         });
 
@@ -544,12 +546,8 @@ public class ClassDetailActivity extends AppCompatActivity {
                 );
 
         btnAdd.setOnClickListener(v -> {
-
             Set<String> toAddIds = adapter.getSelectedIds();
             if (toAddIds.isEmpty()) return;
-
-
-
 
             List<Course> selectedCourses = new ArrayList<>();
             for (Course c : allCourses) {
@@ -557,7 +555,6 @@ public class ClassDetailActivity extends AppCompatActivity {
                     selectedCourses.add(c);
                 }
             }
-
 
             for (Course course : selectedCourses) {
                 String cid = course.getId();
@@ -569,53 +566,79 @@ public class ClassDetailActivity extends AppCompatActivity {
                         .collection("courses")
                         .document(cid);
 
-
                 srcCourseRef.get().addOnSuccessListener(courseDoc -> {
                     Course fullCourse = courseDoc.toObject(Course.class);
                     if (fullCourse == null) return;
 
-
-                    Map<String,Object> courseMap = new HashMap<>();
+                    Map<String, Object> courseMap = new HashMap<>();
                     courseMap.put("id", cid);
                     courseMap.put("title", fullCourse.getTitle());
                     courseMap.put("creater", fullCourse.getCreater());
+                    courseMap.put("classId", classId);
+                    courseMap.put("createdAt", fullCourse.getCreatedAt());
 
+                    DocumentReference classCourseRef = db.collection("classes")
+                            .document(classId)
+                            .collection("courses")
+                            .document(cid);
 
+                    // Step 1: Ghi document course
+                    classCourseRef.set(courseMap)
+                            .addOnSuccessListener(aVoid -> {
 
-                    srcCourseRef.collection("vocabularies")
-                            .get().addOnSuccessListener(vSnap -> {
-                                List<Map<String,Object>> vocs = new ArrayList<>();
-                                for (DocumentSnapshot vDoc : vSnap.getDocuments()) {
-                                    Map<String,Object> vMap = vDoc.getData();
-                                    vMap.put("id", vDoc.getId());
-                                    vocs.add(vMap);
-                                }
-                                courseMap.put("vocabularies", vocs);
+                                // Step 2: Lấy vocabularies
+                                srcCourseRef.collection("vocabularies")
+                                        .get()
+                                        .addOnSuccessListener(querySnapshots -> {
+                                            List<Map<String, Object>> vocabularyList = new ArrayList<>();
 
+                                            for (DocumentSnapshot vDoc : querySnapshots) {
+                                                Map<String, Object> vMap = vDoc.getData();
+                                                if (vMap == null) continue;
 
-                                db.collection("classes")
-                                        .document(classId)
-                                        .collection("courses")
-                                        .document(cid)
-                                        .set(courseMap)
-                                        .addOnSuccessListener(a -> {
+                                                vMap.put("id", vDoc.getId());
 
-                                            Toast.makeText(this, "Đã thêm học phần "+ fullCourse.getTitle(), Toast.LENGTH_SHORT).show();
-                                            bsDialog.dismiss();
-                                            loadCourses();
+                                                // Ghi vào subcollection vocabularies
+                                                classCourseRef.collection("vocabularies")
+                                                        .document(vDoc.getId())
+                                                        .set(vMap);
+
+                                                // Thêm vào list để ghi field vocabularyList
+                                                vocabularyList.add(vMap);
+                                            }
+
+                                            // Step 3: Ghi trường vocabularyList vào document chính
+                                            classCourseRef.update("vocabularyList", vocabularyList)
+                                                    .addOnSuccessListener(unused -> {
+                                                        Toast.makeText(this, "Đã thêm học phần " + fullCourse.getTitle(), Toast.LENGTH_SHORT).show();
+                                                        bsDialog.dismiss();
+                                                        loadCourses();
+                                                    })
+                                                    .addOnFailureListener(e ->
+                                                            Toast.makeText(this, "Lỗi lưu vocabularyList: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                    );
+
                                         })
                                         .addOnFailureListener(e ->
-                                                Toast.makeText(this, "Lỗi ghi course: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(this, "Lỗi tải từ vựng: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                                         );
-                            });
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Lỗi ghi khóa học: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                            );
                 });
             }
         });
 
 
 
+
         bsDialog.show();
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadClassDetail();
+    }
 }
