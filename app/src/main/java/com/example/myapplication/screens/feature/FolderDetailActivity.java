@@ -3,6 +3,7 @@ package com.example.myapplication.screens.feature;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -39,7 +40,7 @@ public class FolderDetailActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
-    private String folderId;
+    private String folderId, classId, from;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,9 @@ public class FolderDetailActivity extends AppCompatActivity {
 
 
         folderId = getIntent().getStringExtra("folderId");
+        classId = getIntent().getStringExtra("classId");
+        from = getIntent().getStringExtra("from");
+
         if (folderId == null) {
             Toast.makeText(this, "Không xác định được thư mục", Toast.LENGTH_SHORT).show();
             finish();
@@ -111,9 +115,17 @@ public class FolderDetailActivity extends AppCompatActivity {
             popup.show();
         });
 
+        if ("class".equals(from)) {
+            btnAdd.setVisibility(View.GONE);
+            btnMenu.setVisibility(View.GONE);
+            loadFolderInfoFromClass(textViewName, textViewDate);
+            loadCoursesFromClass();
+        } else {
+            loadFolderInfo(textViewName, textViewDate);
+            loadCourses();
 
-        loadFolderInfo(textViewName, textViewDate);
-        loadCourses();
+        }
+
 
     }
     private void loadFolderInfo(TextView tvName, TextView tvDate) {
@@ -141,6 +153,53 @@ public class FolderDetailActivity extends AppCompatActivity {
     private void loadCourses() {
         db.collection("users")
                 .document(currentUser.getUid())
+                .collection("folders")
+                .document(folderId)
+                .collection("courses")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(qsnap -> {
+                    courseList.clear();
+                    for (DocumentSnapshot ds : qsnap.getDocuments()) {
+                        Course c = ds.toObject(Course.class);
+                        if (c != null) {
+
+                            courseList.add(c);
+                        }
+                    }
+                    courseAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi lấy courses: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private void loadFolderInfoFromClass(TextView tvName, TextView tvDate) {
+        db.collection("classes")
+                .document(classId)
+                .collection("folders")
+                .document(folderId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Folder f = doc.toObject(Folder.class);
+                    if (f != null) {
+                        tvName.setText(f.getName());
+                        String date = new SimpleDateFormat(
+                                "dd/MM/yyyy HH:mm", Locale.getDefault())
+                                .format(new Date(f.getCreatedAt()));
+                        tvDate.setText(date);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi lấy folder: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private void loadCoursesFromClass() {
+        db.collection("classes")
+                .document(classId)
                 .collection("folders")
                 .document(folderId)
                 .collection("courses")
@@ -234,6 +293,11 @@ public class FolderDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadCourses();
+        if ("class".equals(from)) {
+            loadCoursesFromClass();
+        } else {
+            loadCourses();
+
+        }
     }
 }

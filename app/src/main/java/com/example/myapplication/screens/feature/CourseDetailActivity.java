@@ -108,7 +108,7 @@ public class CourseDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-
+        Log.d("sfsdgfdfhdfgfsdgsdfg", classId + " " + folderId + " " + courseId);
         if ("class".equals(from)) {
             btnMenu.setVisibility(View.GONE);
             loadCourseDetailFromClass();

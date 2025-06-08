@@ -186,6 +186,8 @@ public class ClassDetailActivity extends AppCompatActivity {
                         item.setOnClickListener(v -> {
                             Intent i = new Intent(this, FolderDetailActivity.class);
                             i.putExtra("folderId", fid);
+                            i.putExtra("classId", classId);
+                            i.putExtra("from", "class");
                             startActivity(i);
                         });
 
@@ -230,7 +232,6 @@ public class ClassDetailActivity extends AppCompatActivity {
                             i.putExtra("courseId", cid);
                             i.putExtra("classId", classId);
                             i.putExtra("from", "class");
-                            Log.d("courseId, classId, from", cid + ", " + classId + ", " + "class");
                             startActivity(i);
                         });
 
@@ -377,9 +378,6 @@ public class ClassDetailActivity extends AppCompatActivity {
         builder.show();
     }
 
-
-
-
     private void showAddFoldersToClass() {
         View sheet = getLayoutInflater().inflate(R.layout.bs_add_folders, null);
         BottomSheetDialog bsDialog = new BottomSheetDialog(this);
@@ -391,86 +389,111 @@ public class ClassDetailActivity extends AppCompatActivity {
         FolderSelectAdapter adapter = new FolderSelectAdapter(list, ids -> btn.setEnabled(!ids.isEmpty()));
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
-        db.collection("users").document(currentUser.getUid())
+
+        String uid = currentUser.getUid();
+
+        db.collection("users").document(uid)
                 .collection("folders").get()
                 .addOnSuccessListener(q -> {
                     list.clear();
                     for (DocumentSnapshot d : q) {
                         Folder f = d.toObject(Folder.class);
-                        f.setId(d.getId()); list.add(f);
+                        f.setId(d.getId());
+                        list.add(f);
                     }
                     adapter.notifyDataSetChanged();
                 });
+
         btn.setOnClickListener(v -> {
             List<String> toAdd = new ArrayList<>(adapter.getSelectedIds());
             if (toAdd.isEmpty()) return;
-
-            String uid = currentUser.getUid();
 
             for (String fid : toAdd) {
                 DocumentReference srcFolderRef = db.collection("users")
                         .document(uid)
                         .collection("folders")
                         .document(fid);
+
                 srcFolderRef.get().addOnSuccessListener(folderDoc -> {
                     Folder folder = folderDoc.toObject(Folder.class);
                     if (folder == null) return;
-
 
                     Map<String, Object> folderMap = new HashMap<>();
                     folderMap.put("id", fid);
                     folderMap.put("name", folder.getName());
                     folderMap.put("creater", folder.getCreater());
                     folderMap.put("createdAt", folder.getCreatedAt());
+                    folderMap.put("classId", classId);
 
                     srcFolderRef.collection("courses")
-                            .get().addOnSuccessListener(courseSnap -> {
-                                List<Map<String,Object>> courseList = new ArrayList<>();
+                            .get()
+                            .addOnSuccessListener(courseSnap -> {
+                                List<Task<Void>> allTasks = new ArrayList<>();
+                                List<Map<String, Object>> courseList = new ArrayList<>();
 
-                                List<Task<?>> tasks = new ArrayList<>();
                                 for (DocumentSnapshot cDoc : courseSnap.getDocuments()) {
                                     Course course = cDoc.toObject(Course.class);
                                     if (course == null) continue;
                                     String cid = cDoc.getId();
 
-
-                                    Map<String,Object> courseMap = new HashMap<>();
+                                    Map<String, Object> courseMap = new HashMap<>();
                                     courseMap.put("id", cid);
                                     courseMap.put("title", course.getTitle());
                                     courseMap.put("creater", course.getCreater());
+                                    courseMap.put("createdAt", course.getCreatedAt());
+                                    courseMap.put("classId", classId);
 
-                                    Task<?> t = srcFolderRef
-                                            .collection("courses").document(cid)
+                                    DocumentReference classFolderCourseRef = db.collection("classes")
+                                            .document(classId)
+                                            .collection("folders")
+                                            .document(fid)
+                                            .collection("courses")
+                                            .document(cid);
+
+                                    // Ghi course vào folder
+                                    Task<Void> writeCourse = classFolderCourseRef.set(courseMap);
+                                    allTasks.add(writeCourse);
+
+                                    // Ghi vocabularies
+                                    Task<Void> vocabTask = srcFolderRef
+                                            .collection("courses")
+                                            .document(cid)
                                             .collection("vocabularies")
-                                            .get().addOnSuccessListener(vSnap -> {
-                                                List<Map<String,Object>> vocs = new ArrayList<>();
-                                                for (DocumentSnapshot vDoc : vSnap) {
-                                                    Map<String,Object> vMap = vDoc.getData();
+                                            .get()
+                                            .continueWithTask(task -> {
+                                                List<Map<String, Object>> vocList = new ArrayList<>();
+                                                for (DocumentSnapshot vDoc : task.getResult()) {
+                                                    Map<String, Object> vMap = vDoc.getData();
+                                                    if (vMap == null) continue;
                                                     vMap.put("id", vDoc.getId());
-                                                    vocs.add(vMap);
+                                                    vocList.add(vMap);
+
+                                                    classFolderCourseRef.collection("vocabularies")
+                                                            .document(vDoc.getId())
+                                                            .set(vMap);
                                                 }
-                                                courseMap.put("vocabularies", vocs);
+                                                return classFolderCourseRef.update("vocabularyList", vocList);
                                             });
-                                    tasks.add(t);
+
+                                    allTasks.add(vocabTask);
                                     courseList.add(courseMap);
                                 }
 
-                                Tasks.whenAllComplete(tasks)
+                                Tasks.whenAllComplete(allTasks)
                                         .addOnSuccessListener(__ -> {
                                             folderMap.put("courses", courseList);
-
                                             db.collection("classes")
                                                     .document(classId)
                                                     .collection("folders")
                                                     .document(fid)
                                                     .set(folderMap)
                                                     .addOnSuccessListener(a -> {
-                                                        Toast.makeText(this, "Đã thêm folder "+fid, Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(this, "Đã thêm folder " + folder.getName(), Toast.LENGTH_SHORT).show();
                                                         bsDialog.dismiss();
                                                         loadFolders();
                                                     })
                                                     .addOnFailureListener(e ->
-                                                            Toast.makeText(this, "Lỗi ghi folder vào lớp: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(this, "Lỗi ghi folder: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                                                     );
                                         });
                             });
@@ -480,7 +503,6 @@ public class ClassDetailActivity extends AppCompatActivity {
 
         bsDialog.show();
     }
-
     private void showAddCoursesToClass() {
         View sheet = getLayoutInflater().inflate(R.layout.bs_add_courses, null);
         BottomSheetDialog bsDialog = new BottomSheetDialog(this);
@@ -636,9 +658,9 @@ public class ClassDetailActivity extends AppCompatActivity {
         bsDialog.show();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadClassDetail();
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        loadClassDetail();
+//    }
 }
