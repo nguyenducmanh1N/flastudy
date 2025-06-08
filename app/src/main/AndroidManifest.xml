@@ -14,9 +14,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
@@ -78,32 +78,31 @@
             android:exported="false" />
         <activity
             android:name=".screens.feature.CreateFolderActivity"
-            android:exported="false" />
-        <activity
-            android:name=".HomeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".screens.AddActivity"
-            android:exported="false" />
-        <activity
-            android:name=".screens.FolderActivity"
-            android:exported="false" />
-        <activity
-            android:name=".screens.BottomNavigationActivity"
-            android:exported="false"
-            android:label="@string/title_activity_bottom_navigation" />
+            android:exported="false" /> <!-- <activity -->
+        <!-- android:name=".HomeActivity" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".screens.AddActivity" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".screens.FolderActivity" -->
+        <!-- android:exported="false" /> -->
+        <!-- <activity -->
+        <!-- android:name=".screens.BottomNavigationActivity" -->
+        <!-- android:exported="false" -->
+        <!-- android:label="@string/title_activity_bottom_navigation" /> -->
         <activity
             android:name=".screens.HomeActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".screens.auth.LoginActivity"
-            android:exported="false" />
+            android:windowSoftInputMode="adjustPan" /> <!-- <activity -->
+        <!-- android:name=".screens.auth.LoginActivity" -->
+        <!-- android:exported="false" /> -->
         <activity
             android:name=".screens.auth.SignUpActivity"
             android:exported="true" />
         <activity
-            android:name=".MainActivity"
+            android:name=".screens.auth.LoginActivity"
+            android:theme="@style/Theme.Flastudy.Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

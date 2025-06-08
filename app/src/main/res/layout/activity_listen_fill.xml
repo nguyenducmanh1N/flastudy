@@ -55,6 +55,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:tint="#0E0D3D" />
 
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nhấn để nghe"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnPlayAudio" />
+
     <!-- Ô nhập đáp án -->
     <EditText
         android:id="@+id/inputAnswer"
@@ -66,7 +76,7 @@
         android:textSize="18sp"
         android:padding="12dp"
         android:background="@drawable/input_background"
-        app:layout_constraintTop_toBottomOf="@id/btnPlayAudio"
+        app:layout_constraintTop_toBottomOf="@id/textView2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

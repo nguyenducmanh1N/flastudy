@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="261dp"
-    android:layout_height="100dp"
+    android:layout_height="125dp"
+    android:minHeight="120dp"
     android:orientation="horizontal"
     android:gravity="center"
     android:background="@drawable/bg_card"
@@ -18,7 +19,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="78dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
         android:orientation="vertical">
 
@@ -26,10 +27,12 @@
             android:id="@+id/folderName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pd"
+            android:text="Tên thư mục"
             android:textColor="#FFFFFF"
             android:textSize="14sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"/>
 
         <TextView
             android:id="@+id/folderCount"
@@ -38,15 +41,19 @@
             android:layout_marginTop="4dp"
             android:text="1 mục"
             android:textColor="#AAAAAA"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
 
         <TextView
             android:id="@+id/folderCreater"
             android:layout_width="match_parent"
-            android:layout_height="34dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="người tạo:"
             android:textColor="#AAAAAA"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end"/>
     </LinearLayout>
 </LinearLayout>

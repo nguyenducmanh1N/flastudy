@@ -6,6 +6,7 @@
     android:orientation="vertical"
     android:background="@drawable/bg_card"
     android:padding="16dp"
+    android:gravity="center"
     android:layout_marginBottom="8dp">
 
 
@@ -19,7 +20,7 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:layout_gravity="center"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             android:src="@drawable/ic_folder" />
 
         <LinearLayout

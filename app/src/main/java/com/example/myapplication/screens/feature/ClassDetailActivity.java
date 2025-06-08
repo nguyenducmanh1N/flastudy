@@ -51,12 +51,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class ClassDetailActivity extends AppCompatActivity {
-    private TextView tvTitle, tvCourseCount, tvOwner;
+    private TextView tvTitle, tvOwner;
     private ImageView btnClose, btnMenu;
     private TabLayout tabLayout;
 
     private ScrollView folderWrapper, coursesWrapper, memberWrapper;
-    private LinearLayout folderContainer, courseContainer;
+    private LinearLayout folderContainer, courseContainer, memberContainer;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseUser currentUser;
@@ -70,16 +70,16 @@ public class ClassDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_class_detail);
 
         tvTitle       = findViewById(R.id.titleText);
-        tvCourseCount = findViewById(R.id.subTitleText);
         tvOwner       = findViewById(R.id.subTitleText2);
         btnClose      = findViewById(R.id.btnExit);
         btnMenu       = findViewById(R.id.btnMenu);
         tabLayout     = findViewById(R.id.tvTabLayout);
         folderWrapper = findViewById(R.id.containerFolders);
         coursesWrapper= findViewById(R.id.containerCoursesWrapper);
-        memberWrapper = findViewById(R.id.containerMembers);
+        memberWrapper = findViewById(R.id.containerMembersWrapper);
         folderContainer = findViewById(R.id.folderContainer);
         courseContainer = findViewById(R.id.courseContainer);
+        memberContainer = findViewById(R.id.memberContainer);
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.detail_class_layout),
@@ -148,8 +148,6 @@ public class ClassDetailActivity extends AppCompatActivity {
                     }
                     tvTitle.setText(cls.getName());
                     tvOwner.setText("Người tạo: " + cls.getCreater());
-                    int count = cls.getCourseIds() != null ? cls.getCourseIds().size() : 0;
-                    tvCourseCount.setText(count + " học phần");
 
                     loadFolders();
                 })
@@ -241,6 +239,46 @@ public class ClassDetailActivity extends AppCompatActivity {
                         Toast.makeText(this, "Lỗi load courses: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
     }
+
+    private void loadMembers() {
+        memberContainer.removeAllViews();
+
+        db.collection("classes")
+                .document(classId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    List<String> members = (List<String>) doc.get("members");
+                    for (String email : members) {
+                        db.collection("users")
+                                .whereEqualTo("email", email)
+                                .limit(1)
+                                .get()
+                                .addOnSuccessListener(query -> {
+                                    String username = email; // fallback nếu không có username
+                                    if (!query.isEmpty()) {
+                                        DocumentSnapshot userDoc = query.getDocuments().get(0);
+                                        String name = userDoc.getString("username");
+                                        if (name != null && !name.isEmpty()) {
+                                            username = name;
+                                        }
+                                    }
+
+                                    View item = LayoutInflater.from(this)
+                                            .inflate(R.layout.item_member_vertical, memberContainer, false);
+                                    TextView tvName = item.findViewById(R.id.memberName);
+                                    TextView tvEmail = item.findViewById(R.id.memberEmail);
+
+                                    tvName.setText(username);
+                                    tvEmail.setText("Email: " + email);
+                                    memberContainer.addView(item);
+                                });
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi load members: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+    }
+
 
 
     private void showOptions() {
@@ -338,19 +376,7 @@ public class ClassDetailActivity extends AppCompatActivity {
     }
 
 
-    private void loadMembers() {
 
-        LinearLayout memContainer = memberWrapper.findViewById(R.id.containerMembers);
-        memContainer.removeAllViews();
-        List<String> emails = cls.getMembers();
-        if (emails == null) return;
-        for (String email : emails) {
-            TextView tv = new TextView(this);
-            tv.setText(email);
-            tv.setPadding(8,8,8,8);
-            memContainer.addView(tv);
-        }
-    }
 
     private void showAddFoldersToClass() {
         View sheet = getLayoutInflater().inflate(R.layout.bs_add_folders, null);

@@ -58,6 +58,7 @@
 
         <CheckBox
             android:id="@+id/cbSelect2"
+            android:enabled="false"
             android:layout_gravity="center|end"
             android:layout_width="25dp"
             android:layout_height="match_parent" />

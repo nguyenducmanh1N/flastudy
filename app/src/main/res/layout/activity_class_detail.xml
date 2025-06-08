@@ -46,7 +46,7 @@
     <!-- Tabs -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="87dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <TextView
@@ -59,7 +59,7 @@
             android:textSize="12sp" />
 
         <LinearLayout
-            android:layout_width="356dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
@@ -73,34 +73,19 @@
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/subTitleText2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/subTitleText"
-                    android:layout_width="102dp"
-                    android:layout_height="23dp"
-                    android:paddingBottom="1dp"
-                    android:text=""
-                    android:textColor="#CCCCCC"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:id="@+id/subTitleText2"
-                    android:layout_width="245dp"
-                    android:layout_height="match_parent"
-                    android:paddingBottom="1dp"
-                    android:text=""
-                    android:textColor="#CCCCCC"
-                    android:textSize="14sp" />
-            </LinearLayout>
+                android:paddingBottom="4dp"
+                android:text=""
+                android:textColor="#CCCCCC"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/textViewDate"
-                android:layout_width="139dp"
-                android:layout_height="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingBottom="1dp"
                 android:text="23 tháng 5, 2025"
                 android:textColor="#8888AA"
@@ -122,14 +107,20 @@
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabFolder"
-            android:text="Thư mục" />
+            android:text="Thư mục"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabCourse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Học phần" />
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/tabMember"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Thành viên" />
 
     </com.google.android.material.tabs.TabLayout>
@@ -166,16 +157,16 @@
         </ScrollView>
 
         <ScrollView
-            android:id="@+id/containerMembers"
+            android:id="@+id/containerMembersWrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone">
-            <TextView
-                android:id="@+id/cMembers"
+            <LinearLayout
+                android:id="@+id/memberContainer"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Danh sách thành viên"
-                android:visibility="gone"/>
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="13dp"/>
         </ScrollView>
 
 
