@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.R;
 import com.example.myapplication.model.Folder;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,6 +30,9 @@ public class FolderSelectAdapter
     private final List<Folder> folders;
     private final Set<String> selected = new HashSet<>();
     private final OnSelectionChanged listener;
+
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
     public FolderSelectAdapter(List<Folder> folders, OnSelectionChanged listener) {
         this.folders = folders;
@@ -46,8 +52,18 @@ public class FolderSelectAdapter
         Folder folder = folders.get(position);
         holder.tvName.setText(folder.getName());
 
-        holder.tvCount.setText(folder.getCount() + " mục");
+        holder.tvCount.setText("Đang tải...");
         holder.tvCreater.setText("Người tạo: " + folder.getCreater());
+
+        db.collection("users").document(currentUser.getUid())
+                .collection("folders").document(folder.getId())
+                .collection("courses")
+                .get()
+                .addOnSuccessListener(coursesSnap -> {
+                    int courseCount = coursesSnap.size();
+                    holder.tvCount.setText(courseCount + " mục");
+                })
+                .addOnFailureListener(e -> holder.tvCount.setText("0 mục"));
 
         holder.check.setChecked(selected.contains(folder.getId()));
         holder.itemView.setOnClickListener(v -> {

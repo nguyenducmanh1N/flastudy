@@ -31,6 +31,8 @@ import com.example.myapplication.model.NotificationItem;
 import com.example.myapplication.screens.feature.ClassDetailActivity;
 import com.example.myapplication.screens.feature.CourseDetailActivity;
 import com.example.myapplication.screens.feature.FolderDetailActivity;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -263,10 +265,10 @@ public class HomeFragment extends Fragment {
 
     private void loadCoursesForFolders() {
         courseList.clear();
-        List<com.google.android.gms.tasks.Task<?>> courseTasks = new ArrayList<>();
+        List<Task<?>> courseTasks = new ArrayList<>();
 
         for (Folder f : folderList) {
-            com.google.android.gms.tasks.Task<?> task = db.collection("users")
+            Task<?> task = db.collection("users")
                     .document(currentUser.getUid())
                     .collection("folders")
                     .document(f.getId())
@@ -285,7 +287,7 @@ public class HomeFragment extends Fragment {
             courseTasks.add(task);
         }
 
-        com.google.android.gms.tasks.Tasks.whenAllComplete(courseTasks)
+        Tasks.whenAllComplete(courseTasks)
                 .addOnCompleteListener(t -> {
                     courseAdapter.notifyDataSetChanged();
                     courseRecyclerView.scrollToPosition(0);

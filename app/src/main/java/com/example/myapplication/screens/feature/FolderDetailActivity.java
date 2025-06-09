@@ -3,6 +3,7 @@ package com.example.myapplication.screens.feature;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -52,6 +53,7 @@ public class FolderDetailActivity extends AppCompatActivity {
 
 
         folderId = getIntent().getStringExtra("folderId");
+
         if (folderId == null) {
             Toast.makeText(this, "Không xác định được thư mục", Toast.LENGTH_SHORT).show();
             finish();
@@ -111,10 +113,8 @@ public class FolderDetailActivity extends AppCompatActivity {
             popup.show();
         });
 
-
         loadFolderInfo(textViewName, textViewDate);
         loadCourses();
-
     }
     private void loadFolderInfo(TextView tvName, TextView tvDate) {
         db.collection("users")

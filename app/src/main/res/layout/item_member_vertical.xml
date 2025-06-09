@@ -18,9 +18,9 @@
             android:id="@+id/imageView"
             android:layout_width="38dp"
             android:layout_height="38dp"
-            android:layout_marginRight="10dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_folder" />
+            android:layout_marginRight="10dp"
+            app:srcCompat="@drawable/baseline_man_24" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -29,39 +29,25 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvTitle"
+                android:id="@+id/memberName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1"
+                android:text="Tên thành viên"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="40 thuật ngữ"
-                android:textColor="#AAAAAA"
-                android:textSize="12sp" />
-
-            <TextView
-                android:id="@+id/tvCreater"
+                android:id="@+id/memberEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text=" người tạo:"
+                android:text="Email: "
                 android:textColor="#AAAAAA"
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/cbSelect"
-            android:enabled="false"
-            android:layout_gravity="center"
-            android:layout_width="25dp"
-            android:layout_height="match_parent" />
+
     </LinearLayout>
 
 </LinearLayout>

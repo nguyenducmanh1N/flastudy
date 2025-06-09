@@ -10,8 +10,8 @@
 
     <TextView
         android:id="@+id/tvThongBao"
-        android:layout_width="369dp"
-        android:layout_height="217dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="Thông báo"
         android:textColor="#FFFFFF"
         android:textSize="18sp"

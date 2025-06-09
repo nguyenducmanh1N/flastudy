@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -51,12 +52,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class ClassDetailActivity extends AppCompatActivity {
-    private TextView tvTitle, tvCourseCount, tvOwner;
+    private TextView tvTitle, tvOwner;
     private ImageView btnClose, btnMenu;
     private TabLayout tabLayout;
 
     private ScrollView folderWrapper, coursesWrapper, memberWrapper;
-    private LinearLayout folderContainer, courseContainer;
+    private LinearLayout folderContainer, courseContainer, memberContainer;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseUser currentUser;
@@ -70,16 +71,16 @@ public class ClassDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_class_detail);
 
         tvTitle       = findViewById(R.id.titleText);
-        tvCourseCount = findViewById(R.id.subTitleText);
         tvOwner       = findViewById(R.id.subTitleText2);
         btnClose      = findViewById(R.id.btnExit);
         btnMenu       = findViewById(R.id.btnMenu);
         tabLayout     = findViewById(R.id.tvTabLayout);
         folderWrapper = findViewById(R.id.containerFolders);
         coursesWrapper= findViewById(R.id.containerCoursesWrapper);
-        memberWrapper = findViewById(R.id.containerMembers);
+        memberWrapper = findViewById(R.id.containerMembersWrapper);
         folderContainer = findViewById(R.id.folderContainer);
         courseContainer = findViewById(R.id.courseContainer);
+        memberContainer = findViewById(R.id.memberContainer);
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.detail_class_layout),
@@ -148,8 +149,6 @@ public class ClassDetailActivity extends AppCompatActivity {
                     }
                     tvTitle.setText(cls.getName());
                     tvOwner.setText("Người tạo: " + cls.getCreater());
-                    int count = cls.getCourseIds() != null ? cls.getCourseIds().size() : 0;
-                    tvCourseCount.setText(count + " học phần");
 
                     loadFolders();
                 })
@@ -185,8 +184,9 @@ public class ClassDetailActivity extends AppCompatActivity {
                         tvCreater.setText("Người tạo: " + creater);
 
                         item.setOnClickListener(v -> {
-                            Intent i = new Intent(this, FolderDetailActivity.class);
+                            Intent i = new Intent(this, FolderDetailFromClassActivity.class);
                             i.putExtra("folderId", fid);
+                            i.putExtra("classId", classId);
                             startActivity(i);
                         });
 
@@ -213,8 +213,7 @@ public class ClassDetailActivity extends AppCompatActivity {
                         String creater  = doc.getString("creater");
 
                         List<Map<String,Object>> vocs =
-                                (List<Map<String,Object>>) doc.get("vocabularies");
-                        int termCount = vocs != null ? vocs.size() : 0;
+                                (List<Map<String,Object>>) doc.get("vocabularyList");
 
                         View item = LayoutInflater.from(this)
                                 .inflate(R.layout.item_course_vertical, courseContainer, false);
@@ -223,14 +222,14 @@ public class ClassDetailActivity extends AppCompatActivity {
                         TextView tvCreater = item.findViewById(R.id.courseCreater);
 
                         tvTitle.setText(title);
+                        int termCount = vocs != null ? vocs.size() : 0;
                         tvCount.setText(termCount + " thuật ngữ");
                         tvCreater.setText("Người tạo: " + creater);
 
                         item.setOnClickListener(v -> {
-                            Intent i = new Intent(this, CourseDetailActivity.class);
+                            Intent i = new Intent(this, CourseDetailFromClassActivity.class);
                             i.putExtra("courseId", cid);
-
-                            i.putExtra("folderId", doc.getString("folderId"));
+                            i.putExtra("classId", classId);
                             startActivity(i);
                         });
 
@@ -241,6 +240,46 @@ public class ClassDetailActivity extends AppCompatActivity {
                         Toast.makeText(this, "Lỗi load courses: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
     }
+
+    private void loadMembers() {
+        memberContainer.removeAllViews();
+
+        db.collection("classes")
+                .document(classId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    List<String> members = (List<String>) doc.get("members");
+                    for (String email : members) {
+                        db.collection("users")
+                                .whereEqualTo("email", email)
+                                .limit(1)
+                                .get()
+                                .addOnSuccessListener(query -> {
+                                    String username = email; // fallback nếu không có username
+                                    if (!query.isEmpty()) {
+                                        DocumentSnapshot userDoc = query.getDocuments().get(0);
+                                        String name = userDoc.getString("username");
+                                        if (name != null && !name.isEmpty()) {
+                                            username = name;
+                                        }
+                                    }
+
+                                    View item = LayoutInflater.from(this)
+                                            .inflate(R.layout.item_member_vertical, memberContainer, false);
+                                    TextView tvName = item.findViewById(R.id.memberName);
+                                    TextView tvEmail = item.findViewById(R.id.memberEmail);
+
+                                    tvName.setText(username);
+                                    tvEmail.setText("Email: " + email);
+                                    memberContainer.addView(item);
+                                });
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Lỗi load members: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+    }
+
 
 
     private void showOptions() {
@@ -337,21 +376,6 @@ public class ClassDetailActivity extends AppCompatActivity {
         builder.show();
     }
 
-
-    private void loadMembers() {
-
-        LinearLayout memContainer = memberWrapper.findViewById(R.id.containerMembers);
-        memContainer.removeAllViews();
-        List<String> emails = cls.getMembers();
-        if (emails == null) return;
-        for (String email : emails) {
-            TextView tv = new TextView(this);
-            tv.setText(email);
-            tv.setPadding(8,8,8,8);
-            memContainer.addView(tv);
-        }
-    }
-
     private void showAddFoldersToClass() {
         View sheet = getLayoutInflater().inflate(R.layout.bs_add_folders, null);
         BottomSheetDialog bsDialog = new BottomSheetDialog(this);
@@ -363,86 +387,111 @@ public class ClassDetailActivity extends AppCompatActivity {
         FolderSelectAdapter adapter = new FolderSelectAdapter(list, ids -> btn.setEnabled(!ids.isEmpty()));
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
-        db.collection("users").document(currentUser.getUid())
+
+        String uid = currentUser.getUid();
+
+        db.collection("users").document(uid)
                 .collection("folders").get()
                 .addOnSuccessListener(q -> {
                     list.clear();
                     for (DocumentSnapshot d : q) {
                         Folder f = d.toObject(Folder.class);
-                        f.setId(d.getId()); list.add(f);
+                        f.setId(d.getId());
+                        list.add(f);
                     }
                     adapter.notifyDataSetChanged();
                 });
+
         btn.setOnClickListener(v -> {
             List<String> toAdd = new ArrayList<>(adapter.getSelectedIds());
             if (toAdd.isEmpty()) return;
-
-            String uid = currentUser.getUid();
 
             for (String fid : toAdd) {
                 DocumentReference srcFolderRef = db.collection("users")
                         .document(uid)
                         .collection("folders")
                         .document(fid);
+
                 srcFolderRef.get().addOnSuccessListener(folderDoc -> {
                     Folder folder = folderDoc.toObject(Folder.class);
                     if (folder == null) return;
-
 
                     Map<String, Object> folderMap = new HashMap<>();
                     folderMap.put("id", fid);
                     folderMap.put("name", folder.getName());
                     folderMap.put("creater", folder.getCreater());
                     folderMap.put("createdAt", folder.getCreatedAt());
+                    folderMap.put("classId", classId);
 
                     srcFolderRef.collection("courses")
-                            .get().addOnSuccessListener(courseSnap -> {
-                                List<Map<String,Object>> courseList = new ArrayList<>();
+                            .get()
+                            .addOnSuccessListener(courseSnap -> {
+                                List<Task<Void>> allTasks = new ArrayList<>();
+                                List<Map<String, Object>> courseList = new ArrayList<>();
 
-                                List<Task<?>> tasks = new ArrayList<>();
                                 for (DocumentSnapshot cDoc : courseSnap.getDocuments()) {
                                     Course course = cDoc.toObject(Course.class);
                                     if (course == null) continue;
                                     String cid = cDoc.getId();
 
-
-                                    Map<String,Object> courseMap = new HashMap<>();
+                                    Map<String, Object> courseMap = new HashMap<>();
                                     courseMap.put("id", cid);
                                     courseMap.put("title", course.getTitle());
                                     courseMap.put("creater", course.getCreater());
+                                    courseMap.put("createdAt", course.getCreatedAt());
+                                    courseMap.put("folderId", folder.getId());
 
-                                    Task<?> t = srcFolderRef
-                                            .collection("courses").document(cid)
+                                    DocumentReference classFolderCourseRef = db.collection("classes")
+                                            .document(classId)
+                                            .collection("folders")
+                                            .document(fid)
+                                            .collection("courses")
+                                            .document(cid);
+
+                                    // Ghi course vào folder
+                                    Task<Void> writeCourse = classFolderCourseRef.set(courseMap);
+                                    allTasks.add(writeCourse);
+
+                                    // Ghi vocabularies
+                                    Task<Void> vocabTask = srcFolderRef
+                                            .collection("courses")
+                                            .document(cid)
                                             .collection("vocabularies")
-                                            .get().addOnSuccessListener(vSnap -> {
-                                                List<Map<String,Object>> vocs = new ArrayList<>();
-                                                for (DocumentSnapshot vDoc : vSnap) {
-                                                    Map<String,Object> vMap = vDoc.getData();
+                                            .get()
+                                            .continueWithTask(task -> {
+                                                List<Map<String, Object>> vocList = new ArrayList<>();
+                                                for (DocumentSnapshot vDoc : task.getResult()) {
+                                                    Map<String, Object> vMap = vDoc.getData();
+                                                    if (vMap == null) continue;
                                                     vMap.put("id", vDoc.getId());
-                                                    vocs.add(vMap);
+                                                    vocList.add(vMap);
+
+                                                    classFolderCourseRef.collection("vocabularies")
+                                                            .document(vDoc.getId())
+                                                            .set(vMap);
                                                 }
-                                                courseMap.put("vocabularies", vocs);
+                                                return classFolderCourseRef.update("vocabularyList", vocList);
                                             });
-                                    tasks.add(t);
+
+                                    allTasks.add(vocabTask);
                                     courseList.add(courseMap);
                                 }
 
-                                Tasks.whenAllComplete(tasks)
+                                Tasks.whenAllComplete(allTasks)
                                         .addOnSuccessListener(__ -> {
                                             folderMap.put("courses", courseList);
-
                                             db.collection("classes")
                                                     .document(classId)
                                                     .collection("folders")
                                                     .document(fid)
                                                     .set(folderMap)
                                                     .addOnSuccessListener(a -> {
-                                                        Toast.makeText(this, "Đã thêm folder "+fid, Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(this, "Đã thêm folder " + folder.getName(), Toast.LENGTH_SHORT).show();
                                                         bsDialog.dismiss();
                                                         loadFolders();
                                                     })
                                                     .addOnFailureListener(e ->
-                                                            Toast.makeText(this, "Lỗi ghi folder vào lớp: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                            Toast.makeText(this, "Lỗi ghi folder: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                                                     );
                                         });
                             });
@@ -452,7 +501,6 @@ public class ClassDetailActivity extends AppCompatActivity {
 
         bsDialog.show();
     }
-
     private void showAddCoursesToClass() {
         View sheet = getLayoutInflater().inflate(R.layout.bs_add_courses, null);
         BottomSheetDialog bsDialog = new BottomSheetDialog(this);
@@ -518,12 +566,8 @@ public class ClassDetailActivity extends AppCompatActivity {
                 );
 
         btnAdd.setOnClickListener(v -> {
-
             Set<String> toAddIds = adapter.getSelectedIds();
             if (toAddIds.isEmpty()) return;
-
-
-
 
             List<Course> selectedCourses = new ArrayList<>();
             for (Course c : allCourses) {
@@ -531,7 +575,6 @@ public class ClassDetailActivity extends AppCompatActivity {
                     selectedCourses.add(c);
                 }
             }
-
 
             for (Course course : selectedCourses) {
                 String cid = course.getId();
@@ -543,53 +586,79 @@ public class ClassDetailActivity extends AppCompatActivity {
                         .collection("courses")
                         .document(cid);
 
-
                 srcCourseRef.get().addOnSuccessListener(courseDoc -> {
                     Course fullCourse = courseDoc.toObject(Course.class);
                     if (fullCourse == null) return;
 
-
-                    Map<String,Object> courseMap = new HashMap<>();
+                    Map<String, Object> courseMap = new HashMap<>();
                     courseMap.put("id", cid);
                     courseMap.put("title", fullCourse.getTitle());
                     courseMap.put("creater", fullCourse.getCreater());
+                    courseMap.put("classId", classId);
+                    courseMap.put("createdAt", fullCourse.getCreatedAt());
 
+                    DocumentReference classCourseRef = db.collection("classes")
+                            .document(classId)
+                            .collection("courses")
+                            .document(cid);
 
+                    // Step 1: Ghi document course
+                    classCourseRef.set(courseMap)
+                            .addOnSuccessListener(aVoid -> {
 
-                    srcCourseRef.collection("vocabularies")
-                            .get().addOnSuccessListener(vSnap -> {
-                                List<Map<String,Object>> vocs = new ArrayList<>();
-                                for (DocumentSnapshot vDoc : vSnap.getDocuments()) {
-                                    Map<String,Object> vMap = vDoc.getData();
-                                    vMap.put("id", vDoc.getId());
-                                    vocs.add(vMap);
-                                }
-                                courseMap.put("vocabularies", vocs);
+                                // Step 2: Lấy vocabularies
+                                srcCourseRef.collection("vocabularies")
+                                        .get()
+                                        .addOnSuccessListener(querySnapshots -> {
+                                            List<Map<String, Object>> vocabularyList = new ArrayList<>();
 
+                                            for (DocumentSnapshot vDoc : querySnapshots) {
+                                                Map<String, Object> vMap = vDoc.getData();
+                                                if (vMap == null) continue;
 
-                                db.collection("classes")
-                                        .document(classId)
-                                        .collection("courses")
-                                        .document(cid)
-                                        .set(courseMap)
-                                        .addOnSuccessListener(a -> {
+                                                vMap.put("id", vDoc.getId());
 
-                                            Toast.makeText(this, "Đã thêm học phần "+ fullCourse.getTitle(), Toast.LENGTH_SHORT).show();
-                                            bsDialog.dismiss();
-                                            loadCourses();
+                                                // Ghi vào subcollection vocabularies
+                                                classCourseRef.collection("vocabularies")
+                                                        .document(vDoc.getId())
+                                                        .set(vMap);
+
+                                                // Thêm vào list để ghi field vocabularyList
+                                                vocabularyList.add(vMap);
+                                            }
+
+                                            // Step 3: Ghi trường vocabularyList vào document chính
+                                            classCourseRef.update("vocabularyList", vocabularyList)
+                                                    .addOnSuccessListener(unused -> {
+                                                        Toast.makeText(this, "Đã thêm học phần " + fullCourse.getTitle(), Toast.LENGTH_SHORT).show();
+                                                        bsDialog.dismiss();
+                                                        loadCourses();
+                                                    })
+                                                    .addOnFailureListener(e ->
+                                                            Toast.makeText(this, "Lỗi lưu vocabularyList: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                    );
+
                                         })
                                         .addOnFailureListener(e ->
-                                                Toast.makeText(this, "Lỗi ghi course: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(this, "Lỗi tải từ vựng: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                                         );
-                            });
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Lỗi ghi khóa học: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                            );
                 });
             }
         });
 
 
 
+
         bsDialog.show();
     }
 
-
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        loadClassDetail();
+//    }
 }

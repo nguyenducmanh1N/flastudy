@@ -6,5 +6,7 @@
 
     <color name="red">#F44336</color>
     <color name="teal_700">#6666F0</color>
+    <color name="splash_bg_color">#0E0D3D</color>
+
 
 </resources>

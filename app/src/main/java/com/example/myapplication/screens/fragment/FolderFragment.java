@@ -82,94 +82,174 @@ public class FolderFragment extends Fragment {
 
     private void loadCourses() {
         courseContainer.removeAllViews();
-        db.collection("users").document(userId)
-                .collection("courses")
+
+        db.collection("users")
+                .document(userId)
+                .collection("folders")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
-                .addOnSuccessListener(q -> {
-                    for (DocumentSnapshot doc : q) {
-                        Course c = doc.toObject(Course.class);
-                        View item = LayoutInflater.from(getContext())
-                                .inflate(R.layout.item_course_vertical, courseContainer, false);
-                        TextView tvTitle = item.findViewById(R.id.courseTitle);
-                        TextView tvCount = item.findViewById(R.id.courseTermCount);
-                        TextView tvCreater = item.findViewById(R.id.courseCreater);
-                        tvTitle.setText(c.getTitle());
-                        int cnt = c.getVocabularyList()!=null?c.getVocabularyList().size():0;
-                        tvCount.setText(cnt+" thuật ngữ");
-                        tvCreater.setText("Người tạo: "+c.getCreater());
-                        item.setOnClickListener(v -> {
-                            Intent i = new Intent(getContext(), CourseDetailActivity.class);
-                            i.putExtra("courseId", doc.getId());
-                            startActivity(i);
-                        });
-                        courseContainer.addView(item);
+                .addOnSuccessListener(folderSnapshot -> {
+                    List<DocumentSnapshot> folders = folderSnapshot.getDocuments();
+
+                    if (folders.isEmpty()) {
+                        Toast.makeText(getContext(), "Không có thư mục nào.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    for (DocumentSnapshot folderDoc : folders) {
+                        String folderId = folderDoc.getId();
+                        Folder folder = folderDoc.toObject(Folder.class);
+                        db.collection("users")
+                                .document(userId)
+                                .collection("folders")
+                                .document(folderId)
+                                .collection("courses")
+                                .orderBy("createdAt", Query.Direction.DESCENDING)
+                                .get()
+                                .addOnSuccessListener(courseSnapshot -> {
+                                    for (DocumentSnapshot courseDoc : courseSnapshot) {
+                                        Course c = courseDoc.toObject(Course.class);
+                                        View item = LayoutInflater.from(getContext())
+                                                .inflate(R.layout.item_course_vertical, courseContainer, false);
+                                        TextView tvTitle = item.findViewById(R.id.courseTitle);
+                                        TextView tvCount = item.findViewById(R.id.courseTermCount);
+                                        TextView tvCreater = item.findViewById(R.id.courseCreater);
+
+                                        tvTitle.setText(c.getTitle());
+                                        int cnt = c.getVocabularyList() != null ? c.getVocabularyList().size() : 0;
+                                        tvCount.setText(cnt + " thuật ngữ");
+                                        tvCreater.setText("Người tạo: " + c.getCreater());
+
+                                        item.setOnClickListener(v -> {
+                                            Intent i = new Intent(getContext(), CourseDetailActivity.class);
+                                            i.putExtra("courseId", courseDoc.getId());
+                                            i.putExtra("folderId", folderId); // Gửi folderId nếu cần
+                                            startActivity(i);
+                                        });
+
+                                        courseContainer.addView(item);
+                                    }
+                                })
+                                .addOnFailureListener(e -> Toast.makeText(getContext(),
+                                        "Lỗi load học phần trong thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show());
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(),
-                        "Lỗi load học phần: "+e.getMessage(), Toast.LENGTH_SHORT).show());
+                        "Lỗi load thư mục để lấy học phần: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
+
 
     private void loadFolders() {
         folderContainer.removeAllViews();
+
         db.collection("users").document(userId)
                 .collection("folders")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(q -> {
+                    if (q.isEmpty()) return;
+
                     for (DocumentSnapshot doc : q) {
                         Folder f = doc.toObject(Folder.class);
+                        String folderId = doc.getId();
+
                         View item = LayoutInflater.from(getContext())
                                 .inflate(R.layout.item_folder_vertical_2, folderContainer, false);
+
                         TextView tvTitle = item.findViewById(R.id.tvTitle);
                         TextView tvCount = item.findViewById(R.id.tvCount);
                         TextView tvCreater = item.findViewById(R.id.tvCreater);
+
                         tvTitle.setText(f.getName());
-                        int cnt = f.getCount();
-                        tvCount.setText(cnt+" mục");
-                        tvCreater.setText("Người tạo: "+f.getCreater());
+                        tvCreater.setText("Người tạo: " + f.getCreater());
+
+                        // Set tạm thời để tránh rỗng khi chưa lấy xong courses
+                        tvCount.setText("Đang tải...");
+
                         item.setOnClickListener(v -> {
                             Intent i = new Intent(getContext(), FolderDetailActivity.class);
-                            i.putExtra("folderId", doc.getId());
+                            i.putExtra("folderId", folderId);
                             startActivity(i);
                         });
+
                         folderContainer.addView(item);
+
+                        // Load courses count cho folder này
+                        db.collection("users").document(userId)
+                                .collection("folders").document(folderId)
+                                .collection("courses")
+                                .get()
+                                .addOnSuccessListener(coursesSnap -> {
+                                    int courseCount = coursesSnap.size();
+                                    tvCount.setText(courseCount + " mục");
+                                })
+                                .addOnFailureListener(e -> tvCount.setText("0 mục"));
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(),
-                        "Lỗi load thư mục: "+e.getMessage(), Toast.LENGTH_SHORT).show());
+                        "Lỗi load thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
+
 
     private void loadClasses() {
         classContainer.removeAllViews();
         db.collection("classes")
                 .whereArrayContains("members", currentUser.getEmail())
                 .get()
-                .addOnSuccessListener(q -> {
-                    for (DocumentSnapshot doc : q) {
+                .addOnSuccessListener(querySnapshot -> {
+                    for (DocumentSnapshot doc : querySnapshot) {
                         Class cls = doc.toObject(Class.class);
+                        if (cls == null) continue;
+
                         View item = LayoutInflater.from(getContext())
                                 .inflate(R.layout.item_class_vertical, classContainer, false);
-                        // similar binding for class item...
+
                         TextView tvTitle = item.findViewById(R.id.classTitle);
                         TextView tvFCount = item.findViewById(R.id.classFolderCount);
                         TextView tvCCount = item.findViewById(R.id.classCourseCount);
                         TextView tvCreater = item.findViewById(R.id.classCreater);
+
                         tvTitle.setText(cls.getName());
-                        int cnt = cls.getFolderIds().size();
-                        int cct = cls.getCourseIds().size();
-                        tvFCount.setText(cnt+" mục");
-                        tvCCount.setText(cct+ " mucc");
-                        tvCreater.setText("Người tạo: "+cls.getCreater());
+                        tvCreater.setText("Người tạo: " + cls.getCreater());
+
+                        // Lấy số folder
+                        db.collection("classes")
+                                .document(doc.getId())
+                                .collection("folders")
+                                .get()
+                                .addOnSuccessListener(folders -> {
+                                    tvFCount.setText(folders.size() + " mục");
+                                })
+                                .addOnFailureListener(e -> tvFCount.setText("Lỗi"));
+
+                        // Lấy số course
+                        db.collection("classes")
+                                .document(doc.getId())
+                                .collection("courses")
+                                .get()
+                                .addOnSuccessListener(courses -> {
+                                    tvCCount.setText(courses.size() + " mục");
+                                })
+                                .addOnFailureListener(e -> tvCCount.setText("Lỗi"));
+
                         item.setOnClickListener(v -> {
                             Intent i = new Intent(getContext(), ClassDetailActivity.class);
                             i.putExtra("classId", doc.getId());
                             startActivity(i);
                         });
+
                         classContainer.addView(item);
                     }
                 })
                 .addOnFailureListener(e -> Toast.makeText(getContext(),
-                        "Lỗi load lớp học: "+e.getMessage(), Toast.LENGTH_SHORT).show());
+                        "Lỗi load lớp học: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadCourses();
+        loadFolders();
+        loadClasses();
     }
 }
