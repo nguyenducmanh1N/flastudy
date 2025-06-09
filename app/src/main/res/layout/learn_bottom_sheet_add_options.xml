@@ -71,5 +71,6 @@
         android:drawableLeft="@drawable/baseline_delete_24"
         android:text="Kiểm tra noi"
         android:textColor="@android:color/white"
+        android:visibility="gone"
         android:textSize="16sp" />
 </LinearLayout>
