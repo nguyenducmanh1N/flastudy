@@ -4,9 +4,9 @@
     <item
         android:id="@+id/action_edit"
         android:title="Sửa tên" />
-    <item
-        android:id="@+id/action_share"
-        android:title="Chia sẻ" />
+<!--    <item-->
+<!--        android:id="@+id/action_share"-->
+<!--        android:title="Chia sẻ" />-->
     <item
         android:id="@+id/action_delete"
         android:title="Xóa thư mục"

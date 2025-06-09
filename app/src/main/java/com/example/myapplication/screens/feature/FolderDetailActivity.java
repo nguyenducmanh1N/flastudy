@@ -100,10 +100,12 @@ public class FolderDetailActivity extends AppCompatActivity {
                 if (id == R.id.action_edit) {
                     showEditNameDialog();
                     return true;
-                } else if (id == R.id.action_share) {
-                    shareFolder();
-                    return true;
-                } else if (id == R.id.action_delete) {
+                }
+//                else if (id == R.id.action_share) {
+//                    shareFolder();
+//                    return true;
+//                }
+                else if (id == R.id.action_delete) {
                     confirmAndDeleteFolder();
                     return true;
                 }

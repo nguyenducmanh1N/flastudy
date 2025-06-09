@@ -28,6 +28,7 @@ import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.screens.feature.learn.AIQuizActivity;
 import com.example.myapplication.screens.feature.learn.FillActivity;
 import com.example.myapplication.screens.feature.learn.FlashCardActivity;
+import com.example.myapplication.screens.feature.learn.GeminiLivePronunciationActivity;
 import com.example.myapplication.screens.feature.learn.ListenFillActivity;
 import com.example.myapplication.screens.feature.learn.ListenQuizActivity;
 import com.example.myapplication.screens.feature.learn.QuizActivity;
@@ -188,9 +189,9 @@ public class CourseDetailActivity extends AppCompatActivity {
         bottomSheetDialog.setContentView(view);
 
         TextView edit = view.findViewById(R.id.edit);
-        TextView addToFolder = view.findViewById(R.id.addToFolder);
-        TextView addToClass = view.findViewById(R.id.addToClass);
-        TextView share = view.findViewById(R.id.share);
+//        TextView addToFolder = view.findViewById(R.id.addToFolder);
+//        TextView addToClass = view.findViewById(R.id.addToClass);
+//        TextView share = view.findViewById(R.id.share);
         TextView delete = view.findViewById(R.id.delete);
 
         edit.setOnClickListener(v -> {
@@ -202,22 +203,22 @@ public class CourseDetailActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        addToFolder.setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateFolderActivity.class);
-            startActivity(intent);
-        });
-
-        addToClass.setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateClassActivity.class);
-            startActivity(intent);
-        });
-        share.setOnClickListener(v -> {
-            bottomSheetDialog.dismiss();
-            Intent intent = new Intent(this, CreateClassActivity.class);
-            startActivity(intent);
-        });
+//        addToFolder.setOnClickListener(v -> {
+//            bottomSheetDialog.dismiss();
+//            Intent intent = new Intent(this, CreateFolderActivity.class);
+//            startActivity(intent);
+//        });
+//
+//        addToClass.setOnClickListener(v -> {
+//            bottomSheetDialog.dismiss();
+//            Intent intent = new Intent(this, CreateClassActivity.class);
+//            startActivity(intent);
+//        });
+//      share.setOnClickListener(v -> {
+//            bottomSheetDialog.dismiss();
+//            Intent intent = new Intent(this, CreateClassActivity.class);
+//            startActivity(intent);
+//        });
         delete.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
             new AlertDialog.Builder(this)
@@ -265,7 +266,7 @@ public class CourseDetailActivity extends AppCompatActivity {
         TextView hear = view.findViewById(R.id.hear);
         TextView aiQuiz = view.findViewById(R.id.aiQuiz);
         TextView hearandfill = view.findViewById(R.id.hearandfill);
-        //TextView delete = view.findViewById(R.id.test);
+        TextView speakCheck = view.findViewById(R.id.speakCheck);
 
         quiz.setOnClickListener(v -> {
             bottomSheetDialog.dismiss();
@@ -304,12 +305,12 @@ public class CourseDetailActivity extends AppCompatActivity {
             intent.putExtra("folderId",folderId);
             startActivity(intent);
         });
-//        delete.setOnClickListener(v -> {
-//            bottomSheetDialog.dismiss();
-//            Intent intent = new Intent(this, CreateClassActivity.class);
-//            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
-//            startActivity(intent);
-//        });
+        speakCheck.setOnClickListener(v -> {
+            bottomSheetDialog.dismiss();
+            Intent intent = new Intent(this, GeminiLivePronunciationActivity.class);
+            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+            startActivity(intent);
+        });
 
 
         bottomSheetDialog.show();

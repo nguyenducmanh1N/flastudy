@@ -62,14 +62,14 @@
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 
-<!--    <TextView-->
-<!--        android:id="@+id/uu"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:drawablePadding="8dp"-->
-<!--        android:padding="16dp"-->
-<!--        android:drawableLeft="@drawable/baseline_delete_24"-->
-<!--        android:text="Kiểm tra"-->
-<!--        android:textColor="@android:color/white"-->
-<!--        android:textSize="16sp" />-->
+    <TextView
+        android:id="@+id/speakCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:drawableLeft="@drawable/baseline_delete_24"
+        android:text="Kiểm tra noi"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
 </LinearLayout>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0E0D3D">
@@ -9,7 +10,7 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="16dp"
         android:text="Thư viện của bạn"
         android:textColor="@android:color/white"
         android:textSize="18sp"
@@ -50,16 +51,32 @@
             android:text="Lớp học" />
     </com.google.android.material.tabs.TabLayout>
 
+    <EditText
+        android:id="@+id/etFilter"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Lọc theo tên..."
+        android:imeOptions="actionDone"
+        android:inputType="text"
+        android:padding="12dp"
+        android:background="@drawable/bg_search_bar"
+        app:layout_constraintTop_toBottomOf="@id/tabLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp" />
     <!-- Wrappers for each list -->
+
     <ScrollView
         android:id="@+id/coursesWrapper"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="396dp"
+        android:layout_height="560dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout">
+        app:layout_constraintTop_toBottomOf="@id/tabLayout"
+        >
 
         <LinearLayout
             android:id="@+id/courseContainer"
@@ -72,8 +89,8 @@
 
     <ScrollView
         android:id="@+id/foldersWrapper"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="403dp"
+        android:layout_height="537dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -91,8 +108,8 @@
 
     <ScrollView
         android:id="@+id/classesWrapper"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="403dp"
+        android:layout_height="537dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

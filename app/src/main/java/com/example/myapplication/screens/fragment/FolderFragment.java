@@ -2,9 +2,12 @@ package com.example.myapplication.screens.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -21,23 +24,25 @@ import com.example.myapplication.model.Folder;
 import com.example.myapplication.screens.feature.ClassDetailActivity;
 import com.example.myapplication.screens.feature.CourseDetailActivity;
 import com.example.myapplication.screens.feature.FolderDetailActivity;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.android.material.tabs.TabLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FolderFragment extends Fragment {
-
     private TabLayout tabLayout;
+    private EditText etFilter;
     private ScrollView coursesWrapper, foldersWrapper, classesWrapper;
     private LinearLayout courseContainer, folderContainer, classContainer;
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
     private String userId;
+    private String currentFilter = "";
 
     @Nullable
     @Override
@@ -47,6 +52,7 @@ public class FolderFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_folder, container, false);
 
         tabLayout = view.findViewById(R.id.tabLayout);
+        etFilter = view.findViewById(R.id.etFilter);
         coursesWrapper = view.findViewById(R.id.coursesWrapper);
         foldersWrapper = view.findViewById(R.id.foldersWrapper);
         classesWrapper = view.findViewById(R.id.classesWrapper);
@@ -56,7 +62,9 @@ public class FolderFragment extends Fragment {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
-        userId = currentUser.getUid();
+        userId = currentUser != null ? currentUser.getUid() : null;
+
+        setupFilterListener();
 
         // default tab
         loadCourses();
@@ -64,14 +72,12 @@ public class FolderFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override public void onTabSelected(TabLayout.Tab tab) {
                 int pos = tab.getPosition();
-                coursesWrapper.setVisibility(pos==0?View.VISIBLE:View.GONE);
-                foldersWrapper.setVisibility(pos==1?View.VISIBLE:View.GONE);
-                classesWrapper.setVisibility(pos==2?View.VISIBLE:View.GONE);
-                switch(pos) {
-                    case 0: loadCourses(); break;
-                    case 1: loadFolders(); break;
-                    case 2: loadClasses(); break;
-                }
+                coursesWrapper.setVisibility(pos == 0 ? View.VISIBLE : View.GONE);
+                foldersWrapper.setVisibility(pos == 1 ? View.VISIBLE : View.GONE);
+                classesWrapper.setVisibility(pos == 2 ? View.VISIBLE : View.GONE);
+                if (pos == 0) loadCourses();
+                else if (pos == 1) loadFolders();
+                else loadClasses();
             }
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
             @Override public void onTabReselected(TabLayout.Tab tab) {}
@@ -80,35 +86,42 @@ public class FolderFragment extends Fragment {
         return view;
     }
 
+    private void setupFilterListener() {
+        etFilter.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentFilter = s.toString().trim().toLowerCase();
+                int pos = tabLayout.getSelectedTabPosition();
+                if (pos == 0) loadCourses();
+                else if (pos == 1) loadFolders();
+                else loadClasses();
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+    }
+
     private void loadCourses() {
         courseContainer.removeAllViews();
+        if (userId == null) return;
 
-        db.collection("users")
-                .document(userId)
+        db.collection("users").document(userId)
                 .collection("folders")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(folderSnapshot -> {
-                    List<DocumentSnapshot> folders = folderSnapshot.getDocuments();
-
-                    if (folders.isEmpty()) {
-                        Toast.makeText(getContext(), "Không có thư mục nào.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    for (DocumentSnapshot folderDoc : folders) {
+                    for (DocumentSnapshot folderDoc : folderSnapshot.getDocuments()) {
                         String folderId = folderDoc.getId();
-                        Folder folder = folderDoc.toObject(Folder.class);
-                        db.collection("users")
-                                .document(userId)
-                                .collection("folders")
-                                .document(folderId)
+                        db.collection("users").document(userId)
+                                .collection("folders").document(folderId)
                                 .collection("courses")
                                 .orderBy("createdAt", Query.Direction.DESCENDING)
                                 .get()
                                 .addOnSuccessListener(courseSnapshot -> {
-                                    for (DocumentSnapshot courseDoc : courseSnapshot) {
+                                    for (DocumentSnapshot courseDoc : courseSnapshot.getDocuments()) {
                                         Course c = courseDoc.toObject(Course.class);
+                                        if (c == null) continue;
+                                        if (!c.getTitle().toLowerCase().contains(currentFilter)) continue;
+
                                         View item = LayoutInflater.from(getContext())
                                                 .inflate(R.layout.item_course_vertical, courseContainer, false);
                                         TextView tvTitle = item.findViewById(R.id.courseTitle);
@@ -122,48 +135,45 @@ public class FolderFragment extends Fragment {
 
                                         item.setOnClickListener(v -> {
                                             Intent i = new Intent(getContext(), CourseDetailActivity.class);
-                                            i.putExtra("courseId", courseDoc.getId());
-                                            i.putExtra("folderId", folderId); // Gửi folderId nếu cần
+                                            i.putExtra(CourseDetailActivity.EXTRA_COURSE_ID, courseDoc.getId());
+                                            i.putExtra(CourseDetailActivity.EXTRA_FOLDER_ID, folderId);
                                             startActivity(i);
                                         });
 
                                         courseContainer.addView(item);
                                     }
-                                })
-                                .addOnFailureListener(e -> Toast.makeText(getContext(),
-                                        "Lỗi load học phần trong thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                });
                     }
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(),
-                        "Lỗi load thư mục để lấy học phần: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    if (courseContainer.getChildCount() == 0) {
+                        Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
-
 
     private void loadFolders() {
         folderContainer.removeAllViews();
+        if (userId == null) return;
 
         db.collection("users").document(userId)
                 .collection("folders")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
-                .addOnSuccessListener(q -> {
-                    if (q.isEmpty()) return;
-
-                    for (DocumentSnapshot doc : q) {
+                .addOnSuccessListener(snapshot -> {
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
                         Folder f = doc.toObject(Folder.class);
                         String folderId = doc.getId();
 
+                        if (f == null) continue;
+                        if (!f.getName().toLowerCase().contains(currentFilter)) continue;
+
                         View item = LayoutInflater.from(getContext())
                                 .inflate(R.layout.item_folder_vertical_2, folderContainer, false);
-
                         TextView tvTitle = item.findViewById(R.id.tvTitle);
                         TextView tvCount = item.findViewById(R.id.tvCount);
                         TextView tvCreater = item.findViewById(R.id.tvCreater);
 
                         tvTitle.setText(f.getName());
                         tvCreater.setText("Người tạo: " + f.getCreater());
-
-                        // Set tạm thời để tránh rỗng khi chưa lấy xong courses
                         tvCount.setText("Đang tải...");
 
                         item.setOnClickListener(v -> {
@@ -174,36 +184,35 @@ public class FolderFragment extends Fragment {
 
                         folderContainer.addView(item);
 
-                        // Load courses count cho folder này
+                        // update count
                         db.collection("users").document(userId)
-                                .collection("folders").document(folderId)
-                                .collection("courses")
-                                .get()
-                                .addOnSuccessListener(coursesSnap -> {
-                                    int courseCount = coursesSnap.size();
-                                    tvCount.setText(courseCount + " mục");
-                                })
-                                .addOnFailureListener(e -> tvCount.setText("0 mục"));
+                                .collection("folders").document(doc.getId())
+                                .collection("courses").get()
+                                .addOnSuccessListener(cSnap ->
+                                        tvCount.setText(cSnap.size() + " mục"));
                     }
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(),
-                        "Lỗi load thư mục: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    if (folderContainer.getChildCount() == 0) {
+                        Toast.makeText(getContext(), "Không tìm thấy thư mục.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
-
 
     private void loadClasses() {
         classContainer.removeAllViews();
+        String email = currentUser != null ? currentUser.getEmail() : null;
+        if (email == null) return;
+
         db.collection("classes")
-                .whereArrayContains("members", currentUser.getEmail())
+                .whereArrayContains("members", email)
                 .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    for (DocumentSnapshot doc : querySnapshot) {
+                .addOnSuccessListener(snapshot -> {
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
                         Class cls = doc.toObject(Class.class);
                         if (cls == null) continue;
+                        if (!cls.getName().toLowerCase().contains(currentFilter)) continue;
 
                         View item = LayoutInflater.from(getContext())
                                 .inflate(R.layout.item_class_vertical, classContainer, false);
-
                         TextView tvTitle = item.findViewById(R.id.classTitle);
                         TextView tvFCount = item.findViewById(R.id.classFolderCount);
                         TextView tvCCount = item.findViewById(R.id.classCourseCount);
@@ -212,25 +221,15 @@ public class FolderFragment extends Fragment {
                         tvTitle.setText(cls.getName());
                         tvCreater.setText("Người tạo: " + cls.getCreater());
 
-                        // Lấy số folder
-                        db.collection("classes")
-                                .document(doc.getId())
-                                .collection("folders")
-                                .get()
-                                .addOnSuccessListener(folders -> {
-                                    tvFCount.setText(folders.size() + " mục");
-                                })
-                                .addOnFailureListener(e -> tvFCount.setText("Lỗi"));
-
-                        // Lấy số course
-                        db.collection("classes")
-                                .document(doc.getId())
-                                .collection("courses")
-                                .get()
-                                .addOnSuccessListener(courses -> {
-                                    tvCCount.setText(courses.size() + " mục");
-                                })
-                                .addOnFailureListener(e -> tvCCount.setText("Lỗi"));
+                        // counts
+                        db.collection("classes").document(doc.getId())
+                                .collection("folders").get()
+                                .addOnSuccessListener(fs ->
+                                        tvFCount.setText(fs.size() + " mục"));
+                        db.collection("classes").document(doc.getId())
+                                .collection("courses").get()
+                                .addOnSuccessListener(cs ->
+                                        tvCCount.setText(cs.size() + " mục"));
 
                         item.setOnClickListener(v -> {
                             Intent i = new Intent(getContext(), ClassDetailActivity.class);
@@ -238,18 +237,22 @@ public class FolderFragment extends Fragment {
                             startActivity(i);
                         });
 
+
                         classContainer.addView(item);
                     }
-                })
-                .addOnFailureListener(e -> Toast.makeText(getContext(),
-                        "Lỗi load lớp học: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    if (classContainer.getChildCount() == 0) {
+                        Toast.makeText(getContext(), "Không tìm thấy lớp học.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        loadCourses();
-        loadFolders();
-        loadClasses();
+        // refresh when returning
+        int pos = tabLayout.getSelectedTabPosition();
+        if (pos == 0) loadCourses();
+        else if (pos == 1) loadFolders();
+        else loadClasses();
     }
 }

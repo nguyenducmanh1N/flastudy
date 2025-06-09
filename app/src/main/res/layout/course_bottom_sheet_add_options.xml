@@ -18,37 +18,37 @@
         android:textColor="@android:color/white"
         android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/addToFolder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_folder"
-        android:drawablePadding="8dp"
-        android:padding="16dp"
-        android:text="Thêm vào thư mục"
-        android:textSize="16sp"
-        android:textColor="@android:color/white" />
+<!--    <TextView-->
+<!--        android:id="@+id/addToFolder"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:drawableLeft="@drawable/ic_folder"-->
+<!--        android:drawablePadding="8dp"-->
+<!--        android:padding="16dp"-->
+<!--        android:text="Thêm vào thư mục"-->
+<!--        android:textSize="16sp"-->
+<!--        android:textColor="@android:color/white" />-->
 
-    <TextView
-        android:id="@+id/addToClass"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/baseline_groups_24"
-        android:drawablePadding="8dp"
-        android:padding="16dp"
-        android:text="Thêm vào lớp học"
-        android:textSize="16sp"
-        android:textColor="@android:color/white" />
-    <TextView
-        android:id="@+id/share"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/baseline_ios_share_24"
-        android:drawablePadding="8dp"
-        android:padding="16dp"
-        android:text="Chia sẻ"
-        android:textSize="16sp"
-        android:textColor="@android:color/white" />
+<!--    <TextView-->
+<!--        android:id="@+id/addToClass"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:drawableLeft="@drawable/baseline_groups_24"-->
+<!--        android:drawablePadding="8dp"-->
+<!--        android:padding="16dp"-->
+<!--        android:text="Thêm vào lớp học"-->
+<!--        android:textSize="16sp"-->
+<!--        android:textColor="@android:color/white" />-->
+<!--    <TextView-->
+<!--        android:id="@+id/share"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:drawableLeft="@drawable/baseline_ios_share_24"-->
+<!--        android:drawablePadding="8dp"-->
+<!--        android:padding="16dp"-->
+<!--        android:text="Chia sẻ"-->
+<!--        android:textSize="16sp"-->
+<!--        android:textColor="@android:color/white" />-->
 
     <TextView
         android:id="@+id/delete"

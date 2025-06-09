@@ -91,14 +91,14 @@
         android:textColor="#CCCCCC"
         android:textSize="14sp" />
 
-    <Button
-        android:id="@+id/btnStudy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Học"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1E1E3F"
-        android:layout_marginTop="16dp" />
+<!--    <Button-->
+<!--        android:id="@+id/btnStudy"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Học"-->
+<!--        android:textColor="#FFFFFF"-->
+<!--        android:backgroundTint="#1E1E3F"-->
+<!--        android:layout_marginTop="16dp" />-->
 
     <!-- Danh sách học phần -->
     <TextView

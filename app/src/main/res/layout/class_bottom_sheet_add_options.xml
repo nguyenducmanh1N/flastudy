@@ -50,16 +50,16 @@
         android:text="Thêm thành viên"
         android:textSize="16sp"
         android:textColor="@android:color/white" />
-    <TextView
-        android:id="@+id/share"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/baseline_ios_share_24"
-        android:drawablePadding="8dp"
-        android:padding="16dp"
-        android:text="Chia sẻ"
-        android:textSize="16sp"
-        android:textColor="@android:color/white" />
+<!--    <TextView-->
+<!--        android:id="@+id/share"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:drawableLeft="@drawable/baseline_ios_share_24"-->
+<!--        android:drawablePadding="8dp"-->
+<!--        android:padding="16dp"-->
+<!--        android:text="Chia sẻ"-->
+<!--        android:textSize="16sp"-->
+<!--        android:textColor="@android:color/white" />-->
 
     <TextView
         android:id="@+id/delete"
