@@ -16,10 +16,16 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/ic_logo"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_logo"
+        android:roundIcon="@drawable/ic_logo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
+        <activity
+            android:name=".screens.feature.FolderDetailFromClassActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.feature.CourseDetailFromClassActivity"
+            android:exported="false" />
         <activity
             android:name=".screens.feature.ChangePasswordActivity"
             android:exported="false" />
@@ -102,8 +108,8 @@
             android:exported="true" />
         <activity
             android:name=".screens.auth.LoginActivity"
-            android:theme="@style/Theme.Flastudy.Splash"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Flastudy.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

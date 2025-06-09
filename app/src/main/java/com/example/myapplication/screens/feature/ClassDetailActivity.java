@@ -184,10 +184,9 @@ public class ClassDetailActivity extends AppCompatActivity {
                         tvCreater.setText("Người tạo: " + creater);
 
                         item.setOnClickListener(v -> {
-                            Intent i = new Intent(this, FolderDetailActivity.class);
+                            Intent i = new Intent(this, FolderDetailFromClassActivity.class);
                             i.putExtra("folderId", fid);
                             i.putExtra("classId", classId);
-                            i.putExtra("from", "class");
                             startActivity(i);
                         });
 
@@ -214,8 +213,7 @@ public class ClassDetailActivity extends AppCompatActivity {
                         String creater  = doc.getString("creater");
 
                         List<Map<String,Object>> vocs =
-                                (List<Map<String,Object>>) doc.get("vocabularies");
-                        int termCount = vocs != null ? vocs.size() : 0;
+                                (List<Map<String,Object>>) doc.get("vocabularyList");
 
                         View item = LayoutInflater.from(this)
                                 .inflate(R.layout.item_course_vertical, courseContainer, false);
@@ -224,14 +222,14 @@ public class ClassDetailActivity extends AppCompatActivity {
                         TextView tvCreater = item.findViewById(R.id.courseCreater);
 
                         tvTitle.setText(title);
+                        int termCount = vocs != null ? vocs.size() : 0;
                         tvCount.setText(termCount + " thuật ngữ");
                         tvCreater.setText("Người tạo: " + creater);
 
                         item.setOnClickListener(v -> {
-                            Intent i = new Intent(this, CourseDetailActivity.class);
+                            Intent i = new Intent(this, CourseDetailFromClassActivity.class);
                             i.putExtra("courseId", cid);
                             i.putExtra("classId", classId);
-                            i.putExtra("from", "class");
                             startActivity(i);
                         });
 
@@ -441,7 +439,7 @@ public class ClassDetailActivity extends AppCompatActivity {
                                     courseMap.put("title", course.getTitle());
                                     courseMap.put("creater", course.getCreater());
                                     courseMap.put("createdAt", course.getCreatedAt());
-                                    courseMap.put("classId", classId);
+                                    courseMap.put("folderId", folder.getId());
 
                                     DocumentReference classFolderCourseRef = db.collection("classes")
                                             .document(classId)
