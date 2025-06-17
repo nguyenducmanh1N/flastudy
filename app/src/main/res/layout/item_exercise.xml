@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@drawable/bg_rounded_button"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp">
+
+    <TextView
+        android:id="@+id/tvExerciseId"
+        android:layout_width="319dp"
+        android:layout_height="wrap_content"
+        android:text="ID: "
+        android:textColor="#2196F3"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvExerciseScore"
+        android:layout_width="319dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Đúng: 0/0 (0%)"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvExerciseTime"
+        android:layout_width="319dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Thời gian: "
+        android:textColor="#AAAAAA"
+        android:textSize="13sp" />
+</LinearLayout>

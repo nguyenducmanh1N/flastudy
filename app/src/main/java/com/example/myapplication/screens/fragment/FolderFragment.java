@@ -184,7 +184,7 @@ public class FolderFragment extends Fragment {
 
                         folderContainer.addView(item);
 
-                        // update count
+
                         db.collection("users").document(userId)
                                 .collection("folders").document(doc.getId())
                                 .collection("courses").get()
@@ -201,7 +201,6 @@ public class FolderFragment extends Fragment {
         classContainer.removeAllViews();
         String email = currentUser != null ? currentUser.getEmail() : null;
         if (email == null) return;
-
         db.collection("classes")
                 .whereArrayContains("members", email)
                 .get()
@@ -249,7 +248,7 @@ public class FolderFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // refresh when returning
+        
         int pos = tabLayout.getSelectedTabPosition();
         if (pos == 0) loadCourses();
         else if (pos == 1) loadFolders();

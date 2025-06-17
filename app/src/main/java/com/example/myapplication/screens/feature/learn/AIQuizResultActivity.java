@@ -168,9 +168,21 @@ public class AIQuizResultActivity extends AppCompatActivity {
                 .collection("questions")
                 .document();
 
+        int correctCount = getIntent().getIntExtra("correctCount", 0);
+        int totalCount = getIntent().getIntExtra("totalCount", 0);
+        int percent = 0;
+        if (totalCount > 0) {
+            percent = (int) Math.round((correctCount * 100.0) / totalCount);
+        }
+        ArrayList<String> wrongWords = getIntent().getStringArrayListExtra("wrongWords");
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("questions", aiQuestions);
         payload.put("createdAt", System.currentTimeMillis());
+        payload.put("correctCount", correctCount);
+        payload.put("totalCount", totalCount);
+        payload.put("percent", percent);
+        payload.put("wrongWords", wrongWords);
 
         batchRef.set(payload)
                 .addOnSuccessListener(v -> {
@@ -186,6 +198,7 @@ public class AIQuizResultActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show()
                 );
     }
+
 
 
 }

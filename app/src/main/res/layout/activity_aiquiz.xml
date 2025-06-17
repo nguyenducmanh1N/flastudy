@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#0E0D3D">
 
-    <!-- Toolbar/Header nằm ở trên cùng -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
@@ -35,7 +35,7 @@
             app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- ProgressBar ở giữa màn hình, ban đầu ẩn -->
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleLarge"
@@ -44,7 +44,7 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <!-- ScrollView chứa nội dung, được đẩy xuống dưới toolbar -->
+
     <ScrollView
         android:id="@+id/scrollContent"
         android:layout_width="match_parent"

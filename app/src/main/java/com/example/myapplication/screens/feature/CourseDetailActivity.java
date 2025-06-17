@@ -23,6 +23,8 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.myapplication.R;
 import com.example.myapplication.adapter.VocabAdapter;
+import com.example.myapplication.adapter.VocabExAdapter;
+import com.example.myapplication.model.AIQuestion;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.screens.feature.learn.AIQuizActivity;
@@ -33,6 +35,7 @@ import com.example.myapplication.screens.feature.learn.ListenFillActivity;
 import com.example.myapplication.screens.feature.learn.ListenQuizActivity;
 import com.example.myapplication.screens.feature.learn.QuizActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -45,6 +48,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import androidx.appcompat.app.AlertDialog;
+import android.view.LayoutInflater;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Map;
 
 public class CourseDetailActivity extends AppCompatActivity {
     public static final String EXTRA_FOLDER_ID = "folderId";
@@ -60,9 +68,13 @@ public class CourseDetailActivity extends AppCompatActivity {
     private ImageView btnBack,btnAdd,btnMenu;
     private ViewPager2 vpCards;
     private VocabAdapter vocabAdapter;
+
+    private VocabExAdapter vocabExAdapter;
     private List<Vocabulary> vocabList = new ArrayList<>();
     private LinearLayout dotsContainer ,flashCard,learn,graft,listen,d;
     private ImageView[] dots;
+    private LinearLayout exContainer;
+    private View exWrapper, vocapWrapper;
 
 
     @Override
@@ -75,12 +87,14 @@ public class CourseDetailActivity extends AppCompatActivity {
         folderId = getIntent().getStringExtra(EXTRA_FOLDER_ID);
         courseId = getIntent().getStringExtra(EXTRA_COURSE_ID);
 
+        exContainer = findViewById(R.id.exContainer);
+        exWrapper = findViewById(R.id.exWrapper);
+        vocapWrapper = findViewById(R.id.vocapWrapper);
+
         tvTitle = findViewById(R.id.tvCourseName);
         tvCreatedAt = findViewById(R.id.tvCourseDate);
         vpCards = findViewById(R.id.vpCards);
         btnMenu = findViewById(R.id.btnMenu);
-
-
 
         btnMenu.setOnClickListener(v -> showAddOptionsCourse());
         vocabAdapter = new VocabAdapter(this, vocabList);
@@ -120,6 +134,29 @@ public class CourseDetailActivity extends AppCompatActivity {
 //            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
 //            startActivity(intent);
 //        });
+
+        RecyclerView rv = findViewById(R.id.rvVocabList);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        vocabExAdapter = new VocabExAdapter(this, vocabList);
+        rv.setAdapter(vocabExAdapter);
+
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) {
+                    vocapWrapper.setVisibility(View.VISIBLE);
+                    exWrapper.setVisibility(View.GONE);
+                } else {
+                    vocapWrapper.setVisibility(View.GONE);
+                    exWrapper.setVisibility(View.VISIBLE);
+                    loadExercises();
+                }
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
 
     }
 
@@ -255,6 +292,89 @@ public class CourseDetailActivity extends AppCompatActivity {
                     Toast.makeText(this, "Xóa thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
+
+    // ...existing code...
+    private void loadExercises() {
+
+        exContainer.removeAllViews();
+        String uid = currentUser.getUid();
+        db.collection("users")
+                .document(uid)
+                .collection("folders")
+                .document(folderId)
+                .collection("courses")
+                .document(courseId)
+                .collection("questions")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        TextView tv = new TextView(this);
+                        tv.setText("Chưa có bài tập nào được lưu.");
+                        tv.setTextColor(0xFFFFFFFF);
+                        tv.setTextSize(16f);
+                        exContainer.addView(tv);
+                        return;
+                    }
+                    LayoutInflater inflater = LayoutInflater.from(this);
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        View card = inflater.inflate(R.layout.item_exercise, exContainer, false);
+                        TextView tvId = card.findViewById(R.id.tvExerciseId);
+                        TextView tvScore = card.findViewById(R.id.tvExerciseScore);
+                        TextView tvTime = card.findViewById(R.id.tvExerciseTime);
+
+                        String id = doc.getId();
+                        Long correct = doc.getLong("correctCount");
+                        Long total = doc.getLong("totalCount");
+                        Long percent = doc.getLong("percent");
+                        Long createdAt = doc.getLong("createdAt");
+
+                        tvId.setText("ID: " + id);
+                        if (correct != null && total != null && percent != null) {
+                            tvScore.setText("Đúng: " + correct + "/" + total + " (" + percent + "%)");
+                        } else {
+                            tvScore.setText("Không có dữ liệu điểm.");
+                        }
+                        if (createdAt != null) {
+                            String date = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                                    .format(new Date(createdAt));
+                            tvTime.setText("Thời gian: " + date);
+                        } else {
+                            tvTime.setText("");
+                        }
+
+
+                        card.setOnClickListener(v -> {
+                            List<Map<String, Object>> questionMaps = (List<Map<String, Object>>) doc.get("questions");
+                            ArrayList<AIQuestion> aiQuestions = new ArrayList<>();
+                            if (questionMaps != null) {
+                                for (Map<String, Object> map : questionMaps) {
+                                    aiQuestions.add(AIQuestion.fromMap(map));
+                                }
+                            }
+                            if (aiQuestions.isEmpty()) {
+                                Toast.makeText(this, "Không có dữ liệu câu hỏi.", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            Intent intent = new Intent(this, AIQuizActivity.class);
+                            intent.putParcelableArrayListExtra("aiQuestions", aiQuestions);
+                            intent.putExtra("folderId", folderId);
+                            intent.putExtra("courseId", courseId);
+
+                            intent.putParcelableArrayListExtra("vocabList", new ArrayList<>(vocabList));
+                            startActivity(intent);
+                        });
+
+                        exContainer.addView(card);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    TextView tv = new TextView(this);
+                    tv.setText("Lỗi khi tải bài tập: " + e.getMessage());
+                    tv.setTextColor(0xFFFF4444);
+                    exContainer.addView(tv);
+                });
+    }
+
 
     private void showAddOptionsLearn() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);

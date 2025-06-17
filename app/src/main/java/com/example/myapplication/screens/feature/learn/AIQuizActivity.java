@@ -65,6 +65,16 @@ public class AIQuizActivity extends AppCompatActivity {
 
         btnBack.setOnClickListener(v -> finish());
 
+        ArrayList<AIQuestion> aiQuestions = getIntent().getParcelableArrayListExtra("aiQuestions");
+        if (aiQuestions != null && !aiQuestions.isEmpty()) {
+            questionList.addAll(aiQuestions);
+            vocabList = getIntent().getParcelableArrayListExtra("vocabList");
+            progressBar.setVisibility(View.GONE);
+            scrollContent.setVisibility(View.VISIBLE);
+            displayCurrentQuestion();
+            return;
+        }
+
         vocabList = getIntent().getParcelableArrayListExtra("vocabList");
         if (vocabList == null || vocabList.isEmpty()) {
             Toast.makeText(this, "Danh sách từ vựng trống!", Toast.LENGTH_SHORT).show();
@@ -183,6 +193,11 @@ public class AIQuizActivity extends AppCompatActivity {
 
     private void displayCurrentQuestion() {
         AIQuestion q = questionList.get(currentIndex);
+
+        // Debug log
+        android.util.Log.d("AIQuiz", "Question: " + q.getQuestion());
+        android.util.Log.d("AIQuiz", "Options: " + q.getOptions());
+        android.util.Log.d("AIQuiz", "Correct: " + q.getCorrectAnswer());
 
         tvQuestion.setText(q.getQuestion());
 

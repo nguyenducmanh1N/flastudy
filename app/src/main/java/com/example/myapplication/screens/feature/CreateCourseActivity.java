@@ -17,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +26,6 @@ import com.example.myapplication.R;
 import com.example.myapplication.model.Course;
 import com.example.myapplication.model.Vocabulary;
 import com.example.myapplication.screens.feature.act.CameraActivity;
-import com.example.myapplication.screens.feature.learn.FlashCardActivity;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.ChatFutures;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
@@ -38,13 +36,10 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,7 +47,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
+import java.lang.StringBuilder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,22 +64,21 @@ import okhttp3.Response;
 
 public class CreateCourseActivity extends AppCompatActivity {
 
-    public static final String EXTRA_FOLDER_ID   = "folderId";
-    public static final String EXTRA_IS_EDIT     = "isEdit";
-    public static final String EXTRA_COURSE_ID   = "courseId";
+    public static final String EXTRA_FOLDER_ID = "folderId";
+    public static final String EXTRA_IS_EDIT   = "isEdit";
+    public static final String EXTRA_COURSE_ID = "courseId";
     private static final Executor aiExecutor = Executors.newSingleThreadExecutor();
 
-    private LinearLayout    containerTerms;
-    private ImageButton     btnAdd;
-    private EditText        inputCourseTitle;
-    private ImageView       btnScan, btnSave, btnClose ,aiGenerate;
+    private LinearLayout containerTerms;
+    private ImageButton btnAdd;
+    private EditText inputCourseTitle;
+    private ImageView btnScan, btnSave, btnClose, aiGenerate;
     private FirebaseFirestore db;
-    private FirebaseUser     currentUser;
-    private Handler          uiHandler;
-    private String           folderId;
-
+    private FirebaseUser currentUser;
+    private Handler uiHandler;
+    private String folderId;
     private boolean isEditMode;
-    private String  editCourseId;
+    private String editCourseId;
 
     private static class DictionaryData {
         List<String> meanings;
@@ -93,13 +87,11 @@ public class CreateCourseActivity extends AppCompatActivity {
         String phonetic;
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_course);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
 
         inputCourseTitle = findViewById(R.id.inputTitle);
         containerTerms    = findViewById(R.id.containerTerms);
@@ -107,39 +99,31 @@ public class CreateCourseActivity extends AppCompatActivity {
         btnScan           = findViewById(R.id.btnScan);
         btnSave           = findViewById(R.id.btnSave);
         btnClose          = findViewById(R.id.btnCloseCreateCourse);
-        aiGenerate     = findViewById(R.id.aiGenerate);
+        aiGenerate        = findViewById(R.id.aiGenerate);
 
+        uiHandler   = new Handler(Looper.getMainLooper());
+        db          = FirebaseFirestore.getInstance();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        folderId    = getIntent().getStringExtra(EXTRA_FOLDER_ID);
+        isEditMode  = getIntent().getBooleanExtra(EXTRA_IS_EDIT, false);
+        editCourseId= getIntent().getStringExtra(EXTRA_COURSE_ID);
 
-                uiHandler      = new Handler(Looper.getMainLooper());
-        db             = FirebaseFirestore.getInstance();
-        currentUser    = FirebaseAuth.getInstance().getCurrentUser();
-        folderId       = getIntent().getStringExtra(EXTRA_FOLDER_ID);
-        isEditMode     = getIntent().getBooleanExtra(EXTRA_IS_EDIT, false);
-        editCourseId   = getIntent().getStringExtra(EXTRA_COURSE_ID);
-
-
-
-        if (folderId == null) {
-            Toast.makeText(this, "Không xác định được thư mục", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-        if (currentUser == null) {
-            Toast.makeText(this, "Bạn chưa đăng nhập", Toast.LENGTH_SHORT).show();
+        if (folderId == null || currentUser == null) {
+            Toast.makeText(this,
+                    folderId == null ? "Không xác định được thư mục" : "Bạn chưa đăng nhập",
+                    Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
         btnScan.setOnClickListener(v -> {
-            Intent intent = new Intent(CreateCourseActivity.this, CameraActivity.class);
+            Intent intent = new Intent(this, CameraActivity.class);
             intent.putExtra(CameraActivity.EXTRA_FOLDER_ID, folderId);
             startActivity(intent);
         });
 
         btnAdd.setOnClickListener(v -> addTermLayout());
-
         btnClose.setOnClickListener(v -> finish());
-
         btnSave.setOnClickListener(v -> saveCourse());
 
         if (isEditMode && editCourseId != null) {
@@ -149,6 +133,61 @@ public class CreateCourseActivity extends AppCompatActivity {
         } else {
             addTermLayout();
         }
+
+        aiGenerate.setOnClickListener(v -> {
+            String topic = inputCourseTitle.getText().toString().trim();
+            if (topic.isEmpty()) {
+                Toast.makeText(this, "Nhập chủ đề để AI tạo từ vựng", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this, "Đang tạo từ vựng bằng AI...", Toast.LENGTH_SHORT).show();
+            generateVocabFromTopic(topic, vocabList -> {
+                runOnUiThread(() -> {
+                    if (vocabList.isEmpty()) {
+                        Toast.makeText(this, "AI không tạo được từ nào.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    containerTerms.removeAllViews();
+                    for (Vocabulary aiV : vocabList) {
+                        View termView = LayoutInflater.from(this)
+                                .inflate(R.layout.item_term, containerTerms, false);
+                        AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+                        AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
+                        ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
+                        ImageView   btnRead                = termView.findViewById(R.id.btnRead);
+
+                        edtTerm.setText(aiV.getWord());
+                        edtDefinition.setText(aiV.getMeaning());
+                        edtDefinition.setVisibility(View.VISIBLE);
+
+                        DictionaryData dictData = new DictionaryData();
+                        dictData.example  = aiV.getExample();
+                        dictData.phonetic = aiV.getPhonetic();
+                        dictData.audio    = "";
+                        dictData.meanings = new ArrayList<>();
+                        termView.setTag(R.id.tag_definition_data, dictData);
+
+                        fetchAudioFromDictionary(aiV.getWord(), audioUrl -> {
+                            uiHandler.post(() -> {
+                                dictData.audio = audioUrl;
+                                termView.setTag(R.id.tag_definition_data, dictData);
+                            });
+                        });
+
+                        btnRemove.setOnClickListener(rem ->
+                                containerTerms.removeView(termView)
+                        );
+                        btnRead.setOnClickListener(r ->
+                                playAudioFromTag(termView)
+                        );
+
+                        containerTerms.addView(termView);
+                    }
+                    Toast.makeText(this, "AI đã tạo xong " + vocabList.size() + " từ.", Toast.LENGTH_SHORT).show();
+                });
+            });
+        });
+
 
         ArrayList<Vocabulary> aiList =
                 getIntent().getParcelableArrayListExtra("aiGeneratedVocabList");
@@ -173,12 +212,18 @@ public class CreateCourseActivity extends AppCompatActivity {
                 dictData.phonetic = "";
                 termView.setTag(R.id.tag_definition_data, dictData);
 
-                fetchDefinitionsDictionary(aiV.getWord(), data -> {
+                fetchDefinitionsByAI(aiV.getWord(), data -> {
                     dictData.meanings = data.meanings;
                     dictData.example  = data.example;
                     dictData.audio    = data.audio;
                     dictData.phonetic = data.phonetic;
                     termView.setTag(R.id.tag_definition_data, dictData);
+                });
+                fetchAudioFromDictionary(aiV.getWord(), audioUrl -> {
+                    uiHandler.post(() -> {
+                        dictData.audio = audioUrl;
+                        termView.setTag(R.id.tag_definition_data, dictData);
+                    });
                 });
 
                 btnRemove.setOnClickListener(rem -> containerTerms.removeView(termView));
@@ -218,89 +263,6 @@ public class CreateCourseActivity extends AppCompatActivity {
                 addTermLayout();
             }
         }
-
-        aiGenerate.setOnClickListener(v -> {
-            String topic = inputCourseTitle.getText().toString().trim();
-            if (topic.isEmpty()) {
-                Toast.makeText(CreateCourseActivity.this,
-                        "Nhập chủ đề để AI tạo từ vựng", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Toast.makeText(CreateCourseActivity.this,
-                    "Đang tạo từ vựng bằng AI...", Toast.LENGTH_SHORT).show();
-
-            generateVocabFromTopic(topic, vocabListFromAI -> {
-                runOnUiThread(() -> {
-
-                    if (vocabListFromAI.isEmpty()) {
-                        Toast.makeText(CreateCourseActivity.this,
-                                "AI không tạo được từ nào.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    containerTerms.removeAllViews();
-
-                    for (Vocabulary aiVocab : vocabListFromAI) {
-
-                        View termView = LayoutInflater.from(CreateCourseActivity.this)
-                                .inflate(R.layout.item_term, containerTerms, false);
-                        AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
-                        AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
-                        ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
-                        ImageView   btnRead                = termView.findViewById(R.id.btnRead);
-
-                        edtTerm.setText(aiVocab.getWord());
-                        edtDefinition.setText(aiVocab.getMeaning());
-
-                        DictionaryData dictData = new DictionaryData();
-                        dictData.example = "";
-                        dictData.audio = "";
-                        dictData.phonetic = "";
-                        termView.setTag(R.id.tag_definition_data, dictData);
-
-                        fetchDefinitionsDictionary(aiVocab.getWord(), data -> {
-                            dictData.meanings = data.meanings;
-                            dictData.example  = data.example;
-                            dictData.audio    = data.audio;
-                            dictData.phonetic = data.phonetic;
-                            termView.setTag(R.id.tag_definition_data, dictData);
-                        });
-
-                        btnRemove.setOnClickListener(rem -> containerTerms.removeView(termView));
-
-                        btnRead.setOnClickListener(r -> {
-                            Object tagObj = termView.getTag(R.id.tag_definition_data);
-                            if (!(tagObj instanceof DictionaryData)) {
-                                Toast.makeText(CreateCourseActivity.this, "Chưa có audio", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                            String audioUrl = ((DictionaryData) tagObj).audio;
-                            if (audioUrl == null || audioUrl.isEmpty()) {
-                                Toast.makeText(CreateCourseActivity.this, "Audio rỗng", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                            MediaPlayer mp = new MediaPlayer();
-                            try {
-                                mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                                mp.setDataSource(audioUrl);
-                                mp.prepareAsync();
-                                mp.setOnPreparedListener(MediaPlayer::start);
-                                mp.setOnCompletionListener(MediaPlayer::release);
-                            } catch (IOException e) {
-                                Toast.makeText(CreateCourseActivity.this, "Không thể phát audio", Toast.LENGTH_SHORT).show();
-                                mp.release();
-                            }
-                        });
-
-                        containerTerms.addView(termView);
-                    }
-
-                    Toast.makeText(CreateCourseActivity.this,
-                            "AI đã tạo xong " + vocabListFromAI.size() + " từ.", Toast.LENGTH_SHORT).show();
-                });
-            });
-        });
-
     }
 
     private void loadCourseForEdit() {
@@ -313,23 +275,25 @@ public class CreateCourseActivity extends AppCompatActivity {
             Course course = doc.toObject(Course.class);
             if (course == null) return;
             inputCourseTitle.setText(course.getTitle());
+            containerTerms.removeAllViews();
             for (Vocabulary v : course.getVocabularyList()) {
                 addTermLayout();
-                View termView = containerTerms.getChildAt(containerTerms.getChildCount()-1);
-                AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
-                AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
-
-                edtTerm.setText(v.getWord());
-                edtDefinition.setText(v.getMeaning());
+                View termView = containerTerms.getChildAt(containerTerms.getChildCount() - 1);
+                ((AutoCompleteTextView)termView.findViewById(R.id.edtTerm)).setText(v.getWord());
+                ((AutoCompleteTextView)termView.findViewById(R.id.edtDefinition)).setText(v.getMeaning());
 
                 DictionaryData dict = new DictionaryData();
+                dict.meanings = new ArrayList<>();
                 dict.example  = v.getExample();
                 dict.audio    = v.getAudio();
                 dict.phonetic = v.getPhonetic();
                 termView.setTag(R.id.tag_definition_data, dict);
+
+                termView.findViewById(R.id.btnRead).setOnClickListener(r -> playAudioFromTag(termView));
+                termView.findViewById(R.id.btnRemoveTerm).setOnClickListener(rem -> containerTerms.removeView(termView));
             }
         }).addOnFailureListener(e ->
-                Toast.makeText(this, "Lỗi load Course: "+e.getMessage(), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Lỗi load Course: " + e.getMessage(), Toast.LENGTH_SHORT).show()
         );
     }
 
@@ -340,12 +304,12 @@ public class CreateCourseActivity extends AppCompatActivity {
         AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
         ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
         ImageView   btnRead                = termView.findViewById(R.id.btnRead);
+        ImageView   btnAI                  = termView.findViewById(R.id.btnAI);
 
-        ArrayAdapter<String> termAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        ArrayAdapter<String> termAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         edtTerm.setAdapter(termAdapter);
         edtTerm.setThreshold(1);
-
         TextWatcher watcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
             @Override public void afterTextChanged(Editable s) {}
@@ -363,62 +327,90 @@ public class CreateCourseActivity extends AppCompatActivity {
         };
         edtTerm.addTextChangedListener(watcher);
 
-        ArrayAdapter<String> defAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        ArrayAdapter<String> defAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         edtDefinition.setAdapter(defAdapter);
         edtDefinition.setThreshold(1);
 
         edtTerm.setOnItemClickListener((p, v, pos, id) -> {
             String word = termAdapter.getItem(pos);
 
-            fetchDefinitionsDictionary(word, dict -> uiHandler.post(() ->
-                    termView.setTag(R.id.tag_definition_data, dict)
-            ));
+            fetchAudioFromDictionary(word, audioUrl -> {
+                DictionaryData dict = new DictionaryData();
+                dict.audio = audioUrl;
+                uiHandler.post(() -> termView.setTag(R.id.tag_definition_data, dict));
+            });
 
             fetchTranslationSuggestions(word, defs -> uiHandler.post(() -> {
+                List<String> stringDefs = new ArrayList<>();
+                for (DictionaryData d : defs) {
+                    stringDefs.add("(" + d.phonetic + ") " + d.meanings.get(0));
+                }
                 defAdapter.clear();
-                defAdapter.addAll(defs);
+                defAdapter.addAll(stringDefs);
                 defAdapter.notifyDataSetChanged();
-                if (!defs.isEmpty()) {
-                    edtDefinition.setText(defs.get(0));
-                    edtDefinition.setSelection(defs.get(0).length());
+                if (!stringDefs.isEmpty()) {
+                    edtDefinition.setText(stringDefs.get(0));
+                    edtDefinition.setSelection(stringDefs.get(0).length());
                     edtDefinition.showDropDown();
                 }
             }));
-
             edtTerm.removeTextChangedListener(watcher);
             edtTerm.setAdapter(null);
             edtTerm.dismissDropDown();
         });
 
+        btnAI.setOnClickListener(v -> {
+            String term = edtTerm.getText().toString().trim();
+            if (term.isEmpty()) {
+                Toast.makeText(this, "Nhập thuật ngữ trước khi lấy nghĩa", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(this, "Đang lấy gợi ý định nghĩa...", Toast.LENGTH_SHORT).show();
+            fetchTranslationSuggestions(term, defs -> uiHandler.post(() -> {
+                defAdapter.clear();
+                for (DictionaryData d : defs) {
+                    defAdapter.add("(" + d.phonetic + ") " + d.meanings.get(0));
+                }
+                defAdapter.notifyDataSetChanged();
+                if (!defs.isEmpty()) {
 
-        btnRead.setOnClickListener(v -> {
-            Object tag = termView.getTag(R.id.tag_definition_data);
-            if (!(tag instanceof DictionaryData)) {
-                Toast.makeText(this, "Chưa có audio", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            String audioUrl = ((DictionaryData)tag).audio;
-            if (audioUrl == null || audioUrl.isEmpty()) {
-                Toast.makeText(this, "Audio rỗng", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            MediaPlayer mp = new MediaPlayer();
-            try {
-                mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mp.setDataSource(audioUrl);
-                mp.prepareAsync();
-                mp.setOnPreparedListener(MediaPlayer::start);
-                mp.setOnCompletionListener(MediaPlayer::release);
-            } catch (IOException e) {
-                Toast.makeText(this, "Không thể phát audio", Toast.LENGTH_SHORT).show();
-                mp.release();
-            }
+                    edtDefinition.setText(defAdapter.getItem(0));
+                    edtDefinition.setSelection(edtDefinition.getText().length());
+                    edtDefinition.showDropDown();
+                } else {
+                    Toast.makeText(this, "Không tìm được định nghĩa", Toast.LENGTH_SHORT).show();
+                }
+            }));
         });
 
+        btnRead.setOnClickListener(v -> playAudioFromTag(termView));
         btnRemove.setOnClickListener(v -> containerTerms.removeView(termView));
-
         containerTerms.addView(termView);
+    }
+
+    private void playAudioFromTag(View termView) {
+        Object tagObj = termView.getTag(R.id.tag_definition_data);
+        if (!(tagObj instanceof DictionaryData)) {
+            Toast.makeText(this, "Chưa có audio", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String audioUrl = ((DictionaryData) tagObj).audio;
+        if (audioUrl == null || audioUrl.isEmpty()) {
+            Toast.makeText(this, "Audio rỗng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        MediaPlayer mp = new MediaPlayer();
+        try {
+            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mp.setDataSource(audioUrl);
+            mp.prepareAsync();
+            mp.setOnPreparedListener(MediaPlayer::start);
+            mp.setOnCompletionListener(MediaPlayer::release);
+        } catch (IOException e) {
+            Toast.makeText(this, "Không thể phát audio", Toast.LENGTH_SHORT).show();
+            mp.release();
+        }
     }
 
     private void saveCourse() {
@@ -430,15 +422,13 @@ public class CreateCourseActivity extends AppCompatActivity {
         List<Vocabulary> vocabList = new ArrayList<>();
         for (int i = 0; i < containerTerms.getChildCount(); i++) {
             View v = containerTerms.getChildAt(i);
-            String w = ((EditText)v.findViewById(R.id.edtTerm))
-                    .getText().toString().trim();
-            String m = ((EditText)v.findViewById(R.id.edtDefinition))
-                    .getText().toString().trim();
+            String w = ((EditText)v.findViewById(R.id.edtTerm)).getText().toString().trim();
+            String m = ((EditText)v.findViewById(R.id.edtDefinition)).getText().toString().trim();
             if (!w.isEmpty() && !m.isEmpty()) {
-                Vocabulary vocab = new Vocabulary(w,m,"","","");
+                Vocabulary vocab = new Vocabulary(w, m, "", "", "");
                 Object tag = v.getTag(R.id.tag_definition_data);
                 if (tag instanceof DictionaryData) {
-                    DictionaryData d = (DictionaryData)tag;
+                    DictionaryData d = (DictionaryData) tag;
                     vocab.setExample(d.example);
                     vocab.setAudio(d.audio);
                     vocab.setPhonetic(d.phonetic);
@@ -450,41 +440,31 @@ public class CreateCourseActivity extends AppCompatActivity {
             Toast.makeText(this, "Thêm ít nhất 1 thuật ngữ", Toast.LENGTH_SHORT).show();
             return;
         }
-
         String uid = currentUser.getUid();
         DocumentReference courseRef;
         if (isEditMode) {
             courseRef = db.collection("users").document(uid)
                     .collection("folders").document(folderId)
                     .collection("courses").document(editCourseId);
-
             courseRef.update("title", title, "createdAt", System.currentTimeMillis())
                     .addOnSuccessListener(a -> {
-
                         courseRef.collection("vocabularies").get()
                                 .addOnSuccessListener(qs -> {
                                     WriteBatch batch = db.batch();
                                     for (DocumentSnapshot ds : qs) batch.delete(ds.getReference());
                                     for (Vocabulary vv : vocabList) {
-                                        DocumentReference vr = courseRef
-                                                .collection("vocabularies").document();
+                                        DocumentReference vr = courseRef.collection("vocabularies").document();
                                         vv.setId(vr.getId());
                                         batch.set(vr, vv);
                                     }
-                                    batch.commit()
-                                            .addOnSuccessListener(a2 -> {
-                                                Toast.makeText(this,
-                                                        "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-                                                finish();
-                                            })
-                                            .addOnFailureListener(e -> Toast.makeText(this,
-                                                    "Lỗi lưu từ vựng: "+e.getMessage(),
-                                                    Toast.LENGTH_SHORT).show());
+                                    batch.commit().addOnSuccessListener(a2 -> {
+                                        Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+                                        finish();
+                                    }).addOnFailureListener(e ->
+                                            Toast.makeText(this, "Lỗi lưu từ vựng: "+e.getMessage(), Toast.LENGTH_SHORT).show());
                                 });
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(this,
-                            "Lỗi update Course: "+e.getMessage(),
-                            Toast.LENGTH_SHORT).show());
+                    }).addOnFailureListener(e ->
+                            Toast.makeText(this, "Lỗi update Course: "+e.getMessage(), Toast.LENGTH_SHORT).show());
         } else {
             String newId = db.collection("users").document(uid)
                     .collection("folders").document(folderId)
@@ -496,10 +476,9 @@ public class CreateCourseActivity extends AppCompatActivity {
                     .collection("folders").document(folderId)
                     .collection("courses").document(newId);
             courseRef.set(course)
-                    .addOnSuccessListener(a -> commitVocabBatch(courseRef,vocabList))
-                    .addOnFailureListener(e -> Toast.makeText(this,
-                            "Lỗi lưu Course: "+e.getMessage(),
-                            Toast.LENGTH_SHORT).show());
+                    .addOnSuccessListener(a -> commitVocabBatch(courseRef, vocabList))
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Lỗi lưu Course: "+e.getMessage(), Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -510,340 +489,267 @@ public class CreateCourseActivity extends AppCompatActivity {
             v.setId(vr.getId());
             batch.set(vr, v);
         }
-        batch.commit()
-                .addOnSuccessListener(a -> {
-                    Toast.makeText(this,
-                            "Tạo Course và lưu từ vựng thành công", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> Toast.makeText(this,
-                        "Lỗi lưu từ vựng: "+e.getMessage(),
-                        Toast.LENGTH_SHORT).show());
+        batch.commit().addOnSuccessListener(a -> {
+            Toast.makeText(this, "Tạo Course và lưu từ vựng thành công", Toast.LENGTH_SHORT).show();
+            finish();
+        }).addOnFailureListener(e ->
+                Toast.makeText(this, "Lỗi lưu từ vựng: "+e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
 
     private void fetchSuggestions(String input, Consumer<List<String>> callback) {
-        OkHttpClient client = new OkHttpClient();
-        String url = "https://api.datamuse.com/sug?s=" + input;
-        Request request = new Request.Builder().url(url).build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) { e.printStackTrace(); }
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) return;
-                List<String> list = new ArrayList<>();
-                try {
-                    JSONArray arr = new JSONArray(response.body().string());
-                    for (int i = 0; i < arr.length() && i < 5; i++) {
-                        list.add(arr.getJSONObject(i).getString("word"));
-                    }
-                } catch (JSONException e) { e.printStackTrace(); }
-                callback.accept(list);
-            }
-        });
-    }
 
-
-//    private void fetchDefinitionsDictionary(String term, Consumer<List<String>> callback) {
-//        OkHttpClient client = new OkHttpClient();
-//        String url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + term;
-//        Request request = new Request.Builder()
-//                .url(url)
-//                .addHeader("Accept", "application/json")
-//                .build();
-//
-//        client.newCall(request).enqueue(new Callback() {
-//            @Override public void onFailure(Call call, IOException e) {
-//                e.printStackTrace();
-//                callback.accept(Collections.singletonList("Không có kết nối"));
-//            }
-//
-//            @Override public void onResponse(Call call, Response response) throws IOException {
-//                if (!response.isSuccessful()) {
-//                    callback.accept(Collections.singletonList("Lỗi server: " + response.code()));
-//                    return;
-//                }
-//                List<String> defs = new ArrayList<>();
-//                try {
-//                    JSONArray arr = new JSONArray(response.body().string());
-//                    JSONObject entry = arr.getJSONObject(0);
-//                    JSONArray meanings = entry.getJSONArray("meanings");
-//                    for (int i = 0; i < meanings.length() && defs.size() < 5; i++) {
-//                        JSONObject m = meanings.getJSONObject(i);
-//                        JSONArray definitions = m.getJSONArray("definitions");
-//                        for (int j = 0; j < definitions.length() && defs.size() < 5; j++) {
-//                            defs.add(definitions.getJSONObject(j).getString("definition"));
-//                        }
-//                    }
-//                    if (defs.isEmpty()) defs.add("Chưa có định nghĩa");
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                    defs = Collections.singletonList("Lỗi phân tích dữ liệu");
-//                }
-//                callback.accept(defs);
-//            }
-//        });
-//    }
-private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> callback) {
-    OkHttpClient client = new OkHttpClient();
-    String url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + term;
-    Request request = new Request.Builder()
-            .url(url)
-            .addHeader("Accept", "application/json")
-            .build();
-
-    client.newCall(request).enqueue(new Callback() {
-        @Override public void onFailure(Call call, IOException e) {
-            e.printStackTrace();
-            DictionaryData err = new DictionaryData();
-            err.meanings = Collections.singletonList("Không có kết nối");
-            err.example = "";
-            err.audio = "";
-            err.phonetic = "";
-            callback.accept(err);
-        }
-
-        @Override public void onResponse(Call call, Response response) throws IOException {
-            DictionaryData data = new DictionaryData();
-            data.meanings = new ArrayList<>();
-            data.example = "";
-            data.audio = "";
-            data.phonetic = "";
-
-            if (!response.isSuccessful()) {
-                data.meanings = Collections.singletonList("Lỗi server: " + response.code());
-                callback.accept(data);
-                return;
-            }
-
-            try {
-                JSONArray arr = new JSONArray(response.body().string());
-                JSONObject entry = arr.getJSONObject(0);
-
-                data.phonetic = entry.optString("phonetic", "");
-
-                JSONArray phonetics = entry.optJSONArray("phonetics");
-                if (phonetics != null) {
-                    for (int i = 0; i < phonetics.length(); i++) {
-                        String audioUrl = phonetics.getJSONObject(i).optString("audio", "");
-                        if (!audioUrl.isEmpty()) {
-                            data.audio = audioUrl;
-                            break;
-                        }
-                    }
-                }
-
-                JSONArray meaningsArr = entry.getJSONArray("meanings");
-                outer:
-                for (int i = 0; i < meaningsArr.length() && data.meanings.size() < 5; i++) {
-                    JSONObject m = meaningsArr.getJSONObject(i);
-                    JSONArray defs = m.getJSONArray("definitions");
-                    for (int j = 0; j < defs.length() && data.meanings.size() < 5; j++) {
-                        JSONObject defObj = defs.getJSONObject(j);
-                        data.meanings.add(defObj.getString("definition"));
-                        if (data.example.isEmpty() && defObj.has("example")) {
-                            data.example = defObj.getString("example");
-                        }
-                        if (!data.example.isEmpty() && data.meanings.size() >= 5) {
-                            break outer;
-                        }
-                    }
-                }
-                if (data.meanings.isEmpty()) {
-                    data.meanings.add("Chưa có định nghĩa");
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-                data.meanings = Collections.singletonList("Lỗi phân tích dữ liệu");
-            }
-            callback.accept(data);
-        }
-    });
-}
-
-
-
-
-    private void fetchDefinitions(String term, Consumer<List<String>> callback) {
-        OkHttpClient client = new OkHttpClient();
-        String url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + term;
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Accept", "application/json")
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                callback.accept(Collections.singletonList("Không có kết nối"));
-            }
-
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    callback.accept(Collections.singletonList("Lỗi server: " + response.code()));
-                    return;
-                }
-                List<String> defs = new ArrayList<>();
-                try {
-                    JSONArray arr = new JSONArray(response.body().string());
-                    JSONObject entry = arr.getJSONObject(0);
-                    JSONArray meanings = entry.getJSONArray("meanings");
-                    for (int i = 0; i < meanings.length() && defs.size() < 5; i++) {
-                        JSONObject m = meanings.getJSONObject(i);
-                        JSONArray definitions = m.getJSONArray("definitions");
-                        for (int j = 0; j < definitions.length() && defs.size() < 5; j++) {
-                            defs.add(definitions.getJSONObject(j).getString("definition"));
-                        }
-                    }
-                    if (defs.isEmpty()) defs.add("Chưa có định nghĩa");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    defs = Collections.singletonList("Lỗi phân tích dữ liệu");
-                }
-                callback.accept(defs);
-            }
-        });
-    }
-
-
-
-    private void fetchTranslationSuggestions(String term, Consumer<List<String>> callback) {
-        OkHttpClient client = new OkHttpClient();
-        String encoded;
-        try {
-
-            encoded = URLEncoder.encode(term, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            encoded = term;
-        }
-        String url = "https://api.mymemory.translated.net/get"
-                + "?q=" + encoded
-                + "&langpair=en|vi";
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Accept", "application/json")
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-                callback.accept(Collections.singletonList("Không có kết nối"));
-            }
-
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                List<String> results = new ArrayList<>();
-                if (!response.isSuccessful()) {
-                    results.add("Lỗi server: " + response.code());
-                } else {
-                    try {
-                        JSONObject root = new JSONObject(response.body().string());
-                        JSONObject respData = root.getJSONObject("responseData");
-                        String main = respData.optString("translatedText");
-                        if (!main.isEmpty()) results.add(main);
-                        JSONArray matches = root.optJSONArray("matches");
-                        if (matches != null) {
-                            for (int i = 0; i < matches.length() && results.size() < 5; i++) {
-                                String txt = matches.getJSONObject(i)
-                                        .optString("translation");
-                                if (!results.contains(txt) && !txt.isEmpty()) {
-                                    results.add(txt);
-                                }
-                            }
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        results.clear();
-                        results.add("Lỗi phân tích dữ liệu");
-                    }
-                }
-                if (results.isEmpty()) results.add("Chưa có định nghĩa");
-                callback.accept(results);
-            }
-        });
-    }
-
-    private void generateVocabFromTopic(String topic, Consumer<List<Vocabulary>> callback) {
-
-        GenerativeModel gm = new GenerativeModel(
-               "gemini-1.5-flash",
-                BuildConfig.GEMINI_API_KEY
-        );
+        GenerativeModel gm = new GenerativeModel("gemini-1.5-flash", BuildConfig.GEMINI_API_KEY);
         GenerativeModelFutures model = GenerativeModelFutures.from(gm);
 
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("You are an AI that generates a list of 10 English vocabulary words related to the topic: \"")
-                .append(topic).append("\".\n")
-                .append("For each word, provide its meaning in concise Vietnamese (not English).\n\n")
-                .append("IMPORTANT: DO NOT wrap your JSON in ```json or any markdown code fences. ONLY output the pure JSON array.\n")
-                .append("Return a JSON array of exactly 15 objects, each with keys:\n")
-                .append("- \"word\": the English vocabulary word (string)\n")
-                .append("- \"meaning\": a short Vietnamese explanation of that word (string)\n\n")
-                .append("Example format:\n")
-                .append("[\n")
-                .append("  { \"word\": \"ecosystem\", \"meaning\": \"Một cộng đồng sinh vật cùng tương tác với môi trường xung quanh.\" },\n")
-                .append("  { \"word\": \"biodiversity\", \"meaning\": \"Sự đa dạng sinh học của các loài trong một khu vực.\" },\n")
-                .append("  ... exactly 10 items ...\n")
-                .append("]\n\n")
-                .append("Now generate the JSON array for topic: \"").append(topic).append("\". ");
+        String prompt = String.format(
+                "You are an AI that suggests up to 5 English words that start with or are related to the prefix \"%s\". " +
+                        "Return a pure JSON array of strings, each being a single word. " +
+                        "Example output:\n[\"apple\", \"application\", \"appoint\"]\n\n" +
+                        "Now suggest for prefix: \"%s\"",
+                input, input
+        );
 
         Content.Builder contentBuilder = new Content.Builder();
         contentBuilder.setRole("user");
         contentBuilder.addText(prompt.toString());
         Content userContent = contentBuilder.build();
 
-        List<Content> history = new ArrayList<>();
-        history.add(userContent);
-        ChatFutures chat = model.startChat(history);
-
+        ChatFutures chat = model.startChat(Collections.singletonList(userContent));
         ListenableFuture<GenerateContentResponse> future = chat.sendMessage(userContent);
 
         Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse response) {
-                String raw = response.getText();
-
-                raw = raw.trim();
-
-                android.util.Log.d("CreateCourseAI", "RAW_RESPONSE=\n" + raw);
+                String raw = response.getText().trim();
 
                 if (raw.startsWith("```")) {
-                    int idx = raw.indexOf('\n');
-                    if (idx != -1) raw = raw.substring(idx + 1).trim();
+                    raw = raw.substring(raw.indexOf('\n') + 1).trim();
                 }
-
                 if (raw.endsWith("```")) {
-                    int idx = raw.lastIndexOf("```");
-                    if (idx != -1) raw = raw.substring(0, idx).trim();
+                    raw = raw.substring(0, raw.lastIndexOf("```")).trim();
                 }
-
-                raw = raw.trim();
-
-                int startIdx = raw.indexOf('[');
-                int endIdx   = raw.lastIndexOf(']');
-                if (startIdx == -1 || endIdx == -1 || endIdx <= startIdx) {
-                    android.util.Log.e("CreateCourseAI",
-                            "Cannot find JSON array boundaries. startIdx=" + startIdx + ", endIdx=" + endIdx);
+                int start = raw.indexOf('['), end = raw.lastIndexOf(']');
+                if (start < 0 || end < 0) {
                     callback.accept(Collections.emptyList());
                     return;
                 }
-                String jsonArray = raw.substring(startIdx, endIdx + 1);
-
-                android.util.Log.d("CreateCourseAI", "EXTRACTED_JSON_ARRAY=\n" + jsonArray);
-
+                String json = raw.substring(start, end + 1);
                 try {
-                    JSONArray arr = new JSONArray(jsonArray);
-                    List<Vocabulary> result = new ArrayList<>();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = arr.getJSONObject(i);
-                        String word    = obj.optString("word", "").trim();
-                        String meaning = obj.optString("meaning", "").trim();
-                        if (!word.isEmpty() && !meaning.isEmpty()) {
-                            result.add(new Vocabulary(word, meaning, "", "", ""));
-                        }
+                    JSONArray arr = new JSONArray(json);
+                    List<String> suggestions = new ArrayList<>();
+                    for (int i = 0; i < arr.length() && i < 5; i++) {
+                        suggestions.add(arr.getString(i));
                     }
-                    callback.accept(result);
+                    callback.accept(suggestions);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    android.util.Log.e("CreateCourseAI", "Parse exception: " + e.getMessage());
+                    callback.accept(Collections.emptyList());
+                }
+            }
+            @Override
+            public void onFailure(Throwable t) {
+                t.printStackTrace();
+                callback.accept(Collections.emptyList());
+            }
+        }, aiExecutor);
+    }
+
+    private void fetchDefinitionsByAI(String term, Consumer<DictionaryData> callback) {
+        String prompt = String.format(
+                "You are an AI that provides:\n" +
+                        "- \"meanings\": an array of up to 5 concise Vietnamese definitions.\n" +
+                        "- \"example\": one example sentence in English.\n" +
+                        "- \"phonetic\": the IPA transcription.\n\n" +
+                        "Return ONLY a JSON object. Example:\n" +
+                        "{ \"meanings\": [\"...\"], \"example\": \"...\", \"phonetic\": \"/.../\" }\n\n" +
+                        "Now: \"%s\".", term
+        );
+        GenerativeModel gm = new GenerativeModel("gemini-1.5-flash", BuildConfig.GEMINI_API_KEY);
+        GenerativeModelFutures model = GenerativeModelFutures.from(gm);
+        Content.Builder contentBuilder = new Content.Builder();
+        contentBuilder.setRole("user");
+        contentBuilder.addText(prompt.toString());
+        Content userContent = contentBuilder.build();
+
+        ChatFutures chat = model.startChat(Collections.singletonList(userContent));
+        ListenableFuture<GenerateContentResponse> future = chat.sendMessage(userContent);
+        Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
+            @Override public void onSuccess(GenerateContentResponse response) {
+                String raw = response.getText().trim();
+                if (raw.startsWith("```")) raw = raw.substring(raw.indexOf('\n')+1).trim();
+                if (raw.endsWith("```")) raw = raw.substring(0, raw.lastIndexOf("```")).trim();
+                try {
+                    JSONObject o = new JSONObject(raw);
+                    DictionaryData d = new DictionaryData();
+                    d.meanings = new ArrayList<>();
+                    JSONArray ma = o.optJSONArray("meanings");
+                    if (ma!=null) for(int i=0;i<ma.length();i++) d.meanings.add(ma.getString(i));
+                    d.example = o.optString("example","");
+                    d.phonetic= o.optString("phonetic","");
+                    d.audio   = "";
+                    callback.accept(d);
+                } catch (Exception e) {
+                    e.printStackTrace(); callback.accept(new DictionaryData());
+                }
+            }
+            @Override public void onFailure(Throwable t) { t.printStackTrace(); callback.accept(new DictionaryData()); }
+        }, aiExecutor);
+    }
+
+    private void fetchAudioFromDictionary(String term, Consumer<String> callback) {
+        OkHttpClient client = new OkHttpClient();
+        String url;
+        try {
+            url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + URLEncoder.encode(term, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + term;
+        }
+        Request request = new Request.Builder().url(url).addHeader("Accept","application/json").build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) { callback.accept(""); }
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) { callback.accept(""); return; }
+                try {
+                    JSONArray arr = new JSONArray(response.body().string());
+                    JSONArray phon = arr.getJSONObject(0).optJSONArray("phonetics");
+                    if (phon!=null) for(int i=0;i<phon.length();i++) {
+                        String a = phon.getJSONObject(i).optString("audio","");
+                        if (!a.isEmpty()) { callback.accept(a); return; }
+                    }
+                } catch (Exception ignored) {}
+                callback.accept("");
+            }
+        });
+    }
+//    private void fetchTranslationSuggestions(String term, Consumer<List<DictionaryData>> callback) {
+//        GenerativeModel gm = new GenerativeModel("gemini-1.5-flash", BuildConfig.GEMINI_API_KEY);
+//        GenerativeModelFutures model = GenerativeModelFutures.from(gm);
+//
+//        StringBuilder prompt = new StringBuilder();
+//        prompt.append("You are an AI that provides up to 3 concise Vietnamese definitions for a single English word, ")
+//                .append("each with its part of speech tag (e.g., \"v\" for verb, \"n\" for noun).\n")
+//                .append("Return a pure JSON array of objects. Each object must have:\n")
+//                .append("  - \"type\": one-letter POS tag as string, e.g. \"v\", \"n\", \"adj\"...\n")
+//                .append("  - \"meaning\": short Vietnamese definition (string)\n\n")
+//                .append("Example:\n")
+//                .append("[\n")
+//                .append("  { \"type\": \"v\", \"meaning\": \"nói\" },\n")
+//                .append("  { \"type\": \"n\", \"meaning\": \"lời nói\" }\n")
+//                .append("]\n\n")
+//                .append("Now generate up to 3 entries for the word \"").append(term).append("\".");
+//
+//        Content.Builder contentBuilder = new Content.Builder();
+//        contentBuilder.setRole("user");
+//        contentBuilder.addText(prompt.toString());
+//        Content userContent = contentBuilder.build();
+//
+//        ChatFutures chat = model.startChat(Collections.singletonList(userContent));
+//        ListenableFuture<GenerateContentResponse> future = chat.sendMessage(userContent);
+//
+//        Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
+//            @Override
+//            public void onSuccess(GenerateContentResponse response) {
+//                String raw = response.getText().trim();
+//                if (raw.startsWith("```")) raw = raw.substring(raw.indexOf('\n') + 1).trim();
+//                if (raw.endsWith("```"))  raw = raw.substring(0, raw.lastIndexOf("```")).trim();
+//
+//                int start = raw.indexOf('['), end = raw.lastIndexOf(']');
+//                if (start < 0 || end < 0 || end <= start) {
+//                    callback.accept(Collections.emptyList());
+//                    return;
+//                }
+//                String json = raw.substring(start, end + 1);
+//                try {
+//                    JSONArray arr = new JSONArray(json);
+//                    List<DictionaryData> list = new ArrayList<>();
+//                    for (int i = 0; i < arr.length() && list.size() < 3; i++) {
+//                        JSONObject obj = arr.getJSONObject(i);
+//                        String type    = obj.optString("type", "").trim();
+//                        String meaning = obj.optString("meaning", "").trim();
+//                        if (!type.isEmpty() && !meaning.isEmpty()) {
+//                            DictionaryData d = new DictionaryData();
+//                            d.meanings = Collections.singletonList(meaning);
+//                            d.example  = "";
+//                            d.audio    = "";
+//                            d.phonetic = type;
+//                            list.add(d);
+//                        }
+//                    }
+//                    callback.accept(list);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                    callback.accept(Collections.emptyList());
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable t) {
+//                t.printStackTrace();
+//                callback.accept(Collections.emptyList());
+//            }
+//        }, aiExecutor);
+//    }
+
+    private void fetchTranslationSuggestions(String term, Consumer<List<DictionaryData>> callback) {
+        GenerativeModel gm = new GenerativeModel("gemini-1.5-flash", BuildConfig.GEMINI_API_KEY);
+        GenerativeModelFutures model = GenerativeModelFutures.from(gm);
+
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("You are an AI that provides up to 3 concise Vietnamese definitions for a single English word or phrase, ")
+                .append("each with its part of speech tag (e.g., \"v\" for verb, \"n\" for noun, \"phr\" for phrase).\n")
+                .append("Return a pure JSON array of objects. Each object must have:\n")
+                .append("  - \"type\": one-letter or three-letter POS tag as string, e.g. \"v\", \"n\", \"adj\", \"phr\"...\n")
+                .append("  - \"meaning\": short Vietnamese definition (string)\n\n")
+                .append("Example for phrase \"get along with\":\n")
+                .append("[\n")
+                .append("  { \"type\": \"phr\", \"meaning\": \"hòa hợp với\" }\n")
+                .append("]\n\n")
+                .append("Now generate up to 3 entries for the term: \"")
+                .append(term.replace("\"", "\\\""))
+                .append("\".");
+
+        Content.Builder contentBuilder = new Content.Builder();
+        contentBuilder.setRole("user");
+        contentBuilder.addText(prompt.toString());
+        Content userContent = contentBuilder.build();
+
+        List<Content> history = Collections.singletonList(userContent);
+        ChatFutures chat = model.startChat(history);
+        ListenableFuture<GenerateContentResponse> future = chat.sendMessage(userContent);
+
+        Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
+            @Override
+            public void onSuccess(GenerateContentResponse response) {
+                String raw = response.getText().trim();
+                android.util.Log.d("GeminiService", "RAW_AI_RESPONSE=\n" + raw);
+                if (raw.startsWith("```")) raw = raw.substring(raw.indexOf('\n') + 1).trim();
+                if (raw.endsWith("```"))  raw = raw.substring(0, raw.lastIndexOf("```")).trim();
+
+                int start = raw.indexOf('['), end = raw.lastIndexOf(']');
+                if (start < 0 || end < 0 || end <= start) {
+                    callback.accept(Collections.emptyList());
+                    return;
+                }
+                String json = raw.substring(start, end + 1);
+                try {
+                    JSONArray arr = new JSONArray(json);
+                    List<DictionaryData> list = new ArrayList<>();
+                    for (int i = 0; i < arr.length() && list.size() < 3; i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        String type    = obj.optString("type", "").trim();
+                        String meaning = obj.optString("meaning", "").trim();
+                        if (!type.isEmpty() && !meaning.isEmpty()) {
+                            DictionaryData d = new DictionaryData();
+                            d.phonetic = type;
+                            d.meanings = Collections.singletonList(meaning);
+                            d.example  = "";
+                            d.audio    = "";
+                            list.add(d);
+                        }
+                    }
+                    callback.accept(list);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                     callback.accept(Collections.emptyList());
                 }
             }
@@ -851,10 +757,96 @@ private void fetchDefinitionsDictionary(String term, Consumer<DictionaryData> ca
             @Override
             public void onFailure(Throwable t) {
                 t.printStackTrace();
-                android.util.Log.e("CreateCourseAI", "AI call failure: " + t.getMessage());
                 callback.accept(Collections.emptyList());
             }
         }, aiExecutor);
-
     }
+
+    private void generateVocabFromTopic(String topic, Consumer<List<Vocabulary>> callback) {
+        GenerativeModel gm = new GenerativeModel("gemini-1.5-flash", BuildConfig.GEMINI_API_KEY);
+        GenerativeModelFutures model = GenerativeModelFutures.from(gm);
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("You are an AI that generates a list of 15 English vocabulary words related to the topic: \"")
+                .append(topic).append("\".\n")
+                .append("For each word, provide:\n")
+                .append("  - \"word\": English word\n")
+                .append("  - \"meaning\": concise Vietnamese meaning\n")
+                .append("  - \"example\": an example sentence in English\n")
+                .append("  - \"phonetic\": phonetic transcription in IPA\n\n")
+                .append("IMPORTANT: ONLY output the pure JSON array of exactly 15 objects (no markdown).\n")
+                .append("Example:\n[\n")
+                .append("  { \"word\": \"ecosystem\", \"meaning\": \"Một cộng đồng...\", ")
+                .append("\"example\": \"The rainforest ecosystem is fragile.\", ")
+                .append("\"phonetic\": \"/ˈiːkoʊˌsɪstəm/\" }, ...\n]\n\n")
+                .append("Generate for: \"").append(topic).append("\".");
+
+        Content.Builder contentBuilder = new Content.Builder();
+        contentBuilder.setRole("user");
+        contentBuilder.addText(prompt.toString());
+        Content userContent = contentBuilder.build();
+
+        ChatFutures chat = model.startChat(Collections.singletonList(userContent));
+        ListenableFuture<GenerateContentResponse> future = chat.sendMessage(userContent);
+
+        Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
+            @Override public void onSuccess(GenerateContentResponse response) {
+                String raw = response.getText().trim();
+
+                android.util.Log.d("GeminiService", "RAW_AI_RESPONSE=\n" + raw);
+                if (raw.startsWith("```")) raw = raw.substring(raw.indexOf('\n') + 1).trim();
+                if (raw.endsWith("```")) raw = raw.substring(0, raw.lastIndexOf("```")).trim();
+                int start = raw.indexOf('['), end = raw.lastIndexOf(']');
+                if (start < 0 || end < 0) {
+                    callback.accept(Collections.emptyList());
+                    return;
+                }
+                String json = raw.substring(start, end + 1);
+                try {
+                    JSONArray arr = new JSONArray(json);
+                    List<Vocabulary> list = new ArrayList<>();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject o = arr.getJSONObject(i);
+                        String w  = o.optString("word","").trim();
+                        String m  = o.optString("meaning","").trim();
+                        String ex = o.optString("example","").trim();
+                        String ph = o.optString("phonetic","").trim();
+                        if (!w.isEmpty() && !m.isEmpty()) {
+                            Vocabulary v = new Vocabulary(w, m, ex, "", ph);
+                            list.add(v);
+                        }
+                    }
+                    callback.accept(list);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    callback.accept(Collections.emptyList());
+                }
+            }
+            @Override public void onFailure(Throwable t) {
+                t.printStackTrace();
+                callback.accept(Collections.emptyList());
+            }
+        }, aiExecutor);
+    }
+
+    private void addTermViewWithVocabulary(Vocabulary aiV) {
+        View termView = LayoutInflater.from(this)
+                .inflate(R.layout.item_term, containerTerms, false);
+        AutoCompleteTextView edtTerm       = termView.findViewById(R.id.edtTerm);
+        AutoCompleteTextView edtDefinition = termView.findViewById(R.id.edtDefinition);
+        ImageButton btnRemove              = termView.findViewById(R.id.btnRemoveTerm);
+        ImageView   btnRead                = termView.findViewById(R.id.btnRead);
+        edtTerm.setText(aiV.getWord());
+        edtDefinition.setText(aiV.getMeaning());
+        edtDefinition.setVisibility(View.VISIBLE);
+        DictionaryData dictData = new DictionaryData();
+        dictData.example  = aiV.getExample();
+        dictData.phonetic = aiV.getPhonetic();
+        dictData.audio    = aiV.getAudio();
+        dictData.meanings = new ArrayList<>();
+        termView.setTag(R.id.tag_definition_data, dictData);
+        btnRemove.setOnClickListener(rem -> containerTerms.removeView(termView));
+        btnRead.setOnClickListener(r -> playAudioFromTag(termView));
+        containerTerms.addView(termView);
+    }
+
 }

@@ -8,14 +8,6 @@
     android:layout_marginTop="8dp"
     android:layout_above="@id/edtTerm"
     android:background="@drawable/bg_card">
-<!--    <EditText-->
-<!--        android:id="@+id/edtTerm"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:background="@null"-->
-<!--        android:hint="Thuật ngữ"-->
-<!--        android:textColor="@android:color/white"-->
-<!--        android:textColorHint="#CCCCCC" />-->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -72,6 +64,16 @@
                 android:src="@drawable/baseline_hearing_24"
                 app:tint="@android:color/white" />
 
+            <ImageView
+                android:id="@+id/btnAI"
+                android:layout_width="39dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_weight="1"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:src="@drawable/baseline_android_24"
+                app:tint="@android:color/white" />
+
             <ImageButton
                 android:id="@+id/btnRemoveTerm"
                 android:layout_width="match_parent"
@@ -85,12 +87,4 @@
 
     </LinearLayout>
 
-    <!--    <EditText-->
-    <!--        android:id="@+id/edtDefinition"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:background="@null"-->
-    <!--        android:hint="Định nghĩa"-->
-    <!--        android:textColor="@android:color/white"-->
-    <!--        android:textColorHint="#CCCCCC" />-->
 </LinearLayout>
